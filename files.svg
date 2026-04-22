@@ -1,19 +1,16 @@
 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="solidBlueFill" x1="2" y1="4" x2="22" y2="21" gradientUnits="userSpaceOnUse">
+    <linearGradient id="folderFill" x1="2" y1="4" x2="22" y2="21" gradientUnits="userSpaceOnUse">
       <stop offset="0%" stop-color="#24A1DE"/>
       <stop offset="100%" stop-color="#1a7fb0"/>
     </linearGradient>
   </defs>
 
-  <path d="M4 4H9L11 7H20C21.1046 7 22 7.89543 22 9V18C22 19.1046 21.1046 20 20 20H4C2.89543 20 2 19.1046 2 18V6C2 4.89543 2.89543 4 4 4Z" 
-        fill="url(#solidBlueFill)" 
-        stroke="white" 
-        stroke-width="1.2" 
-        stroke-linejoin="round"/>
+  <path d="M4 4H9.5C10.3 4 11 4.7 11.4 5.3L12.6 7.2C12.8 7.7 13.3 8 13.9 8H20C21.1 8 22 8.9 22 10V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z" 
+        fill="url(#folderFill)"/>
 
-  <path d="M7 11H12M7 15H17" 
+  <path d="M7 12H13M7 16H17" 
         stroke="white" 
-        stroke-width="1.5" 
+        stroke-width="1.6" 
         stroke-linecap="round"/>
 </svg>
