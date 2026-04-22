@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>MR Vault · Glassmorphism</title>
+    <title>MR VAULT</title></title>
     <link rel="icon" type="image/svg+xml" href="files.svg">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -673,14 +673,14 @@ function handlePasteEvent(e, options = {}) {
             if (file) {
                 if (preventDefault) e.preventDefault();
                 
-                console.log('📁 Paste fayl:', file.name);
+                console.log(' Paste fayl:', file.name);
                 
                 if (openModal && !uploadModal.classList.contains('show')) {
                     uploadModal.classList.add('show');
                 }
                 
                 handleFile(file);
-                showToast(`📋 ${file.name} yuklandi`, 'paste');
+                showToast(`${file.name} yuklandi`, 'paste');
                 
                 return true;
             }
@@ -895,7 +895,7 @@ window.addEventListener('paste', (e) => {
         function attachPostEvents() {
             document.querySelectorAll('.post-media').forEach(el => el.addEventListener('click', (e) => { if (e.target.closest('button') || e.target.closest('video') || e.target.closest('audio')) return; handleMediaClick(el); }));
             document.querySelectorAll('.copy-btn').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); navigator.clipboard?.writeText(btn.dataset.url); showToast('Havola nusxalandi', 'success'); }));
-            document.querySelectorAll('.delete-btn').forEach(btn => btn.addEventListener('click', async (e) => { e.stopPropagation(); if (!confirm("Postni o'chirmoqchimisiz?")) return; await deleteDoc(doc(db, 'posts', btn.dataset.id)); showToast('🗑️ O\'chirildi', 'success'); }));
+            document.querySelectorAll('.delete-btn').forEach(btn => btn.addEventListener('click', async (e) => { e.stopPropagation(); if (!confirm("Postni o'chirmoqchimisiz?")) return; await deleteDoc(doc(db, 'posts', btn.dataset.id)); showToast('🗑O\'chirildi', 'success'); }));
         }
 
         async function handleMediaClick(el) {
