@@ -667,55 +667,44 @@
             if (activeCategory !== 'all') filtered = filtered.filter(p => p.category === activeCategory);
             renderPosts(filtered);
         }
-
-       function loadPosts() {
-    // Vaqtincha - barcha postlarni o'qish (test uchun)
+// ========== POSTLARNI YUKLASH (TUZATILGAN) ==========
+function loadPosts() {
     const q = query(collection(db, 'posts'));
     
     onSnapshot(q, (snap) => {
-        console.log('📊 Postlar soni:', snap.docs.length);
-        allPosts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        console.log('📊 Yuklandi:', snap.docs.length, 'ta post');
+        allPosts = [];
+        snap.forEach(doc => {
+            allPosts.push({ id: doc.id, ...doc.data() });
+        });
+        console.log('📊 Birinchi post:', allPosts[0]);
         filterPosts();
     }, (error) => {
-        console.error('❌ Snapshot error:', error);
+        console.error('❌ Xatolik:', error.code, error.message);
         postsFeed.innerHTML = `<div class="empty-state">
             <div class="icon">❌</div>
-            <p>Xatolik: ${error.message}</p>
+            <p>${error.message}</p>
         </div>`;
     });
 }
-        // ========== RENDER ==========
-        function renderPosts(posts) {
-            if (!posts.length) { postsFeed.innerHTML = '<div class="empty-state"><div class="icon">📭</div><p>Postlar yo\'q</p></div>'; return; }
-            postsFeed.innerHTML = posts.map(p => {
-                const time = p.createdAt?.toDate?.() || new Date();
-                const timeStr = new Intl.DateTimeFormat('uz-UZ', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }).format(time);
-                const isOwner = currentUser && p.userId === currentUser.uid;
-                
-                return `<div class="post-card" data-id="${p.id}" data-password="${p.password || ''}" data-blur="${p.isBlurred}" data-has-password="${p.hasPassword}" data-media='${JSON.stringify(p)}'>
-                    <div class="post-header">
-                        <div class="post-avatar">${(p.userFullName || 'A')[0]}</div>
-                        <div class="post-info"><div class="post-author">${p.userFullName || 'Anonim'}</div><div class="post-time">${timeStr}</div></div>
-                    </div>
-                    ${p.text ? `<div class="post-text">${escapeHtml(p.text)}</div>` : ''}
-                    <div class="post-media" data-url="${p.mediaUrl}" data-type="${p.mediaType}">
-                        ${p.mediaType?.startsWith('image') ? `<img src="${p.mediaUrl}" loading="lazy">` : ''}
-                        ${p.mediaType?.startsWith('video') ? `<video src="${p.mediaUrl}" controls preload="metadata"></video>` : ''}
-                        ${p.mediaType?.startsWith('audio') ? `<audio src="${p.mediaUrl}" controls></audio>` : ''}
-                        ${!p.mediaType?.startsWith('image') && !p.mediaType?.startsWith('video') && !p.mediaType?.startsWith('audio') ? `<div class="post-file">📄 ${p.fileName || 'Fayl'}</div>` : ''}
-                    </div>
-                    <span class="post-category">🏷️ ${p.category}</span>
-                    <div class="post-actions">
-                        <button class="view-btn">👁️ ${p.views || 0}</button>
-                        <button class="copy-btn" data-url="${p.mediaUrl}">📋 Nusxalash</button>
-                        ${isOwner ? `<button class="delete-btn" data-id="${p.id}">🗑️ O'chirish</button>` : ''}
-                    </div>
-                </div>`;
-            }).join('');
-            
-            attachPostEvents();
-        }
 
+// ========== FILTER (TUZATILGAN) ==========
+function filterPosts() {
+    let filtered = [...allPosts];
+    
+    if (activeBigTab === 'my' && currentUser) {
+        filtered = filtered.filter(p => p.userId === currentUser.uid);
+    } else if (activeBigTab === 'public') {
+        filtered = filtered.filter(p => p.isPublic === true);
+    }
+    
+    if (activeCategory !== 'all') {
+        filtered = filtered.filter(p => p.category === activeCategory);
+    }
+    
+    console.log('📊 Filtrlangan:', filtered.length);
+    renderPosts(filtered);
+}
         function attachPostEvents() {
             document.querySelectorAll('.post-media').forEach(el => {
                 el.addEventListener('click', (e) => { if (e.target.closest('button')) return; handleMediaClick(el); });
