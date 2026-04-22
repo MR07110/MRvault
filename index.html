@@ -3,246 +3,153 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>MR Vault · Glassmorphism</title>
+    <title>MRVAULT</title></title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='12' fill='%2324A1DE'/%3E%3Cpath d='M12 5v14M5 12h14' stroke='white' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E">
     <style>
-        /* =========================================
-           1. RESET & VARIABLES
-           ========================================= */
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        
         :root {
-            /* Colors */
-            --primary: #24A1DE; 
-            --primary-dark: #1a7fb0;
-            --bg: #0e0e0e; 
-            --glass-bg: rgba(28, 28, 28, 0.7);
-            --glass-card: rgba(255, 255, 255, 0.08);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --text: #ffffff; 
-            --text-secondary: rgba(255, 255, 255, 0.7);
-            --success: #2ecc71; 
-            --error: #e74c3c;
-            
-            /* UI Settings */
-            --blur-amount: 40px;
-            --border-radius-lg: 28px;
-            --border-radius-md: 20px;
-            --border-radius-sm: 16px;
-            --shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --primary: #24A1DE; --primary-dark: #1a7fb0; --bg: #0e0e0e; --glass-bg: rgba(28, 28, 28, 0.7);
+            --glass-card: rgba(255, 255, 255, 0.08); --glass-border: rgba(255, 255, 255, 0.1);
+            --text: #ffffff; --text-secondary: rgba(255, 255, 255, 0.7); --success: #2ecc71; --error: #e74c3c;
+            --warning: #f39c12; --pdf-color: #e74c3c; --doc-color: #2ecc71; --archive-color: #f39c12;
+            --blur-amount: 40px; --border-radius-lg: 28px; --border-radius-md: 20px; --border-radius-sm: 16px;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.2); --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        
-        /* Custom Scrollbar for Webkit */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
-
-        /* =========================================
-           2. BASE STYLES & BACKGROUND
-           ========================================= */
         body {
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
-            background: var(--bg); 
-            color: var(--text); 
-            min-height: 100vh;
-            -webkit-font-smoothing: antialiased; 
-            overflow-x: hidden;
+            background: var(--bg); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; overflow-x: hidden;
         }
-        
-        /* Modern Glassmorphism Gradient Background */
         body::before {
-            content: ''; 
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            content: ''; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             background: radial-gradient(circle at 20% 30%, rgba(36, 161, 222, 0.15) 0%, transparent 50%),
                         radial-gradient(circle at 80% 70%, rgba(110, 200, 255, 0.1) 0%, transparent 50%);
-            pointer-events: none; 
-            z-index: -1;
-            transform: translateZ(0); /* Hardware Acceleration */
+            pointer-events: none; z-index: -1; transform: translateZ(0);
         }
-        
         body.login-mode { display: flex; align-items: center; justify-content: center; padding: 16px; }
         .app { display: none; } 
         body.app-mode .app { display: block; }
         body.login-mode .login-container { display: block; } 
         body.app-mode .login-container { display: none; }
         
-        /* =========================================
-           3. AUTHENTICATION (LOGIN/REGISTER)
-           ========================================= */
-        .login-container { 
-            max-width: 400px; width: 100%; margin: 0 auto; display: none; 
-            animation: fadeIn 0.5s ease;
-        }
-        
+        /* Login */
+        .login-container { max-width: 400px; width: 100%; margin: 0 auto; display: none; animation: fadeIn 0.5s ease; }
         .login-card {
-            background: var(--glass-card); 
-            backdrop-filter: blur(var(--blur-amount));
-            -webkit-backdrop-filter: blur(var(--blur-amount));
-            padding: 40px 32px; 
-            border-radius: var(--border-radius-lg);
-            text-align: center; 
-            box-shadow: var(--shadow);
-            border: 1px solid var(--glass-border);
-            transform: translateZ(0);
+            background: var(--glass-card); backdrop-filter: blur(var(--blur-amount)); -webkit-backdrop-filter: blur(var(--blur-amount));
+            padding: 40px 32px; border-radius: var(--border-radius-lg); text-align: center; box-shadow: var(--shadow);
+            border: 1px solid var(--glass-border); transform: translateZ(0);
         }
-        
         .login-logo { margin-bottom: 24px; }
         .login-logo svg { width: 64px; height: 64px; filter: drop-shadow(0 4px 8px rgba(36, 161, 222, 0.3)); }
         .login-title { font-size: 28px; font-weight: 700; margin-bottom: 8px; color: var(--text); letter-spacing: -0.5px; }
         .login-subtitle { font-size: 15px; color: var(--text-secondary); margin-bottom: 32px; }
-        
         .input-group { margin-bottom: 20px; text-align: left; }
         .input-label {
-            display: flex; align-items: center; gap: 6px;
-            font-size: 13px; font-weight: 600; color: var(--primary); margin-bottom: 8px;
-            text-transform: uppercase; letter-spacing: 0.5px;
+            display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--primary);
+            margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;
         }
         .input-label svg { width: 16px; height: 16px; }
-        
         .input-field {
-            width: 100%; padding: 14px 18px;
-            background: rgba(0, 0, 0, 0.2); 
-            border: 1px solid var(--glass-border); 
-            border-radius: var(--border-radius-sm);
-            color: var(--text); font-size: 16px; outline: none;
-            transition: var(--transition);
+            width: 100%; padding: 14px 18px; background: rgba(0, 0, 0, 0.2); border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius-sm); color: var(--text); font-size: 16px; outline: none; transition: var(--transition);
         }
         .input-field:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(36, 161, 222, 0.2); background: rgba(0,0,0,0.4); }
         .input-field::placeholder { color: var(--text-secondary); opacity: 0.5; }
-        
         .login-btn {
-            width: 100%; 
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            color: white; border: none; padding: 16px; border-radius: var(--border-radius-sm);
-            font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 24px;
-            transition: var(--transition); 
-            box-shadow: 0 4px 16px rgba(36, 161, 222, 0.3);
+            width: 100%; background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white; border: none; padding: 16px; border-radius: var(--border-radius-sm); font-size: 16px; font-weight: 600;
+            cursor: pointer; margin-top: 24px; transition: var(--transition); box-shadow: 0 4px 16px rgba(36, 161, 222, 0.3);
             display: flex; align-items: center; justify-content: center; gap: 8px;
         }
-        .login-btn:hover { box-shadow: 0 6px 20px rgba(36, 161, 222, 0.5); transform: translateY(-2px); }
         .login-btn:active { transform: scale(0.98); }
         .login-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-        
-        .toggle-link { color: var(--primary); font-weight: 700; cursor: pointer; margin-left: 6px; transition: color 0.2s;}
-        .toggle-link:hover { color: #6ec8ff; }
+        .toggle-link { color: var(--primary); font-weight: 700; cursor: pointer; margin-left: 6px; transition: color 0.2s; }
         .login-toggle { margin-top: 28px; font-size: 15px; color: var(--text-secondary); }
         .error-message { color: var(--error); font-size: 13px; text-align: center; min-height: 20px; margin-top: 12px; }
-        
         .spinner {
-            width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3);
-            border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite;
+            width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white;
+            border-radius: 50%; animation: spin 0.8s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* =========================================
-           4. MAIN APP LAYOUT (HEADER & TABS)
-           ========================================= */
+        /* App Header */
         .app-header {
-            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-            padding: 12px 20px; display: flex; align-items: center; justify-content: space-between;
-            background: var(--glass-bg); backdrop-filter: blur(var(--blur-amount));
-            -webkit-backdrop-filter: blur(var(--blur-amount));
-            border-bottom: 1px solid var(--glass-border);
-            transform: translateZ(0);
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 12px 20px;
+            display: flex; align-items: center; justify-content: space-between;
+            background: var(--glass-bg); backdrop-filter: blur(var(--blur-amount)); -webkit-backdrop-filter: blur(var(--blur-amount));
+            border-bottom: 1px solid var(--glass-border); transform: translateZ(0);
         }
         .app-header h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; display: flex; align-items: center; gap: 8px; }
-        .app-header h1 svg { width: 28px; height: 28px; filter: drop-shadow(0 2px 4px rgba(36,161,222,0.4));}
-        
+        .app-header h1 svg { width: 28px; height: 28px; filter: drop-shadow(0 2px 4px rgba(36,161,222,0.4)); }
         .user-info { display: flex; align-items: center; gap: 12px; }
         .user-name { font-size: 15px; font-weight: 500; color: var(--text); max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        
         .logout-btn {
             background: var(--glass-card); border: 1px solid var(--glass-border); color: var(--text-secondary);
-            padding: 8px 16px; border-radius: 30px; font-size: 13px; font-weight: 500;
-            cursor: pointer; transition: var(--transition); display: flex; align-items: center; gap: 6px;
+            padding: 8px 16px; border-radius: 30px; font-size: 13px; font-weight: 500; cursor: pointer;
+            transition: var(--transition); display: flex; align-items: center; gap: 6px;
         }
         .logout-btn svg { width: 16px; height: 16px; }
-        .logout-btn:hover { background: rgba(255,255,255,0.15); color: white; }
         .logout-btn:active { background: var(--error); border-color: var(--error); color: white; }
 
         .big-tabs {
-            position: fixed; top: 65px; left: 0; right: 0; z-index: 99;
-            padding: 12px 20px 0; display: flex; gap: 24px;
-            background: var(--glass-bg); backdrop-filter: blur(var(--blur-amount));
-            -webkit-backdrop-filter: blur(var(--blur-amount));
-            border-bottom: 1px solid var(--glass-border);
-            transform: translateZ(0);
+            position: fixed; top: 65px; left: 0; right: 0; z-index: 99; padding: 12px 20px 0; display: flex; gap: 24px;
+            background: var(--glass-bg); backdrop-filter: blur(var(--blur-amount)); -webkit-backdrop-filter: blur(var(--blur-amount));
+            border-bottom: 1px solid var(--glass-border); transform: translateZ(0);
         }
         .big-tab {
-            background: transparent; border: none; color: var(--text-secondary);
-            font-size: 16px; font-weight: 600; padding: 0 0 12px 0; cursor: pointer;
-            position: relative; transition: color 0.2s; display: flex; align-items: center; gap: 6px;
+            background: transparent; border: none; color: var(--text-secondary); font-size: 16px; font-weight: 600;
+            padding: 0 0 12px 0; cursor: pointer; position: relative; transition: color 0.2s;
+            display: flex; align-items: center; gap: 6px;
         }
         .big-tab svg { width: 20px; height: 20px; }
         .big-tab.active { color: var(--primary); }
         .big-tab.active::after {
             content: ''; position: absolute; bottom: -1px; left: 0; width: 100%; height: 3px;
-            background: var(--primary); border-radius: 3px 3px 0 0;
-            box-shadow: 0 -2px 8px rgba(36,161,222,0.5);
+            background: var(--primary); border-radius: 3px 3px 0 0; box-shadow: 0 -2px 8px rgba(36,161,222,0.5);
         }
 
         .category-tabs {
-            position: fixed; top: 120px; left: 0; right: 0; z-index: 98;
-            padding: 10px 16px; display: flex; gap: 8px; overflow-x: auto;
-            white-space: nowrap; scrollbar-width: none;
-            background: transparent; backdrop-filter: none;
+            position: fixed; top: 120px; left: 0; right: 0; z-index: 98; padding: 10px 16px;
+            display: flex; gap: 8px; overflow-x: auto; white-space: nowrap; scrollbar-width: none;
         }
         .category-tabs::-webkit-scrollbar { display: none; }
         .category-tab {
-            background: var(--glass-card); backdrop-filter: blur(10px);
-            border: 1px solid var(--glass-border); color: var(--text-secondary);
-            padding: 8px 16px; border-radius: 30px; font-size: 14px; font-weight: 500;
+            background: var(--glass-card); backdrop-filter: blur(10px); border: 1px solid var(--glass-border);
+            color: var(--text-secondary); padding: 8px 16px; border-radius: 30px; font-size: 14px; font-weight: 500;
             cursor: pointer; transition: var(--transition); display: flex; align-items: center; gap: 6px;
         }
         .category-tab svg { width: 16px; height: 16px; }
-        .category-tab:hover { background: rgba(255,255,255,0.15); color: white;}
         .category-tab.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 12px rgba(36,161,222,0.3); }
 
-        /* =========================================
-           5. POSTS & CONTENT AREA
-           ========================================= */
+        /* Content */
         .content { padding-top: 175px; padding-bottom: 90px; min-height: 100vh; }
         .container { max-width: 600px; margin: 0 auto; padding: 0 16px; }
         .posts-feed { display: flex; flex-direction: column; gap: 20px; }
-
         .post-card {
-            background: var(--glass-card); backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-radius: var(--border-radius-md); border: 1px solid var(--glass-border);
-            overflow: hidden; 
-            animation: fadeIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            will-change: transform, opacity;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            background: var(--glass-card); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            border-radius: var(--border-radius-md); border: 1px solid var(--glass-border); overflow: hidden;
+            animation: fadeIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        
         .post-header { padding: 16px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--glass-border); }
         .post-avatar {
-            width: 44px; height: 44px; border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), #6ec8ff);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 18px; font-weight: 600; color: white;
-            box-shadow: 0 4px 10px rgba(36,161,222,0.4);
+            width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), #6ec8ff);
+            display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 600; color: white;
         }
         .post-info { flex: 1; }
         .post-author { font-weight: 600; font-size: 15px; color: var(--text); }
         .post-time { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
-        
         .post-text { padding: 16px; font-size: 15px; line-height: 1.5; word-wrap: break-word; }
-        
         .post-media { position: relative; cursor: pointer; background: rgba(0,0,0,0.3); }
         .post-media img, .post-media video { width: 100%; max-height: 400px; object-fit: cover; display: block; }
         .post-media audio { width: 100%; margin: 16px 0; padding: 0 16px; }
-        
         .post-category {
-            display: inline-flex; align-items: center; gap: 4px;
-            padding: 6px 12px; background: rgba(0,0,0,0.3); border-radius: 30px;
-            font-size: 12px; margin: 12px 16px; color: var(--text-secondary);
-            border: 1px solid var(--glass-border);
+            display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; background: rgba(0,0,0,0.3);
+            border-radius: 30px; font-size: 12px; margin: 12px 16px; color: var(--text-secondary); border: 1px solid var(--glass-border);
         }
-        
         .post-actions { padding: 12px 16px; display: flex; gap: 16px; border-top: 1px solid var(--glass-border); }
         .post-actions button {
             background: transparent; border: none; color: var(--text-secondary); font-size: 13px;
@@ -250,187 +157,178 @@
             border-radius: 30px; transition: var(--transition);
         }
         .post-actions button svg { width: 18px; height: 18px; }
-        .post-actions button:hover { background: rgba(255,255,255,0.05); color: white; }
         .post-actions button:active { background: rgba(255,255,255,0.1); transform: scale(0.95); }
         .delete-btn { color: var(--error) !important; margin-left: auto; }
-        .delete-btn:hover { background: rgba(231, 76, 60, 0.1) !important; }
 
-        /* =========================================
-           6. BLUR LAYER (EXTREME PRIVACY)
-           ========================================= */
+        /* Blur Layer */
         .blur-layer {
-            position: absolute; 
-            inset: 0;
-            /* Ekstremal Blur qiymati */
-            backdrop-filter: blur(100px) saturate(1.5);
-            -webkit-backdrop-filter: blur(100px) saturate(1.5);
-            /* Qorong'u fon detallarni yopadi */
-            background: rgba(0, 0, 0, 0.5); 
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; 
-            transition: opacity 0.3s ease;
-            z-index: 2;
+            position: absolute; inset: 0; backdrop-filter: blur(100px) saturate(1.5); -webkit-backdrop-filter: blur(100px) saturate(1.5);
+            background: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; cursor: pointer;
+            transition: opacity 0.3s ease; z-index: 2;
         }
-        .blur-layer:hover { background: rgba(0,0,0,0.4); }
         .blur-content { text-align: center; color: white; }
         .blur-content svg { width: 48px; height: 48px; margin-bottom: 12px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5)); }
         .blur-text {
-            font-size: 14px; font-weight: 600; background: rgba(0,0,0,0.6);
-            padding: 10px 20px; border-radius: 30px; 
-            border: 1px solid rgba(255,255,255,0.2);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            font-size: 14px; font-weight: 600; background: rgba(0,0,0,0.6); padding: 10px 20px; border-radius: 30px;
+            border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
 
-        /* =========================================
-           7. FLOATING ACTION BUTTON (FAB)
-           ========================================= */
+        /* FAB */
         .fab {
-            position: fixed; width: 64px; height: 64px; border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark)); 
-            border: none; box-shadow: 0 4px 24px rgba(36,161,222,0.5);
-            cursor: grab; z-index: 200; display: flex; align-items: center; justify-content: center;
-            bottom: 24px; right: 24px; user-select: none; touch-action: none;
+            position: fixed; width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border: none; box-shadow: 0 4px 24px rgba(36,161,222,0.5); cursor: grab; z-index: 200;
+            display: flex; align-items: center; justify-content: center; bottom: 24px; right: 24px;
             transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .fab svg { width: 32px; height: 32px; stroke: white; stroke-width: 2; }
-        .fab:hover { transform: scale(1.05); }
         .fab:active { cursor: grabbing; transform: scale(0.95); }
-        .fab.dragging { transition: none; opacity: 0.9; box-shadow: 0 8px 30px rgba(36,161,222,0.6); transform: scale(1.1); }
 
-        /* =========================================
-           8. MODALS & OVERLAYS
-           ========================================= */
+        /* Modals */
         .modal-overlay {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.6); backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            z-index: 300; display: none; align-items: flex-end; justify-content: center;
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); z-index: 300;
+            display: none; align-items: flex-end; justify-content: center;
         }
         .modal-overlay.show { display: flex; animation: fadeInModal 0.3s; }
         @keyframes fadeInModal { from { opacity: 0; } to { opacity: 1; } }
-
         .upload-modal {
-            background: var(--glass-bg); backdrop-filter: blur(var(--blur-amount));
+            background: var(--glass-bg); backdrop-filter: blur(var(--blur-amount)); -webkit-backdrop-filter: blur(var(--blur-amount));
             width: 100%; max-width: 500px; border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
             padding: 24px 24px 30px; animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            max-height: 90vh; overflow-y: auto; border: 1px solid var(--glass-border);
-            border-bottom: none;
+            max-height: 90vh; overflow-y: auto; border: 1px solid var(--glass-border); border-bottom: none;
         }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        
         .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
         .modal-header h3 { font-size: 20px; font-weight: 600; }
-        .close-modal { background: rgba(255,255,255,0.1); border: none; color: white; cursor: pointer; padding: 8px; border-radius: 50%; transition: var(--transition); }
-        .close-modal:hover { background: rgba(255,255,255,0.2); transform: rotate(90deg); }
+        .close-modal {
+            background: rgba(255,255,255,0.1); border: none; color: white; cursor: pointer;
+            padding: 8px; border-radius: 50%; transition: var(--transition);
+        }
         .close-modal svg { width: 24px; height: 24px; }
 
+        /* Upload Area */
         .upload-area {
             border: 2px dashed var(--glass-border); border-radius: var(--border-radius-md);
-            padding: 40px 20px; text-align: center; cursor: pointer;
-            transition: var(--transition); margin-bottom: 20px; background: rgba(0,0,0,0.2);
+            padding: 40px 20px; text-align: center; cursor: pointer; transition: var(--transition);
+            margin-bottom: 20px; background: rgba(0,0,0,0.2);
         }
-        .upload-area:hover { border-color: var(--primary); background: rgba(36, 161, 222, 0.05); }
         .upload-icon svg { width: 48px; height: 48px; margin-bottom: 12px; color: var(--primary); }
-        
-        .preview-area { margin-bottom: 20px; text-align: center; background: rgba(0,0,0,0.3); border-radius: var(--border-radius-sm); padding: 10px;}
+        .preview-area { margin-bottom: 20px; text-align: center; }
         .preview-area img, .preview-area video { max-width: 100%; max-height: 200px; border-radius: 8px; object-fit: contain; }
         
+        /* File Preview with Format Icons */
+        .preview-file {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 30px 20px; background: rgba(0, 0, 0, 0.2); border-radius: var(--border-radius-sm);
+            border: 1px solid var(--glass-border);
+        }
+        .preview-file .file-icon { margin-bottom: 16px; }
+        .preview-file .file-icon svg { width: 64px; height: 64px; }
+        .preview-file .file-name { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 4px; word-break: break-all; text-align: center; }
+        .preview-file .file-size { font-size: 12px; color: var(--text-secondary); }
+
         .caption-input {
             width: 100%; background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border);
-            border-radius: var(--border-radius-sm); padding: 16px; color: var(--text);
-            font-size: 15px; resize: none; min-height: 100px; margin-bottom: 20px;
-            transition: var(--transition); outline: none;
+            border-radius: var(--border-radius-sm); padding: 16px; color: var(--text); font-size: 15px;
+            resize: none; min-height: 100px; margin-bottom: 20px; transition: var(--transition); outline: none;
         }
         .caption-input:focus { border-color: var(--primary); background: rgba(0,0,0,0.4); }
-        
         .option-group { margin-bottom: 24px; }
-        .option-label { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: var(--text-secondary); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;}
+        .option-label {
+            display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600;
+            color: var(--text-secondary); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;
+        }
         .option-label svg { width: 18px; height: 18px; color: var(--primary); }
-        
         .category-options { display: flex; flex-wrap: wrap; gap: 10px; }
         .category-option {
-            background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border);
-            color: var(--text-secondary); padding: 10px 16px; border-radius: 30px;
-            font-size: 14px; cursor: pointer; transition: var(--transition);
+            background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); color: var(--text-secondary);
+            padding: 10px 16px; border-radius: 30px; font-size: 14px; cursor: pointer; transition: var(--transition);
             display: flex; align-items: center; gap: 6px;
         }
         .category-option svg { width: 16px; height: 16px; }
-        .category-option:hover { background: rgba(255,255,255,0.1); }
         .category-option.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 12px rgba(36,161,222,0.3); }
-        
         .visibility-options { display: flex; gap: 24px; }
-        .visibility-option { display: flex; align-items: center; gap: 10px; cursor: pointer; color: white; font-size: 15px;}
+        .visibility-option { display: flex; align-items: center; gap: 10px; cursor: pointer; color: white; font-size: 15px; }
         .visibility-option input { width: 18px; height: 18px; accent-color: var(--primary); cursor: pointer; }
-        
-        .checkbox-group { display: flex; flex-direction: column; gap: 16px; background: rgba(0,0,0,0.2); padding: 16px; border-radius: var(--border-radius-sm); border: 1px solid var(--glass-border);}
-        .checkbox-item { display: flex; align-items: center; gap: 12px; cursor: pointer; color: white; font-size: 15px;}
-        .checkbox-item input { width: 18px; height: 18px; accent-color: var(--primary); cursor: pointer;}
-        
+        .checkbox-group {
+            display: flex; flex-direction: column; gap: 16px; background: rgba(0,0,0,0.2); padding: 16px;
+            border-radius: var(--border-radius-sm); border: 1px solid var(--glass-border);
+        }
+        .checkbox-item { display: flex; align-items: center; gap: 12px; cursor: pointer; color: white; font-size: 15px; }
+        .checkbox-item input { width: 18px; height: 18px; accent-color: var(--primary); cursor: pointer; }
         .upload-btn {
             width: 100%; background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white; border: none; padding: 18px; border-radius: var(--border-radius-sm); 
+            color: white; border: none; padding: 18px; border-radius: var(--border-radius-sm);
             font-size: 16px; font-weight: 700; cursor: pointer; display: flex; align-items: center;
             justify-content: center; gap: 10px; transition: var(--transition); box-shadow: 0 4px 15px rgba(36,161,222,0.4);
         }
         .upload-btn svg { width: 22px; height: 22px; }
-        .upload-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(36,161,222,0.6); }
-        .upload-btn:disabled { opacity: 0.5; cursor: not-allowed; background: rgba(255,255,255,0.1); box-shadow: none; color: var(--text-secondary);}
+        .upload-btn:disabled { opacity: 0.5; cursor: not-allowed; background: rgba(255,255,255,0.1); box-shadow: none; color: var(--text-secondary); }
 
-        /* Viewer Modal */
+        /* Viewer */
         .viewer-overlay {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.95);
             z-index: 400; display: none; flex-direction: column; backdrop-filter: blur(20px);
         }
         .viewer-overlay.show { display: flex; animation: fadeInModal 0.3s; }
         .viewer-header {
-            position: absolute; top: 0; left: 0; right: 0; padding: 20px;
-            display: flex; align-items: center; gap: 16px; z-index: 10;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+            position: absolute; top: 0; left: 0; right: 0; padding: 20px; display: flex; align-items: center;
+            gap: 16px; z-index: 10; background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
         }
         .back-btn {
-            background: rgba(255,255,255,0.1); backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.2); color: white; width: 48px; height: 48px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center; cursor: pointer; transition: var(--transition);
+            background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2);
+            color: white; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center;
+            justify-content: center; cursor: pointer; transition: var(--transition);
         }
-        .back-btn:hover { background: rgba(255,255,255,0.2); transform: translateX(-5px); }
         .back-btn svg { width: 24px; height: 24px; }
-        
-        .viewer-content { flex: 1; display: flex; align-items: center; justify-content: center; padding: 20px; margin-top: 60px;}
-        .viewer-content img, .viewer-content video { max-width: 100%; max-height: 85vh; object-fit: contain; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.5);}
+        .viewer-content { flex: 1; display: flex; align-items: center; justify-content: center; padding: 20px; margin-top: 60px; }
+        .viewer-content img, .viewer-content video { max-width: 100%; max-height: 85vh; object-fit: contain; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
         .viewer-content audio { width: 100%; max-width: 500px; }
 
         /* Password Modal */
         .password-modal {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.9);
-            background: var(--glass-bg); backdrop-filter: blur(var(--blur-amount));
-            padding: 32px 24px; border-radius: var(--border-radius-md); z-index: 500;
-            width: 90%; max-width: 360px; display: none; border: 1px solid var(--glass-border);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5); opacity: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: var(--glass-bg); backdrop-filter: blur(var(--blur-amount)); padding: 32px 24px;
+            border-radius: var(--border-radius-md); z-index: 500; width: 90%; max-width: 360px;
+            display: none; border: 1px solid var(--glass-border); box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            opacity: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         .password-modal.show { display: block; transform: translate(-50%, -50%) scale(1); opacity: 1; }
-        .password-modal h4 { margin-bottom: 24px; text-align: center; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 20px;}
+        .password-modal h4 { margin-bottom: 24px; text-align: center; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 20px; }
         .password-modal h4 svg { width: 28px; height: 28px; color: var(--primary); }
         .password-modal input { width: 100%; margin-bottom: 20px; }
 
-        /* Toast Messages */
+        /* Toast */
         .toast {
             position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px);
-            background: var(--glass-bg); backdrop-filter: blur(var(--blur-amount));
-            color: var(--text); padding: 14px 28px; border-radius: 40px; font-size: 15px; font-weight: 500;
-            z-index: 500; opacity: 0; visibility: hidden; transition: var(--transition);
-            border: 1px solid var(--glass-border); max-width: 90%; text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3); display: flex; align-items: center; gap: 10px;
+            background: var(--glass-bg); backdrop-filter: blur(var(--blur-amount)); color: var(--text);
+            padding: 14px 28px; border-radius: 40px; font-size: 15px; font-weight: 500; z-index: 500;
+            opacity: 0; visibility: hidden; transition: var(--transition); border: 1px solid var(--glass-border);
+            max-width: 90%; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            display: flex; align-items: center; gap: 10px;
         }
         .toast.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
-        .toast.error { background: rgba(231, 76, 60, 0.9); color: white; border-color: rgba(255,255,255,0.2);}
-        .toast.success { background: rgba(46, 204, 113, 0.9); color: white; border-color: rgba(255,255,255,0.2);}
+        .toast.error { background: rgba(231, 76, 60, 0.9); color: white; border-color: rgba(255,255,255,0.2); }
+        .toast.success { background: rgba(46, 204, 113, 0.9); color: white; border-color: rgba(255,255,255,0.2); }
+        .toast.paste { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; }
 
-        /* States */
+        /* Empty & Loading */
         .empty-state { text-align: center; padding: 80px 20px; color: var(--text-secondary); }
         .empty-state svg { width: 72px; height: 72px; margin-bottom: 20px; opacity: 0.3; }
-        .loading { text-align: center; padding: 60px 20px; color: var(--text-secondary); display: flex; flex-direction: column; align-items: center; gap: 16px;}
+        .loading { text-align: center; padding: 60px 20px; color: var(--text-secondary); display: flex; flex-direction: column; align-items: center; gap: 16px; }
 
-        /* Responsive Design */
+        /* Paste Hint */
+        .paste-hint {
+            display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 16px;
+            padding: 8px 16px; background: rgba(0, 0, 0, 0.2); border-radius: 30px; font-size: 12px;
+            color: var(--text-secondary); border: 1px solid var(--glass-border);
+        }
+        .paste-hint kbd {
+            background: rgba(255, 255, 255, 0.1); border: 1px solid var(--glass-border); border-radius: 6px;
+            padding: 2px 8px; font-family: monospace; font-size: 11px; color: white;
+        }
+
+        /* Responsive */
         @media (max-width: 600px) {
             .app-header { padding: 12px 16px; }
             .app-header h1 { font-size: 20px; }
@@ -440,179 +338,23 @@
             .container { padding: 0 12px; }
             .post-card { border-radius: 20px; }
             .post-header { padding: 12px 16px; }
-            .post-avatar { width: 40px; height: 40px; font-size: 16px;}
+            .post-avatar { width: 40px; height: 40px; font-size: 16px; }
             .fab { width: 56px; height: 56px; bottom: 20px; right: 20px; }
             .fab svg { width: 28px; height: 28px; }
-            .upload-modal { padding: 20px 16px 24px; border-radius: 24px 24px 0 0;}
+            .upload-modal { padding: 20px 16px 24px; border-radius: 24px 24px 0 0; }
+            .upload-area { padding: 30px 16px; }
         }
-      /* =========================================
-   DRAG & DROP VISUAL INDICATORS
-   ========================================= */
-
-/* Upload area - default */
-.upload-area {
-    position: relative;
-    border: 2px dashed var(--glass-border);
-    border-radius: var(--border-radius-md);
-    padding: 40px 20px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    background: rgba(0, 0, 0, 0.2);
-    overflow: hidden;
-}
-
-/* Drag over holati */
-.upload-area.drag-over {
-    border-color: var(--primary);
-    background: rgba(36, 161, 222, 0.15);
-    transform: scale(1.02);
-    box-shadow: 0 0 30px rgba(36, 161, 222, 0.3);
-}
-
-/* Drag over ichidagi ikonka animatsiyasi */
-.upload-area.drag-over .upload-icon svg {
-    animation: bounce 0.6s ease infinite;
-}
-
-@keyframes bounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
-}
-
-/* Drag overlay (butun ekran bo'ylab) */
-.drag-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(36, 161, 222, 0.1);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    z-index: 1000;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    pointer-events: none;
-    border: 4px dashed var(--primary);
-}
-
-.drag-overlay.show {
-    display: flex;
-}
-
-.drag-overlay-content {
-    text-align: center;
-    color: white;
-    background: var(--glass-bg);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    padding: 40px 60px;
-    border-radius: var(--border-radius-lg);
-    border: 1px solid var(--glass-border);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-    animation: pulse 1.5s ease infinite;
-}
-
-@keyframes pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-}
-
-.drag-overlay-content svg {
-    width: 80px;
-    height: 80px;
-    margin-bottom: 20px;
-    color: var(--primary);
-}
-
-.drag-overlay-content h2 {
-    font-size: 28px;
-    margin-bottom: 10px;
-}
-
-.drag-overlay-content p {
-    color: var(--text-secondary);
-    font-size: 16px;
-}
-
-/* =========================================
-   COPY & PASTE VISUAL INDICATORS
-   ========================================= */
-
-/* Paste toast maxsus stillari */
-.toast.paste {
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-    color: white;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    box-shadow: 0 10px 40px rgba(36, 161, 222, 0.4);
-}
-
-.toast.paste svg {
-    animation: spin 0.5s ease;
-}
-
-/* Upload area da paste ishorasi */
-.upload-area .paste-hint {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    margin-top: 16px;
-    padding: 8px 16px;
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 30px;
-    font-size: 12px;
-    color: var(--text-secondary);
-    border: 1px solid var(--glass-border);
-}
-
-.upload-area .paste-hint kbd {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid var(--glass-border);
-    border-radius: 6px;
-    padding: 2px 8px;
-    font-family: monospace;
-    font-size: 11px;
-    color: white;
-}
-
-/* Fayl yuklanganda success animatsiyasi */
-.upload-area.upload-success {
-    border-color: var(--success);
-    background: rgba(46, 204, 113, 0.1);
-    animation: successPulse 0.5s ease;
-}
-
-@keyframes successPulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.02); }
-}
-
-/* Drop zone active bo'lganda */
-body.drag-active * {
-    pointer-events: none;
-}
-
-body.drag-active .upload-area,
-body.drag-active .drag-overlay {
-    pointer-events: auto;
-}
     </style>
 </head>
 <body class="login-mode">
+    <!-- Login Container -->
     <div class="login-container">
         <div class="login-card">
             <div class="login-logo">
-                <svg viewBox="0 0 24 24" fill="none">
-                    <circle cx="12" cy="12" r="12" fill="#24A1DE"/>
-                    <path d="M12 6v12M6 12h12" stroke="white" stroke-width="2" stroke-linecap="round"/>
-                </svg>
+                <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="12" fill="#24A1DE"/><path d="M12 6v12M6 12h12" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
             </div>
             <div class="login-title" id="loginTitle">Kirish</div>
             <div class="login-subtitle" id="loginSubtitle">Xush kelibsiz! Ma'lumotlarni kiriting.</div>
-            
             <form id="loginForm">
                 <div class="input-group" id="nameGroup" style="display: none;">
                     <label class="input-label">
@@ -621,7 +363,6 @@ body.drag-active .drag-overlay {
                     </label>
                     <input type="text" id="fullName" class="input-field" placeholder="Ismingiz" autocomplete="name">
                 </div>
-                
                 <div class="input-group">
                     <label class="input-label">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M5 20v-2a7 7 0 0 1 14 0v2"/></svg>
@@ -629,7 +370,6 @@ body.drag-active .drag-overlay {
                     </label>
                     <input type="text" id="username" class="input-field" placeholder="@username" autocomplete="username" autocapitalize="none">
                 </div>
-                
                 <div class="input-group">
                     <label class="input-label">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
@@ -637,7 +377,6 @@ body.drag-active .drag-overlay {
                     </label>
                     <input type="password" id="password" class="input-field" placeholder="••••••••">
                 </div>
-                
                 <div class="input-group" id="confirmGroup" style="display: none;">
                     <label class="input-label">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
@@ -645,15 +384,12 @@ body.drag-active .drag-overlay {
                     </label>
                     <input type="password" id="confirmPassword" class="input-field" placeholder="••••••••">
                 </div>
-                
                 <div class="error-message" id="loginError"></div>
-                
                 <button type="submit" class="login-btn" id="loginBtn">
                     <span id="btnText">KIRISH</span>
                     <span class="spinner" id="loginSpinner" style="display: none;"></span>
                 </button>
             </form>
-            
             <div class="login-toggle">
                 <span id="toggleText">Hisobingiz yo'qmi?</span>
                 <span class="toggle-link" id="toggleFormBtn">Ro'yxatdan o'tish</span>
@@ -661,13 +397,11 @@ body.drag-active .drag-overlay {
         </div>
     </div>
 
+    <!-- Main App -->
     <div class="app">
         <header class="app-header">
             <h1>
-                <svg viewBox="0 0 24 24" fill="none">
-                    <circle cx="12" cy="12" r="12" fill="#24A1DE"/>
-                    <path d="M12 6v12M6 12h12" stroke="white" stroke-width="2" stroke-linecap="round"/>
-                </svg>
+                <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="12" fill="#24A1DE"/><path d="M12 6v12M6 12h12" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
                 MR Vault
             </h1>
             <div class="user-info">
@@ -691,50 +425,28 @@ body.drag-active .drag-overlay {
         </div>
 
         <div class="category-tabs" id="categoryTabs">
-            <button class="category-tab active" data-cat="all">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
-                Barcha
-            </button>
-            <button class="category-tab" data-cat="maktab">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-                Maktab
-            </button>
-            <button class="category-tab" data-cat="ish">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-                Ish
-            </button>
-            <button class="category-tab" data-cat="dasturlash">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-                Dasturlash
-            </button>
-            <button class="category-tab" data-cat="dars">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14"/><path d="M22 3h-6a4 4 0 0 0-4 4v14"/></svg>
-                Dars
-            </button>
-            <button class="category-tab" data-cat="shaxsiy">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                Shaxsiy
-            </button>
+            <button class="category-tab active" data-cat="all"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg> Barcha</button>
+            <button class="category-tab" data-cat="maktab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> Maktab</button>
+            <button class="category-tab" data-cat="ish"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> Ish</button>
+            <button class="category-tab" data-cat="dasturlash"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg> Dasturlash</button>
+            <button class="category-tab" data-cat="dars"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14"/><path d="M22 3h-6a4 4 0 0 0-4 4v14"/></svg> Dars</button>
+            <button class="category-tab" data-cat="shaxsiy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Shaxsiy</button>
         </div>
 
         <div class="content">
             <div class="container">
                 <div class="posts-feed" id="postsFeed">
-                    <div class="loading">
-                        <div class="spinner"></div>
-                        <p>Ma'lumotlar yuklanmoqda...</p>
-                    </div>
+                    <div class="loading"><div class="spinner"></div><p>Ma'lumotlar yuklanmoqda...</p></div>
                 </div>
             </div>
         </div>
 
         <button class="fab" id="fabBtn">
-            <svg viewBox="0 0 24 24" fill="none">
-                <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-            </svg>
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
         </button>
     </div>
 
+    <!-- Upload Modal -->
     <div class="modal-overlay" id="uploadModal">
         <div class="upload-modal">
             <div class="modal-header">
@@ -749,8 +461,9 @@ body.drag-active .drag-overlay {
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                 </div>
                 <div style="font-size: 16px; font-weight: 500; margin-bottom: 8px;">Fayl tanlash uchun bosing</div>
-                <div style="font-size: 13px; color: var(--text-secondary);">Rasm, video, audio yoki PDF qo'llab quvvatlanadi</div>
-                <input type="file" id="fileInput" style="display: none;" accept="*/*">
+                <div style="font-size: 13px; color: var(--text-secondary);">Rasm, video, audio yoki PDF</div>
+                <div class="paste-hint"><span>yoki</span> <kbd>Ctrl</kbd> + <kbd>V</kbd> <span>bosing</span></div>
+                <input type="file" id="fileInput" style="display: none;" accept="image/*,video/*,audio/*,application/pdf,.pdf,.doc,.docx,.txt,application/zip,application/x-rar-compressed">
             </div>
             
             <div class="preview-area" id="previewArea" style="display: none;"></div>
@@ -773,36 +486,18 @@ body.drag-active .drag-overlay {
             </div>
             
             <div class="option-group">
-                <label class="option-label">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="2"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>
-                    Ko'rinish
-                </label>
+                <label class="option-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="2"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg> Ko'rinish</label>
                 <div class="visibility-options">
-                    <label class="visibility-option">
-                        <input type="radio" name="visibility" value="public" checked>
-                        Ommaviy
-                    </label>
-                    <label class="visibility-option">
-                        <input type="radio" name="visibility" value="private">
-                        Maxfiy
-                    </label>
+                    <label class="visibility-option"><input type="radio" name="visibility" value="public" checked> Ommaviy</label>
+                    <label class="visibility-option"><input type="radio" name="visibility" value="private"> Maxfiy</label>
                 </div>
             </div>
             
             <div class="option-group">
-                <label class="option-label">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                    Qo'shimcha Himoya
-                </label>
+                <label class="option-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Himoya</label>
                 <div class="checkbox-group">
-                    <label class="checkbox-item">
-                        <input type="checkbox" id="blurCheck">
-                        Media faylni xiralashtirish (Blur effekti)
-                    </label>
-                    <label class="checkbox-item">
-                        <input type="checkbox" id="passwordCheck">
-                        Postga parol o'rnatish
-                    </label>
+                    <label class="checkbox-item"><input type="checkbox" id="blurCheck"> Media faylni xiralashtirish</label>
+                    <label class="checkbox-item"><input type="checkbox" id="passwordCheck"> Postga parol o'rnatish</label>
                 </div>
                 <div id="passwordField" style="display: none; margin-top: 12px;">
                     <input type="password" id="postPassword" class="input-field" placeholder="Himoya parolini kiriting" style="width: 100%;">
@@ -816,26 +511,22 @@ body.drag-active .drag-overlay {
         </div>
     </div>
 
+    <!-- Viewer Modal -->
     <div class="viewer-overlay" id="viewerOverlay">
-        <div class="viewer-header">
-            <button class="back-btn" id="closeViewerBtn">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
-            </button>
-        </div>
+        <div class="viewer-header"><button class="back-btn" id="closeViewerBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></button></div>
         <div class="viewer-content" id="viewerContent"></div>
     </div>
 
+    <!-- Password Modal -->
     <div class="password-modal" id="passwordModal">
-        <h4>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-            Himoyalangan Post
-        </h4>
+        <h4><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Himoyalangan Post</h4>
         <input type="password" id="passwordInput" class="input-field" placeholder="Parolni kiriting">
         <button class="login-btn" id="submitPasswordBtn">Tasdiqlash</button>
         <button class="login-btn" id="cancelPasswordBtn" style="background: rgba(255,255,255,0.1); color: white; box-shadow: none; margin-top: 12px;">Bekor qilish</button>
         <div class="error-message" id="passwordError"></div>
     </div>
 
+    <!-- Toast -->
     <div class="toast" id="toast"></div>
 
     <script type="module">
@@ -844,7 +535,7 @@ body.drag-active .drag-overlay {
         import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, deleteDoc, doc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
-        // Firebase Configuration
+        // Config
         const firebaseConfig = {
             apiKey: "AIzaSyBhzWWFFgrOH84J2RIW5o7l_8192iPtbOg",
             authDomain: "code-vibe-df610.firebaseapp.com",
@@ -857,683 +548,386 @@ body.drag-active .drag-overlay {
         const auth = getAuth(app);
         const db = getFirestore(app);
         
-        // Supabase Configuration
         const SUPABASE_URL = "https://mujoriozaxjojrgkkars.supabase.co";
         const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im11am9yaW96YXhqb2pyZ2trYXJzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NjQ1MjQsImV4cCI6MjA5MDU0MDUyNH0.IiCWIT5QU06Wd7fEgRtTkG4IoC5oxyTgRAuWxRf15Zw";
         const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // Global State Variables
-        let currentUser = null;
-        let isLoginMode = true;
-        let allPosts = [];
-        let activeBigTab = 'my';
-        let activeCategory = 'all';
-        let selectedFile = null;
-        let selectedCategory = 'boshqa';
-        let pendingPost = null;
+        // State
+        let currentUser = null, isLoginMode = true, allPosts = [], activeBigTab = 'my', activeCategory = 'all';
+        let selectedFile = null, selectedCategory = 'boshqa', pendingPost = null;
 
         // DOM Elements
-        const body = document.body;
-        const loginForm = document.getElementById('loginForm');
-        const toggleFormBtn = document.getElementById('toggleFormBtn');
-        const nameGroup = document.getElementById('nameGroup');
-        const confirmGroup = document.getElementById('confirmGroup');
-        const loginTitle = document.getElementById('loginTitle');
-        const loginSubtitle = document.getElementById('loginSubtitle');
-        const toggleText = document.getElementById('toggleText');
-        const btnText = document.getElementById('btnText');
-        const loginError = document.getElementById('loginError');
-        const loginSpinner = document.getElementById('loginSpinner');
-        const displayUserName = document.getElementById('displayUserName');
-        const logoutBtn = document.getElementById('logoutBtn');
-        const postsFeed = document.getElementById('postsFeed');
-        const fabBtn = document.getElementById('fabBtn');
-        const uploadModal = document.getElementById('uploadModal');
-        const closeModalBtn = document.getElementById('closeModalBtn');
-        const uploadArea = document.getElementById('uploadArea');
-        const fileInput = document.getElementById('fileInput');
-        const previewArea = document.getElementById('previewArea');
-        const captionInput = document.getElementById('captionInput');
-        const uploadBtn = document.getElementById('uploadBtn');
-        const blurCheck = document.getElementById('blurCheck');
-        const passwordCheck = document.getElementById('passwordCheck');
-        const passwordField = document.getElementById('passwordField');
+        const body = document.body, loginForm = document.getElementById('loginForm'), toggleFormBtn = document.getElementById('toggleFormBtn');
+        const nameGroup = document.getElementById('nameGroup'), confirmGroup = document.getElementById('confirmGroup');
+        const loginTitle = document.getElementById('loginTitle'), loginSubtitle = document.getElementById('loginSubtitle');
+        const toggleText = document.getElementById('toggleText'), btnText = document.getElementById('btnText');
+        const loginError = document.getElementById('loginError'), loginSpinner = document.getElementById('loginSpinner');
+        const displayUserName = document.getElementById('displayUserName'), logoutBtn = document.getElementById('logoutBtn');
+        const postsFeed = document.getElementById('postsFeed'), fabBtn = document.getElementById('fabBtn');
+        const uploadModal = document.getElementById('uploadModal'), closeModalBtn = document.getElementById('closeModalBtn');
+        const uploadArea = document.getElementById('uploadArea'), fileInput = document.getElementById('fileInput');
+        const previewArea = document.getElementById('previewArea'), captionInput = document.getElementById('captionInput');
+        const uploadBtn = document.getElementById('uploadBtn'), blurCheck = document.getElementById('blurCheck');
+        const passwordCheck = document.getElementById('passwordCheck'), passwordField = document.getElementById('passwordField');
         const postPassword = document.getElementById('postPassword');
-        const viewerOverlay = document.getElementById('viewerOverlay');
-        const viewerContent = document.getElementById('viewerContent');
-        const closeViewerBtn = document.getElementById('closeViewerBtn');
-        const passwordModal = document.getElementById('passwordModal');
-        const passwordInput = document.getElementById('passwordInput');
-        const submitPasswordBtn = document.getElementById('submitPasswordBtn');
-        const cancelPasswordBtn = document.getElementById('cancelPasswordBtn');
-        const passwordError = document.getElementById('passwordError');
-        const toast = document.getElementById('toast');
+        const viewerOverlay = document.getElementById('viewerOverlay'), viewerContent = document.getElementById('viewerContent'), closeViewerBtn = document.getElementById('closeViewerBtn');
+        const passwordModal = document.getElementById('passwordModal'), passwordInput = document.getElementById('passwordInput');
+        const submitPasswordBtn = document.getElementById('submitPasswordBtn'), cancelPasswordBtn = document.getElementById('cancelPasswordBtn');
+        const passwordError = document.getElementById('passwordError'), toast = document.getElementById('toast');
 
-        // ==========================================
-        // AUTHENTICATION LOGIC
-        // ==========================================
-        
-        // Toggle Login/Register Form
+        // ========== AUTH ==========
         toggleFormBtn.addEventListener('click', () => {
             isLoginMode = !isLoginMode;
-            
             if (isLoginMode) {
-                nameGroup.style.display = 'none'; 
-                confirmGroup.style.display = 'none';
-                loginTitle.textContent = 'Kirish'; 
-                loginSubtitle.textContent = "Xush kelibsiz! Ma'lumotlarni kiriting.";
-                toggleText.textContent = "Hisobingiz yo'qmi?"; 
-                toggleFormBtn.textContent = "Ro'yxatdan o'tish";
+                nameGroup.style.display = 'none'; confirmGroup.style.display = 'none';
+                loginTitle.textContent = 'Kirish'; loginSubtitle.textContent = "Xush kelibsiz! Ma'lumotlarni kiriting.";
+                toggleText.textContent = "Hisobingiz yo'qmi?"; toggleFormBtn.textContent = "Ro'yxatdan o'tish";
                 btnText.textContent = 'KIRISH';
             } else {
-                nameGroup.style.display = 'block'; 
-                confirmGroup.style.display = 'block';
-                loginTitle.textContent = "Ro'yxatdan o'tish"; 
-                loginSubtitle.textContent = "Yangi hisob oching va platformaga qo'shiling";
-                toggleText.textContent = "Hisobingiz bormi?"; 
-                toggleFormBtn.textContent = 'Kirish';
+                nameGroup.style.display = 'block'; confirmGroup.style.display = 'block';
+                loginTitle.textContent = "Ro'yxatdan o'tish"; loginSubtitle.textContent = "Yangi hisob oching";
+                toggleText.textContent = "Hisobingiz bormi?"; toggleFormBtn.textContent = 'Kirish';
                 btnText.textContent = "RO'YXATDAN O'TISH";
             }
             loginError.textContent = '';
         });
 
-        // Convert Username to Virtual Email
-        function usernameToEmail(username) { 
-            return `${username.toLowerCase().replace(/[^a-z0-9]/g, '')}@mrgram.user`; 
-        }
+        function usernameToEmail(username) { return `${username.toLowerCase().replace(/[^a-z0-9]/g, '')}@mrgram.user`; }
 
-        // Handle Login/Register Submit
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
-            const username = document.getElementById('username').value.trim();
-            const password = document.getElementById('password').value;
-            
-            if (!username || username.length < 3) { 
-                loginError.textContent = 'Username kamida 3 ta belgidan iborat bo\'lishi kerak'; 
-                return; 
-            }
-            if (!password || password.length < 6) { 
-                loginError.textContent = 'Parol kamida 6 ta belgidan iborat bo\'lishi kerak'; 
-                return; 
-            }
-            
-            loginSpinner.style.display = 'inline-block'; 
-            btnText.style.opacity = '0.5';
-            
+            const username = document.getElementById('username').value.trim(), password = document.getElementById('password').value;
+            if (!username || username.length < 3) { loginError.textContent = 'Username kamida 3 ta belgi'; return; }
+            if (!password || password.length < 6) { loginError.textContent = 'Parol kamida 6 ta belgi'; return; }
+            loginSpinner.style.display = 'inline-block'; btnText.style.opacity = '0.5';
             try {
                 const email = usernameToEmail(username);
-                
                 if (isLoginMode) {
                     await signInWithEmailAndPassword(auth, email, password);
                 } else {
-                    const fullName = document.getElementById('fullName').value.trim();
-                    const confirmPassword = document.getElementById('confirmPassword').value;
-                    
-                    if (!fullName) { 
-                        loginError.textContent = 'Ismingizni kiriting'; 
-                        return; 
-                    }
-                    if (password !== confirmPassword) { 
-                        loginError.textContent = 'Parollar mos kelmadi'; 
-                        return; 
-                    }
-                    
+                    const fullName = document.getElementById('fullName').value.trim(), confirmPassword = document.getElementById('confirmPassword').value;
+                    if (!fullName) { loginError.textContent = 'Ismingizni kiriting'; return; }
+                    if (password !== confirmPassword) { loginError.textContent = 'Parollar mos kelmadi'; return; }
                     const userCred = await createUserWithEmailAndPassword(auth, email, password);
                     await updateProfile(userCred.user, { displayName: fullName });
-                    await addDoc(collection(db, 'users'), { 
-                        uid: userCred.user.uid, 
-                        username, 
-                        fullName, 
-                        email, 
-                        createdAt: serverTimestamp() 
-                    });
+                    await addDoc(collection(db, 'users'), { uid: userCred.user.uid, username, fullName, email, createdAt: serverTimestamp() });
                 }
-            } catch (error) { 
-                loginError.textContent = error.message; 
-            } finally {
-                loginSpinner.style.display = 'none'; 
-                btnText.style.opacity = '1';
-            }
+            } catch (error) { loginError.textContent = error.message; }
+            finally { loginSpinner.style.display = 'none'; btnText.style.opacity = '1'; }
         });
 
-        // Auth State Observer
         onAuthStateChanged(auth, (user) => {
+            const loginContainer = document.querySelector('.login-container'), appElement = document.querySelector('.app');
             if (user) { 
                 currentUser = user; 
-                body.classList.remove('login-mode'); 
-                body.classList.add('app-mode'); 
+                if (loginContainer) loginContainer.style.display = 'none';
+                if (appElement) appElement.style.display = 'block';
+                body.classList.remove('login-mode'); body.classList.add('app-mode'); 
                 displayUserName.textContent = user.displayName || user.email?.split('@')[0] || 'User'; 
                 loadPosts(); 
             } else { 
                 currentUser = null; 
-                body.classList.add('login-mode'); 
-                body.classList.remove('app-mode'); 
-            }
+                if (loginContainer) loginContainer.style.display = 'block';
+                if (appElement) appElement.style.display = 'none';
+                body.classList.add('login-mode'); body.classList.remove('app-mode'); 
+            } 
         });
         
-        // Logout
         logoutBtn.addEventListener('click', () => signOut(auth));
 
-        // ==========================================
-        // FLOATING ACTION BUTTON (DRAG & DROP)
-        // ==========================================
+        // ========== FAB ==========
         let isDragging = false, startX, startY, startLeft, startBottom;
-        
-        fabBtn.addEventListener('mousedown', dragStart);
-        document.addEventListener('mousemove', dragMove);
-        document.addEventListener('mouseup', dragEnd);
-        
-        fabBtn.addEventListener('touchstart', dragStart, {passive: false});
-        document.addEventListener('touchmove', dragMove, {passive: false});
-        document.addEventListener('touchend', dragEnd);
-        
-        function dragStart(e) {
-            isDragging = true; 
-            const evt = e.touches ? e.touches[0] : e;
-            startX = evt.clientX; 
-            startY = evt.clientY; 
-            
-            const rect = fabBtn.getBoundingClientRect(); 
-            startLeft = rect.left; 
-            startBottom = window.innerHeight - rect.bottom; 
-            
-            fabBtn.classList.add('dragging');
-            if(e.type === 'touchstart') e.preventDefault();
-        }
-        
-        function dragMove(e) {
-            if (!isDragging) return; 
-            const evt = e.touches ? e.touches[0] : e;
-            
-            let newLeft = startLeft + evt.clientX - startX; 
-            let newBottom = startBottom - (evt.clientY - startY); 
-            
-            // Screen boundaries
-            newLeft = Math.max(10, Math.min(newLeft, window.innerWidth - 70)); 
-            newBottom = Math.max(70, Math.min(newBottom, window.innerHeight - 150)); 
-            
-            fabBtn.style.left = newLeft + 'px'; 
-            fabBtn.style.right = 'auto'; 
-            fabBtn.style.bottom = newBottom + 'px'; 
-            
-            if(e.type === 'touchmove') e.preventDefault();
-        }
-        
-        function dragEnd() {
-            isDragging = false; 
-            fabBtn.classList.remove('dragging');
-        }
-        
-        fabBtn.addEventListener('click', () => { 
-            if (!fabBtn.classList.contains('dragging')) {
-                uploadModal.classList.add('show'); 
-            }
-        });
+        fabBtn.addEventListener('mousedown', dragStart); document.addEventListener('mousemove', dragMove); document.addEventListener('mouseup', dragEnd);
+        fabBtn.addEventListener('touchstart', dragStart, {passive: false}); document.addEventListener('touchmove', dragMove, {passive: false}); document.addEventListener('touchend', dragEnd);
+        function dragStart(e) { isDragging = true; const evt = e.touches ? e.touches[0] : e; startX = evt.clientX; startY = evt.clientY; const rect = fabBtn.getBoundingClientRect(); startLeft = rect.left; startBottom = window.innerHeight - rect.bottom; fabBtn.classList.add('dragging'); if(e.type === 'touchstart') e.preventDefault(); }
+        function dragMove(e) { if (!isDragging) return; const evt = e.touches ? e.touches[0] : e; let newLeft = startLeft + evt.clientX - startX, newBottom = startBottom - (evt.clientY - startY); newLeft = Math.max(10, Math.min(newLeft, window.innerWidth - 70)); newBottom = Math.max(70, Math.min(newBottom, window.innerHeight - 150)); fabBtn.style.left = newLeft + 'px'; fabBtn.style.right = 'auto'; fabBtn.style.bottom = newBottom + 'px'; if(e.type === 'touchmove') e.preventDefault(); }
+        function dragEnd() { isDragging = false; fabBtn.classList.remove('dragging'); }
+        fabBtn.addEventListener('click', () => { if (!fabBtn.classList.contains('dragging')) uploadModal.classList.add('show'); });
 
-        // ==========================================
-        // UPLOAD & MEDIA HANDLING
-        // ==========================================
-        
-        // Modal Controls
+        // ========== MODAL ==========
         closeModalBtn.addEventListener('click', () => { uploadModal.classList.remove('show'); resetForm(); });
         uploadModal.addEventListener('click', (e) => { if (e.target === uploadModal) { uploadModal.classList.remove('show'); resetForm(); } });
-        uploadArea.addEventListener('click', () => fileInput.click());
-        fileInput.addEventListener('change', (e) => { if (e.target.files[0]) handleFile(e.target.files[0]); });
-        // ==========================================
-// UPLOAD & MEDIA HANDLING (YANGILANGAN)
+        
+        // File Input
+        uploadArea.addEventListener('click', (e) => { e.stopPropagation(); fileInput.value = ''; fileInput.click(); });
+        uploadArea.addEventListener('touchend', (e) => { e.preventDefault(); fileInput.value = ''; fileInput.click(); }, { passive: true });
+        
+        fileInput.addEventListener('change', (e) => { if (e.target.files && e.target.files[0]) handleFile(e.target.files[0]); });
+
+      // ==========================================
+// UNIVERSAL PASTE HANDLER (YANGI)
 // ==========================================
 
-// Modalni ochish va yopish
-closeModalBtn.addEventListener('click', () => { uploadModal.classList.remove('show'); resetForm(); });
-uploadModal.addEventListener('click', (e) => { if (e.target === uploadModal) { uploadModal.classList.remove('show'); resetForm(); } });
-uploadArea.addEventListener('click', () => fileInput.click());
-fileInput.addEventListener('change', (e) => { if (e.target.files[0]) handleFile(e.target.files[0]); });
-
-// --- DRAG & DROP QISMI ---
-['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-    uploadArea.addEventListener(eventName, (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-    }, false);
-});
-
-['dragenter', 'dragover'].forEach(eventName => {
-    uploadArea.addEventListener(eventName, () => {
-        uploadArea.style.borderColor = 'var(--primary)';
-        uploadArea.style.background = 'rgba(36, 161, 222, 0.1)';
-    }, false);
-});
-
-['dragleave', 'drop'].forEach(eventName => {
-    uploadArea.addEventListener(eventName, () => {
-        uploadArea.style.borderColor = 'var(--glass-border)';
-        uploadArea.style.background = 'rgba(0, 0, 0, 0.2)';
-    }, false);
-});
-
-uploadArea.addEventListener('drop', (e) => {
-    const dt = e.dataTransfer;
-    const file = dt.files[0];
-    if (file) handleFile(file);
-});
-
-// --- COPY & PASTE (CTRL+V) QISMI ---
-window.addEventListener('paste', (e) => {
-    const items = e.clipboardData.items;
+function handlePasteEvent(e, options = {}) {
+    const { preventDefault = true, openModal = true } = options;
+    const items = e.clipboardData?.items;
+    
+    if (!items) return false;
+    
     for (let i = 0; i < items.length; i++) {
-        if (items[i].type.indexOf('image') !== -1 || items[i].type.indexOf('video') !== -1) {
-            const file = items[i].getAsFile();
-            // Agar modal yopiq bo'lsa, ochamiz
-            if (!uploadModal.classList.contains('show')) {
-                uploadModal.classList.add('show');
+        const item = items[i];
+        
+        // Fayl tekshirish
+        if (item.kind === 'file') {
+            const file = item.getAsFile();
+            
+            if (file) {
+                if (preventDefault) e.preventDefault();
+                
+                console.log('📁 Paste fayl:', file.name);
+                
+                if (openModal && !uploadModal.classList.contains('show')) {
+                    uploadModal.classList.add('show');
+                }
+                
+                handleFile(file);
+                showToast(`📋 ${file.name} yuklandi`, 'paste');
+                
+                return true;
             }
-            handleFile(file);
-            showToast('Fayl xotiradan yuklandi', 'success');
-            break;
         }
+    }
+    
+    return false;
+}
+
+// 1. Caption input (textarea) uchun
+captionInput.addEventListener('paste', (e) => {
+    handlePasteEvent(e, { preventDefault: true, openModal: false });
+});
+
+// 2. Global paste - modal yopiq bo'lganda ochish uchun
+window.addEventListener('paste', (e) => {
+    if (!uploadModal.classList.contains('show')) {
+        handlePasteEvent(e, { preventDefault: true, openModal: true });
     }
 });
 
-// Faylni qayta ishlash funksiyasi (o'zgarishsiz qoladi)
+        // ========== FORMAT ANIQLASH ==========
+        function getFileIcon(file) {
+            const ext = file.name.split('.').pop()?.toLowerCase() || '';
+            const type = file.type;
+            
+            // Rasmlar
+            if (type.startsWith('image/')) {
+                return { icon: 'image', color: 'var(--primary)' };
+            }
+            // Videolar
+            if (type.startsWith('video/')) {
+                return { icon: 'video', color: 'var(--primary)' };
+            }
+            // Audio
+            if (type.startsWith('audio/')) {
+                return { icon: 'audio', color: 'var(--primary)' };
+            }
+            // PDF
+            if (type === 'application/pdf' || ext === 'pdf') {
+                return { icon: 'pdf', color: 'var(--pdf-color)' };
+            }
+            // Word
+            if (ext === 'doc' || ext === 'docx' || type.includes('word')) {
+                return { icon: 'doc', color: 'var(--doc-color)' };
+            }
+            // Excel
+            if (ext === 'xls' || ext === 'xlsx' || type.includes('excel') || type.includes('spreadsheet')) {
+                return { icon: 'excel', color: '#27ae60' };
+            }
+            // PowerPoint
+            if (ext === 'ppt' || ext === 'pptx' || type.includes('presentation')) {
+                return { icon: 'ppt', color: '#e67e22' };
+            }
+            // ZIP/RAR
+            if (ext === 'zip' || ext === 'rar' || ext === '7z' || type.includes('zip') || type.includes('rar')) {
+                return { icon: 'archive', color: 'var(--archive-color)' };
+            }
+            // TXT
+            if (ext === 'txt' || type === 'text/plain') {
+                return { icon: 'txt', color: '#95a5a6' };
+            }
+            // Default
+            return { icon: 'file', color: 'var(--text-secondary)' };
+        }
 
-        // Preview File
+        function getFileIconSVG(iconType) {
+            const svgs = {
+                image: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2.18"/><circle cx="8.5" cy="8.5" r="2.5"/><path d="M21 15l-5-5L6 21"/></svg>',
+                video: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M10 9l5 3-5 3V9z"/></svg>',
+                audio: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>',
+                pdf: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M10 12v4M13 12v4"/><path d="M9 12h1.5a1.5 1.5 0 0 1 0 3H9"/><path d="M13 12h1.5a1.5 1.5 0 0 1 0 3H13"/></svg>',
+                doc: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="16" y2="16"/></svg>',
+                excel: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M8 12h8M8 16h8"/></svg>',
+                ppt: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><circle cx="10" cy="14" r="2"/><path d="M16 14v4"/></svg>',
+                archive: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8v13H3V8"/><path d="M1 3h22v5H1z"/><line x1="10" y1="12" x2="14" y2="12"/></svg>',
+                txt: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="12" x2="16" y2="12"/></svg>',
+                file: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>'
+            };
+            return svgs[iconType] || svgs.file;
+        }
+
         function handleFile(file) { 
+            if (!file) return;
             selectedFile = file; 
             previewArea.style.display = 'block'; 
-            previewArea.innerHTML = ''; 
             
-            if (file.type.startsWith('image')) { 
-                const img = document.createElement('img'); 
-                img.src = URL.createObjectURL(file); 
-                previewArea.appendChild(img); 
-            } else if (file.type.startsWith('video')) { 
-                const video = document.createElement('video'); 
-                video.src = URL.createObjectURL(file); 
-                video.controls = true; 
-                previewArea.appendChild(video); 
-            } else { 
-                previewArea.innerHTML = `<div>📄 ${file.name}</div>`; 
-            } 
+            const fileType = file.type;
+            const fileExt = file.name.split('.').pop()?.toLowerCase() || '';
+            const fileSize = (file.size / 1024 / 1024).toFixed(2);
+            const iconInfo = getFileIcon(file);
+            
+            // Rasm yoki video bo'lsa preview
+            if (fileType.startsWith('image/')) {
+                previewArea.innerHTML = `<img src="${URL.createObjectURL(file)}" alt="Preview" style="max-width:100%;max-height:200px;border-radius:8px;" onload="URL.revokeObjectURL(this.src)">`;
+            } else if (fileType.startsWith('video/')) {
+                previewArea.innerHTML = `<video src="${URL.createObjectURL(file)}" controls style="max-width:100%;max-height:200px;border-radius:8px;"></video>`;
+            } else {
+                // Boshqa fayllar uchun ikonka
+                previewArea.innerHTML = `
+                    <div class="preview-file">
+                        <div class="file-icon" style="color: ${iconInfo.color}">
+                            ${getFileIconSVG(iconInfo.icon)}
+                        </div>
+                        <div class="file-name">${file.name}</div>
+                        <div class="file-size">${fileSize} MB · ${fileExt.toUpperCase()}</div>
+                    </div>
+                `;
+            }
+            
             uploadBtn.disabled = false; 
         }
-        
-        // Reset Upload Form
+
         function resetForm() { 
-            selectedFile = null; 
-            fileInput.value = ''; 
-            previewArea.style.display = 'none'; 
-            previewArea.innerHTML = ''; 
-            captionInput.value = ''; 
-            uploadBtn.disabled = true; 
-            blurCheck.checked = false; 
-            passwordCheck.checked = false; 
-            passwordField.style.display = 'none'; 
-            postPassword.value = ''; 
-            
+            selectedFile = null; fileInput.value = ''; previewArea.style.display = 'none'; previewArea.innerHTML = ''; 
+            captionInput.value = ''; uploadBtn.disabled = true; blurCheck.checked = false; passwordCheck.checked = false; 
+            passwordField.style.display = 'none'; postPassword.value = ''; 
             document.querySelectorAll('.category-option').forEach(o => o.classList.remove('active')); 
-            document.querySelector('[data-cat="boshqa"]').classList.add('active'); 
-            selectedCategory = 'boshqa'; 
-        }
-        
-        // Categories & Options
-        document.querySelectorAll('.category-option').forEach(option => {
-            option.addEventListener('click', function() { 
-                document.querySelectorAll('.category-option').forEach(c => c.classList.remove('active')); 
-                this.classList.add('active'); 
-                selectedCategory = this.dataset.cat; 
-            });
-        });
-        
-        passwordCheck.addEventListener('change', () => {
-            passwordField.style.display = passwordCheck.checked ? 'block' : 'none';
-        });
-
-        // Security: Hash Password
-        async function hashPassword(pwd) { 
-            const encoder = new TextEncoder(); 
-            const data = encoder.encode(pwd); 
-            const hash = await crypto.subtle.digest('SHA-256', data); 
-            return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join(''); 
+            document.querySelector('[data-cat="boshqa"]').classList.add('active'); selectedCategory = 'boshqa'; 
         }
 
-        // Upload Process (Supabase + Firebase)
+        // Categories
+        document.querySelectorAll('.category-option').forEach(option => { option.addEventListener('click', function() { document.querySelectorAll('.category-option').forEach(c => c.classList.remove('active')); this.classList.add('active'); selectedCategory = this.dataset.cat; }); });
+        passwordCheck.addEventListener('change', () => passwordField.style.display = passwordCheck.checked ? 'block' : 'none');
+
+        async function hashPassword(pwd) { const encoder = new TextEncoder(); const data = encoder.encode(pwd); const hash = await crypto.subtle.digest('SHA-256', data); return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join(''); }
+
         uploadBtn.addEventListener('click', async () => {
             if (!selectedFile || !currentUser) return;
-            
-            uploadBtn.disabled = true; 
-            uploadBtn.innerHTML = '<span class="spinner" style="display:inline-block; border-color:white; border-top-color:transparent; margin-right:8px;"></span> Yuklanmoqda...';
-            
+            uploadBtn.disabled = true; uploadBtn.innerHTML = '<span class="spinner" style="display:inline-block; border-color:white; border-top-color:transparent; margin-right:8px;"></span> Yuklanmoqda...';
             try {
-                // 1. Upload to Supabase Storage
-                const timestamp = Date.now();
-                const fileName = `posts/${currentUser.uid}/${timestamp}_${selectedFile.name}`;
+                const timestamp = Date.now(), fileName = `posts/${currentUser.uid}/${timestamp}_${selectedFile.name}`;
                 const { data, error } = await supabase.storage.from('videos').upload(fileName, selectedFile);
                 if (error) throw error;
-                
-                // 2. Get Public URL
                 const { data: { publicUrl } } = supabase.storage.from('videos').getPublicUrl(data.path);
                 const isPublic = document.querySelector('input[name="visibility"]:checked').value === 'public';
-                
-                // 3. Process Password if checked
                 let hashedPassword = null;
-                if (passwordCheck.checked && postPassword.value) {
-                    hashedPassword = await hashPassword(postPassword.value);
-                }
-                
-                // 4. Save to Firestore
+                if (passwordCheck.checked && postPassword.value) hashedPassword = await hashPassword(postPassword.value);
                 await addDoc(collection(db, 'posts'), { 
-                    text: captionInput.value.trim() || null, 
-                    mediaUrl: publicUrl, 
-                    mediaType: selectedFile.type, 
-                    fileName: selectedFile.name, 
-                    fileSize: selectedFile.size, 
-                    category: selectedCategory, 
-                    isPublic, 
-                    isBlurred: blurCheck.checked, 
-                    hasPassword: passwordCheck.checked && !!postPassword.value, 
-                    password: hashedPassword, 
-                    userId: currentUser.uid, 
-                    userFullName: currentUser.displayName || 'Anonim', 
-                    userAvatar: currentUser.photoURL || null, 
-                    createdAt: serverTimestamp(), 
-                    views: 0, 
-                    downloads: 0 
+                    text: captionInput.value.trim() || null, mediaUrl: publicUrl, mediaType: selectedFile.type, 
+                    fileName: selectedFile.name, fileSize: selectedFile.size, category: selectedCategory, isPublic, 
+                    isBlurred: blurCheck.checked, hasPassword: passwordCheck.checked && !!postPassword.value, password: hashedPassword, 
+                    userId: currentUser.uid, userFullName: currentUser.displayName || 'Anonim', userAvatar: currentUser.photoURL || null, 
+                    createdAt: serverTimestamp(), views: 0, downloads: 0 
                 });
-                
-                showToast('Post muvaffaqiyatli yuklandi!', 'success'); 
-                uploadModal.classList.remove('show'); 
-                resetForm();
-            } catch (error) { 
-                showToast('Xatolik yuz berdi: ' + error.message, 'error'); 
-            } finally { 
-                uploadBtn.disabled = false; 
-                uploadBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Postni Yuklash'; 
-            }
+                showToast('Post muvaffaqiyatli yuklandi!', 'success'); uploadModal.classList.remove('show'); resetForm();
+            } catch (error) { showToast('Xatolik: ' + error.message, 'error'); }
+            finally { uploadBtn.disabled = false; uploadBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Postni Yuklash'; }
         });
 
-        // ==========================================
-        // FEED & POST RENDERING
-        // ==========================================
-        
-        // Tab Filters
-        document.querySelectorAll('.big-tab').forEach(tab => {
-            tab.addEventListener('click', function() { 
-                document.querySelectorAll('.big-tab').forEach(bt => bt.classList.remove('active')); 
-                this.classList.add('active'); 
-                activeBigTab = this.dataset.tab; 
-                filterPosts(); 
-            });
-        });
-        
-        document.querySelectorAll('.category-tab').forEach(tab => {
-            tab.addEventListener('click', function() { 
-                document.querySelectorAll('.category-tab').forEach(ct => ct.classList.remove('active')); 
-                this.classList.add('active'); 
-                activeCategory = this.dataset.cat; 
-                filterPosts(); 
-            });
-        });
+        // Tabs
+        document.querySelectorAll('.big-tab').forEach(tab => tab.addEventListener('click', function() { document.querySelectorAll('.big-tab').forEach(bt => bt.classList.remove('active')); this.classList.add('active'); activeBigTab = this.dataset.tab; filterPosts(); }));
+        document.querySelectorAll('.category-tab').forEach(tab => tab.addEventListener('click', function() { document.querySelectorAll('.category-tab').forEach(ct => ct.classList.remove('active')); this.classList.add('active'); activeCategory = this.dataset.cat; filterPosts(); }));
 
-        // Load Posts from Firestore
         function loadPosts() { 
             const q = query(collection(db, 'posts'), orderBy('createdAt', 'desc')); 
-            
-            onSnapshot(q, (snap) => { 
-                allPosts = snap.docs.map(d => ({ id: d.id, ...d.data() })); 
-                filterPosts(); 
-            }, (error) => { 
-                postsFeed.innerHTML = `
-                    <div class="empty-state">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                        <p>${error.message}</p>
-                    </div>`; 
-            }); 
+            onSnapshot(q, (snap) => { allPosts = snap.docs.map(d => ({ id: d.id, ...d.data() })); filterPosts(); }, (error) => { postsFeed.innerHTML = `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><p>${error.message}</p></div>`; }); 
         }
 
-        // Apply Filters
         function filterPosts() { 
             let filtered = [...allPosts]; 
-            
-            if (activeBigTab === 'my' && currentUser) {
-                filtered = filtered.filter(p => p.userId === currentUser.uid); 
-            } else if (activeBigTab === 'public') {
-                filtered = filtered.filter(p => p.isPublic === true); 
-            }
-            
-            if (activeCategory !== 'all') {
-                filtered = filtered.filter(p => p.category === activeCategory); 
-            }
-            
+            if (activeBigTab === 'my' && currentUser) filtered = filtered.filter(p => p.userId === currentUser.uid); 
+            else if (activeBigTab === 'public') filtered = filtered.filter(p => p.isPublic === true); 
+            if (activeCategory !== 'all') filtered = filtered.filter(p => p.category === activeCategory); 
             renderPosts(filtered); 
         }
 
-        // Render HTML for Posts
         function renderPosts(posts) {
-            if (!posts.length) { 
-                postsFeed.innerHTML = `
-                    <div class="empty-state">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg>
-                        <p>Hozircha postlar mavjud emas</p>
-                    </div>`; 
-                return; 
-            }
+            if (!posts.length) { postsFeed.innerHTML = `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg><p>Hozircha postlar mavjud emas</p></div>`; return; }
             
             postsFeed.innerHTML = posts.map(p => {
                 const time = p.createdAt?.toDate?.() || new Date();
                 const timeStr = new Intl.DateTimeFormat('uz-UZ', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }).format(time);
-                
-                const isOwner = currentUser && p.userId === currentUser.uid;
-                const hasBlur = p.isBlurred === true;
-                const hasPass = p.hasPassword === true && p.password;
+                const isOwner = currentUser && p.userId === currentUser.uid, hasBlur = p.isBlurred === true, hasPass = p.hasPassword === true && p.password;
                 
                 let mediaHtml = '';
-                if (p.mediaType?.startsWith('image')) {
-                    mediaHtml = `<img src="${p.mediaUrl}" loading="lazy" alt="Post Image">`;
-                } else if (p.mediaType?.startsWith('video')) {
-                    mediaHtml = `<video src="${p.mediaUrl}" controls preload="metadata"></video>`;
-                } else if (p.mediaType?.startsWith('audio')) {
-                    mediaHtml = `<audio src="${p.mediaUrl}" controls></audio>`;
-                } else {
-                    mediaHtml = `<div class="post-file" style="padding:40px; text-align:center; color:white;">📄 ${p.fileName || 'Fayl'}</div>`;
+                if (p.mediaType?.startsWith('image')) mediaHtml = `<img src="${p.mediaUrl}" loading="lazy" alt="Post">`;
+                else if (p.mediaType?.startsWith('video')) mediaHtml = `<video src="${p.mediaUrl}" controls preload="metadata"></video>`;
+                else if (p.mediaType?.startsWith('audio')) mediaHtml = `<audio src="${p.mediaUrl}" controls></audio>`;
+                else {
+                    const ext = p.fileName?.split('.').pop()?.toLowerCase() || '';
+                    const iconInfo = { icon: 'file', color: 'var(--text-secondary)' };
+                    if (ext === 'pdf') { iconInfo.icon = 'pdf'; iconInfo.color = 'var(--pdf-color)'; }
+                    else if (ext === 'doc' || ext === 'docx') { iconInfo.icon = 'doc'; iconInfo.color = 'var(--doc-color)'; }
+                    else if (ext === 'zip' || ext === 'rar') { iconInfo.icon = 'archive'; iconInfo.color = 'var(--archive-color)'; }
+                    
+                    mediaHtml = `<div class="preview-file" style="padding:20px;">
+                        <div class="file-icon" style="color: ${iconInfo.color}">${getFileIconSVG(iconInfo.icon)}</div>
+                        <div class="file-name">${p.fileName || 'Fayl'}</div>
+                    </div>`;
                 }
                 
                 let overlayHtml = '';
-                if (hasBlur && !hasPass) {
-                    overlayHtml = `
-                        <div class="blur-layer" data-action="unblur">
-                            <div class="blur-content">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
-                            </div>
-                        </div>`;
-                } else if (hasPass) {
-                    overlayHtml = `
-                        <div class="blur-layer" data-action="password">
-                            <div class="blur-content">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                               
-                            </div>
-                        </div>`;
-                }
+                if (hasBlur && !hasPass) overlayHtml = `<div class="blur-layer" data-action="unblur"><div class="blur-content"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></div></div>`;
+                else if (hasPass) overlayHtml = `<div class="blur-layer" data-action="password"><div class="blur-content"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div></div>`;
                 
-                return `
-                    <div class="post-card" data-id="${p.id}" data-password="${p.password || ''}" data-blur="${p.isBlurred}" data-has-password="${p.hasPassword}" data-media='${JSON.stringify(p)}'>
-                        <div class="post-header">
-                            <div class="post-avatar">${(p.userFullName || 'A')[0]}</div>
-                            <div class="post-info">
-                                <div class="post-author">${p.userFullName || 'Anonim'}</div>
-                                <div class="post-time">${timeStr}</div>
-                            </div>
-                        </div>
-                        
-                        ${p.text ? `<div class="post-text">${escapeHtml(p.text)}</div>` : ''}
-                        
-                        <div class="post-media" data-url="${p.mediaUrl}" data-type="${p.mediaType}">
-                            ${mediaHtml}
-                            ${overlayHtml}
-                        </div>
-                        
-                        <span class="post-category">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7h-4.5A2.5 2.5 0 0 0 13 9.5v0A2.5 2.5 0 0 0 15.5 12H18"/><path d="M4 7h4.5A2.5 2.5 0 0 1 11 9.5v0A2.5 2.5 0 0 1 8.5 12H6"/><path d="M12 3v18"/></svg> 
-                            ${p.category}
-                        </span>
-                        
-                        <div class="post-actions">
-                            <button class="view-btn">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="1"/></svg> 
-                                ${p.views || 0}
-                            </button>
-                            <button class="copy-btn" data-url="${p.mediaUrl}">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> 
-                                Havola nusxasi
-                            </button>
-                            ${isOwner ? `
-                                <button class="delete-btn" data-id="${p.id}">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> 
-                                    O'chirish
-                                </button>
-                            ` : ''}
-                        </div>
-                    </div>`;
+                return `<div class="post-card" data-id="${p.id}" data-password="${p.password || ''}" data-blur="${p.isBlurred}" data-has-password="${p.hasPassword}" data-media='${JSON.stringify(p)}'>
+                    <div class="post-header"><div class="post-avatar">${(p.userFullName || 'A')[0]}</div><div class="post-info"><div class="post-author">${p.userFullName || 'Anonim'}</div><div class="post-time">${timeStr}</div></div></div>
+                    ${p.text ? `<div class="post-text">${escapeHtml(p.text)}</div>` : ''}
+                    <div class="post-media" data-url="${p.mediaUrl}" data-type="${p.mediaType}">${mediaHtml}${overlayHtml}</div>
+                    <span class="post-category"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7h-4.5A2.5 2.5 0 0 0 13 9.5v0A2.5 2.5 0 0 0 15.5 12H18"/><path d="M4 7h4.5A2.5 2.5 0 0 1 11 9.5v0A2.5 2.5 0 0 1 8.5 12H6"/><path d="M12 3v18"/></svg> ${p.category}</span>
+                    <div class="post-actions">
+                        <button class="view-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="1"/></svg> ${p.views || 0}</button>
+                        <button class="copy-btn" data-url="${p.mediaUrl}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Havola</button>
+                        ${isOwner ? `<button class="delete-btn" data-id="${p.id}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> O'chirish</button>` : ''}
+                    </div>
+                </div>`;
             }).join('');
-            
             attachPostEvents();
         }
 
-        // Post Interactions (Click, Copy, Delete)
         function attachPostEvents() {
-            document.querySelectorAll('.post-media').forEach(el => { 
-                el.addEventListener('click', (e) => { 
-                    if (e.target.closest('button') || e.target.closest('video') || e.target.closest('audio')) return; 
-                    handleMediaClick(el); 
-                }); 
-            });
-            
-            document.querySelectorAll('.copy-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => { 
-                    e.stopPropagation(); 
-                    navigator.clipboard?.writeText(btn.dataset.url); 
-                    showToast('Havola nusxalandi', 'success'); 
-                });
-            });
-            
-            document.querySelectorAll('.delete-btn').forEach(btn => {
-                btn.addEventListener('click', async (e) => { 
-                    e.stopPropagation(); 
-                    if (!confirm("Postni butunlay o'chirib tashlamoqchimisiz?")) return; 
-                    
-                    await deleteDoc(doc(db, 'posts', btn.dataset.id)); 
-                    showToast('Post o\'chirildi', 'success'); 
-                });
-            });
+            document.querySelectorAll('.post-media').forEach(el => el.addEventListener('click', (e) => { if (e.target.closest('button') || e.target.closest('video') || e.target.closest('audio')) return; handleMediaClick(el); }));
+            document.querySelectorAll('.copy-btn').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); navigator.clipboard?.writeText(btn.dataset.url); showToast('📋 Havola nusxalandi', 'success'); }));
+            document.querySelectorAll('.delete-btn').forEach(btn => btn.addEventListener('click', async (e) => { e.stopPropagation(); if (!confirm("Postni o'chirmoqchimisiz?")) return; await deleteDoc(doc(db, 'posts', btn.dataset.id)); showToast('🗑️ O\'chirildi', 'success'); }));
         }
 
-        // Handle Image Click (Blur removal & Password check)
         async function handleMediaClick(el) {
-            const card = el.closest('.post-card');
-            const overlay = el.querySelector('.blur-layer');
-            const post = JSON.parse(card.dataset.media); 
-            
-            if (overlay) { 
-                const action = overlay.dataset.action; 
-                
-                if (action === 'password' || post.hasPassword) { 
-                    pendingPost = post; 
-                    passwordModal.classList.add('show'); 
-                    passwordInput.value = ''; 
-                    passwordError.textContent = ''; 
-                } else if (action === 'unblur') { 
-                    overlay.style.opacity = '0';
-                    setTimeout(() => overlay.remove(), 300);
-                } 
-                return; 
-            }
+            const card = el.closest('.post-card'), overlay = el.querySelector('.blur-layer'), post = JSON.parse(card.dataset.media);
+            if (overlay) { const action = overlay.dataset.action; if (action === 'password' || post.hasPassword) { pendingPost = post; passwordModal.classList.add('show'); passwordInput.value = ''; passwordError.textContent = ''; } else if (action === 'unblur') { overlay.style.opacity = '0'; setTimeout(() => overlay.remove(), 300); } return; }
             openViewer(post);
         }
 
-        // Password Verification
-        submitPasswordBtn.addEventListener('click', async () => { 
-            if (!pendingPost) return; 
-            
-            const inputHash = await hashPassword(passwordInput.value); 
-            
-            if (inputHash === pendingPost.password) { 
-                passwordModal.classList.remove('show'); 
-                openViewer(pendingPost); 
-                pendingPost = null; 
-            } else { 
-                passwordError.textContent = 'Parol noto\'g\'ri kiritildi'; 
-            } 
-        });
-        
-        cancelPasswordBtn.addEventListener('click', () => { 
-            passwordModal.classList.remove('show'); 
-            pendingPost = null; 
-        });
+        submitPasswordBtn.addEventListener('click', async () => { if (!pendingPost) return; const inputHash = await hashPassword(passwordInput.value); if (inputHash === pendingPost.password) { passwordModal.classList.remove('show'); openViewer(pendingPost); pendingPost = null; } else { passwordError.textContent = 'Parol noto\'g\'ri'; } });
+        cancelPasswordBtn.addEventListener('click', () => { passwordModal.classList.remove('show'); pendingPost = null; });
 
-        // ==========================================
-        // MEDIA VIEWER MODAL
-        // ==========================================
         function openViewer(post) {
             viewerContent.innerHTML = '';
-            
-            if (post.mediaType?.startsWith('image')) { 
-                const img = document.createElement('img'); 
-                img.src = post.mediaUrl; 
-                viewerContent.appendChild(img); 
-            } else if (post.mediaType?.startsWith('video')) { 
-                const v = document.createElement('video'); 
-                v.src = post.mediaUrl; 
-                v.controls = true; 
-                v.autoplay = true; 
-                viewerContent.appendChild(v); 
-            } else if (post.mediaType?.startsWith('audio')) { 
-                const a = document.createElement('audio'); 
-                a.src = post.mediaUrl; 
-                a.controls = true; 
-                a.autoplay = true; 
-                viewerContent.appendChild(a); 
-            } else { 
-                viewerContent.innerHTML = `
-                    <div style="color:white; text-align:center; padding: 40px; background: rgba(255,255,255,0.1); border-radius: 20px;">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" style="width:80px;height:80px; margin-bottom: 20px;">
-                            <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/>
-                            <polyline points="13 2 13 9 20 9"/>
-                        </svg>
-                        <h2>Hujjat fayli</h2>
-                        <div style="margin-top:20px;">
-                            <a href="${post.mediaUrl}" target="_blank" style="background: var(--primary); color:white; padding: 12px 24px; border-radius: 30px; text-decoration: none; font-weight: bold; display: inline-block;">Hujjatni yuklab olish</a>
-                        </div>
-                    </div>`; 
-            }
+            if (post.mediaType?.startsWith('image')) { const img = document.createElement('img'); img.src = post.mediaUrl; viewerContent.appendChild(img); }
+            else if (post.mediaType?.startsWith('video')) { const v = document.createElement('video'); v.src = post.mediaUrl; v.controls = true; v.autoplay = true; viewerContent.appendChild(v); }
+            else if (post.mediaType?.startsWith('audio')) { const a = document.createElement('audio'); a.src = post.mediaUrl; a.controls = true; a.autoplay = true; viewerContent.appendChild(a); }
+            else { viewerContent.innerHTML = `<div style="color:white;text-align:center;padding:40px;"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" style="width:80px;height:80px;margin-bottom:20px;"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg><h2>Hujjat</h2><div style="margin-top:20px;"><a href="${post.mediaUrl}" target="_blank" style="background:var(--primary);color:white;padding:12px 24px;border-radius:30px;text-decoration:none;">Yuklab olish</a></div></div>`; }
             viewerOverlay.classList.add('show');
         }
         
-        closeViewerBtn.addEventListener('click', () => {
-            viewerOverlay.classList.remove('show');
-            viewerContent.innerHTML = ''; // Stop audio/video playing
-        });
-        
-        viewerOverlay.addEventListener('click', (e) => { 
-            if (e.target === viewerOverlay) {
-                viewerOverlay.classList.remove('show');
-                viewerContent.innerHTML = '';
-            }
-        });
+        closeViewerBtn.addEventListener('click', () => { viewerOverlay.classList.remove('show'); viewerContent.innerHTML = ''; });
+        viewerOverlay.addEventListener('click', (e) => { if (e.target === viewerOverlay) { viewerOverlay.classList.remove('show'); viewerContent.innerHTML = ''; } });
 
-        // ==========================================
-        // UTILITIES
-        // ==========================================
-        function escapeHtml(t) { 
-            const d = document.createElement('div'); 
-            d.textContent = t; 
-            return d.innerHTML; 
-        }
-        
+        function escapeHtml(t) { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
         function showToast(m, type) { 
-            toast.innerHTML = type === 'success' ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> ${m}` : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> ${m}`;
-            toast.className = 'toast show ' + type; 
-            setTimeout(() => toast.classList.remove('show'), 3500); 
+            let icon = ''; 
+            if (type === 'success') icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>';
+            else if (type === 'error') icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>';
+            else if (type === 'paste') icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+            else icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><circle cx="12" cy="8" r="1"/></svg>';
+            toast.innerHTML = `${icon} ${m}`; toast.className = `toast show ${type}`; setTimeout(() => toast.classList.remove('show'), 3500); 
         }
     </script>
 </body>
