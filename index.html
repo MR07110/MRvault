@@ -693,7 +693,7 @@ body.drag-active .drag-overlay {
         <div class="category-tabs" id="categoryTabs">
             <button class="category-tab active" data-cat="all">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
-                All
+                Barcha
             </button>
             <button class="category-tab" data-cat="maktab">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
@@ -775,16 +775,16 @@ body.drag-active .drag-overlay {
             <div class="option-group">
                 <label class="option-label">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="2"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>
-                    Ko'rinish (Privacy)
+                    Ko'rinish
                 </label>
                 <div class="visibility-options">
                     <label class="visibility-option">
                         <input type="radio" name="visibility" value="public" checked>
-                        Ommaviy (Public)
+                        Ommaviy
                     </label>
                     <label class="visibility-option">
                         <input type="radio" name="visibility" value="private">
-                        Maxfiy (Private)
+                        Maxfiy
                     </label>
                 </div>
             </div>
@@ -1129,7 +1129,7 @@ window.addEventListener('paste', (e) => {
                 uploadModal.classList.add('show');
             }
             handleFile(file);
-            showToast('📋 Fayl xotiradan yuklandi', 'success');
+            showToast('Fayl xotiradan yuklandi', 'success');
             break;
         }
     }
@@ -1241,11 +1241,11 @@ window.addEventListener('paste', (e) => {
                     downloads: 0 
                 });
                 
-                showToast('✅ Post muvaffaqiyatli yuklandi!', 'success'); 
+                showToast('Post muvaffaqiyatli yuklandi!', 'success'); 
                 uploadModal.classList.remove('show'); 
                 resetForm();
             } catch (error) { 
-                showToast('❌ Xatolik yuz berdi: ' + error.message, 'error'); 
+                showToast('Xatolik yuz berdi: ' + error.message, 'error'); 
             } finally { 
                 uploadBtn.disabled = false; 
                 uploadBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Postni Yuklash'; 
@@ -1344,7 +1344,7 @@ window.addEventListener('paste', (e) => {
                         <div class="blur-layer" data-action="unblur">
                             <div class="blur-content">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
-                                <div class="blur-text">Ko'rish uchun bosing</div>
+                                <div class="blur-text"></div>
                             </div>
                         </div>`;
                 } else if (hasPass) {
@@ -1414,7 +1414,7 @@ window.addEventListener('paste', (e) => {
                 btn.addEventListener('click', (e) => { 
                     e.stopPropagation(); 
                     navigator.clipboard?.writeText(btn.dataset.url); 
-                    showToast('📋 Havola nusxalandi', 'success'); 
+                    showToast('Havola nusxalandi', 'success'); 
                 });
             });
             
@@ -1424,7 +1424,7 @@ window.addEventListener('paste', (e) => {
                     if (!confirm("Postni butunlay o'chirib tashlamoqchimisiz?")) return; 
                     
                     await deleteDoc(doc(db, 'posts', btn.dataset.id)); 
-                    showToast('🗑️ Post o\'chirildi', 'success'); 
+                    showToast('Post o\'chirildi', 'success'); 
                 });
             });
         }
