@@ -3,230 +3,357 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>MR Vault · Personal Media</title>
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='12' fill='%2324A1DE'/%3E%3Cpath d='M12 6v12M6 12h12' stroke='white' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E">
+    <title>MR Vault · Glassmorphism</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='12' fill='%2324A1DE'/%3E%3Cpath d='M12 5v14M5 12h14' stroke='white' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
-            --primary: #24A1DE; --primary-dark: #1a7fb0; --bg: #0e0e0e; --card-bg: #1c1c1c;
-            --text: #ffffff; --text-secondary: #aaaaaa; --border: #2b2b2b;
-            --success: #2ecc71; --error: #e74c3c; --warning: #f39c12;
+            --primary: #24A1DE; --primary-dark: #1a7fb0;
+            --bg: #0e0e0e; --glass-bg: rgba(28, 28, 28, 0.7);
+            --glass-card: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text: #ffffff; --text-secondary: rgba(255, 255, 255, 0.7);
+            --success: #2ecc71; --error: #e74c3c;
+            --blur-amount: 20px;
+            --border-radius-lg: 28px;
+            --border-radius-md: 20px;
+            --border-radius-sm: 16px;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
         }
+        
         [data-theme="light"] {
-            --bg: #f4f4f5; --card-bg: #ffffff; --text: #000000; --text-secondary: #707579; --border: #dadce0;
+            --bg: #f0f2f5; --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-card: rgba(255, 255, 255, 0.6);
+            --glass-border: rgba(0, 0, 0, 0.08);
+            --text: #000000; --text-secondary: rgba(0, 0, 0, 0.6);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         }
+        
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background: var(--bg); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+            background: var(--bg); color: var(--text); min-height: 100vh;
+            -webkit-font-smoothing: antialiased; backdrop-filter: none;
         }
+        
+        /* iOS 26 Glassmorphism Background */
+        body::before {
+            content: ''; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle at 20% 30%, rgba(36, 161, 222, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 70%, rgba(110, 200, 255, 0.1) 0%, transparent 50%);
+            pointer-events: none; z-index: -1;
+        }
+        
         body.login-mode { display: flex; align-items: center; justify-content: center; padding: 16px; }
         .app { display: none; } body.app-mode .app { display: block; }
         body.login-mode .login-container { display: block; } body.app-mode .login-container { display: none; }
+        
+        /* Login Container - Glassmorphism */
         .login-container { max-width: 400px; width: 100%; margin: 0 auto; display: none; }
         .login-card {
-            background: var(--card-bg); padding: 40px 32px; border-radius: 28px; text-align: center;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2); border: 1px solid var(--border);
+            background: var(--glass-card); backdrop-filter: blur(var(--blur-amount));
+            -webkit-backdrop-filter: blur(var(--blur-amount));
+            padding: 40px 32px; border-radius: var(--border-radius-lg);
+            text-align: center; box-shadow: var(--shadow);
+            border: 1px solid var(--glass-border);
         }
-        .login-logo { font-size: 48px; margin-bottom: 24px; }
-        .login-title { font-size: 26px; font-weight: 700; margin-bottom: 8px; color: var(--text); }
-        .login-subtitle { font-size: 14px; color: var(--text-secondary); margin-bottom: 28px; }
+        .login-logo { margin-bottom: 24px; }
+        .login-logo svg { width: 64px; height: 64px; filter: drop-shadow(0 4px 8px rgba(36, 161, 222, 0.3)); }
+        .login-title { font-size: 28px; font-weight: 700; margin-bottom: 8px; color: var(--text); letter-spacing: -0.5px; }
+        .login-subtitle { font-size: 15px; color: var(--text-secondary); margin-bottom: 32px; }
+        
         .input-group { margin-bottom: 20px; text-align: left; }
-        .input-label { display: block; font-size: 13px; font-weight: 600; color: var(--primary); margin-bottom: 6px; text-transform: uppercase; }
-        .input-field {
-            width: 100%; padding: 14px 16px; background: #242424; border: 1.5px solid var(--border);
-            border-radius: 16px; color: var(--text); font-size: 15px; outline: none; transition: border-color 0.2s;
+        .input-label {
+            display: flex; align-items: center; gap: 6px;
+            font-size: 13px; font-weight: 600; color: var(--primary); margin-bottom: 8px;
+            text-transform: uppercase; letter-spacing: 0.5px;
         }
-        .input-field:focus { border-color: var(--primary); }
+        .input-label svg { width: 16px; height: 16px; }
+        .input-field {
+            width: 100%; padding: 14px 18px;
+            background: var(--glass-card); backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border); border-radius: var(--border-radius-sm);
+            color: var(--text); font-size: 16px; outline: none;
+            transition: all 0.2s ease;
+        }
+        .input-field:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(36, 161, 222, 0.2); }
         .input-field::placeholder { color: var(--text-secondary); opacity: 0.5; }
+        
         .login-btn {
             width: 100%; background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            color: white; border: none; padding: 16px; border-radius: 16px; font-size: 16px; font-weight: 600;
-            cursor: pointer; margin-top: 16px; transition: transform 0.15s, box-shadow 0.3s;
+            color: white; border: none; padding: 16px; border-radius: var(--border-radius-sm);
+            font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 24px;
+            transition: all 0.2s ease; box-shadow: 0 4px 16px rgba(36, 161, 222, 0.3);
+            display: flex; align-items: center; justify-content: center; gap: 8px;
         }
+        .login-btn:active { transform: scale(0.98); }
         .login-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        
         .toggle-link { color: var(--primary); font-weight: 700; cursor: pointer; margin-left: 6px; }
-        .login-toggle { margin-top: 28px; font-size: 14px; color: var(--text-secondary); }
+        .login-toggle { margin-top: 28px; font-size: 15px; color: var(--text-secondary); }
         .error-message { color: var(--error); font-size: 13px; text-align: center; min-height: 20px; margin-top: 12px; }
+        
         .spinner {
-            width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white;
-            border-radius: 50%; animation: spin 0.8s linear infinite; display: inline-block;
+            width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* App Header */
+        /* App Header - Glassmorphism */
         .app-header {
-            position: fixed; top: 0; left: 0; right: 0; background: var(--bg); padding: 12px 16px;
-            border-bottom: 1px solid var(--border); z-index: 100; display: flex; align-items: center; justify-content: space-between;
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            padding: 12px 20px; display: flex; align-items: center; justify-content: space-between;
+            background: var(--glass-bg); backdrop-filter: blur(var(--blur-amount));
+            -webkit-backdrop-filter: blur(var(--blur-amount));
+            border-bottom: 1px solid var(--glass-border);
         }
-        .app-header h1 { font-size: 20px; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 8px; }
+        .app-header h1 {
+            font-size: 22px; font-weight: 700; letter-spacing: -0.5px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .app-header h1 svg { width: 28px; height: 28px; }
         .user-info { display: flex; align-items: center; gap: 12px; }
-        .user-name { font-size: 14px; color: var(--text); max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .logout-btn {
-            background: transparent; border: 1px solid var(--border); color: var(--text-secondary);
-            padding: 6px 12px; border-radius: 20px; font-size: 12px; cursor: pointer;
+        .user-name {
+            font-size: 15px; font-weight: 500; color: var(--text);
+            max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
         }
+        .logout-btn {
+            background: var(--glass-card); backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border); color: var(--text-secondary);
+            padding: 8px 16px; border-radius: 30px; font-size: 13px; font-weight: 500;
+            cursor: pointer; transition: all 0.2s;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .logout-btn svg { width: 16px; height: 16px; }
+        .logout-btn:active { background: var(--primary); color: white; }
 
         /* Big Tabs */
         .big-tabs {
-            position: fixed; top: 57px; left: 0; right: 0; background: var(--bg); padding: 12px 16px 0;
-            border-bottom: 1px solid var(--border); z-index: 99; display: flex; gap: 20px;
+            position: fixed; top: 65px; left: 0; right: 0; z-index: 99;
+            padding: 12px 20px 0; display: flex; gap: 24px;
+            background: var(--glass-bg); backdrop-filter: blur(var(--blur-amount));
+            -webkit-backdrop-filter: blur(var(--blur-amount));
+            border-bottom: 1px solid var(--glass-border);
         }
         .big-tab {
-            background: transparent; border: none; color: var(--text-secondary); font-size: 16px; font-weight: 600;
-            padding: 0 0 12px 0; cursor: pointer; position: relative; transition: color 0.2s;
+            background: transparent; border: none; color: var(--text-secondary);
+            font-size: 16px; font-weight: 600; padding: 0 0 12px 0; cursor: pointer;
+            position: relative; transition: color 0.2s;
+            display: flex; align-items: center; gap: 6px;
         }
+        .big-tab svg { width: 20px; height: 20px; }
         .big-tab.active { color: var(--primary); }
         .big-tab.active::after {
             content: ''; position: absolute; bottom: -1px; left: 0; width: 100%; height: 3px;
             background: var(--primary); border-radius: 3px 3px 0 0;
         }
 
-        /* Category Mini Tabs */
+        /* Category Tabs */
         .category-tabs {
-            position: fixed; top: 110px; left: 0; right: 0; background: var(--bg); padding: 8px 16px;
-            border-bottom: 1px solid var(--border); z-index: 98; display: flex; gap: 8px; overflow-x: auto;
+            position: fixed; top: 120px; left: 0; right: 0; z-index: 98;
+            padding: 10px 16px; display: flex; gap: 8px; overflow-x: auto;
             white-space: nowrap; scrollbar-width: none;
+            background: transparent; backdrop-filter: none;
         }
         .category-tabs::-webkit-scrollbar { display: none; }
         .category-tab {
-            background: transparent; border: 1px solid var(--border); color: var(--text-secondary);
-            padding: 6px 14px; border-radius: 20px; font-size: 13px; cursor: pointer; transition: all 0.2s;
+            background: var(--glass-card); backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border); color: var(--text-secondary);
+            padding: 8px 16px; border-radius: 30px; font-size: 14px; font-weight: 500;
+            cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px;
         }
+        .category-tab svg { width: 16px; height: 16px; }
         .category-tab.active { background: var(--primary); color: white; border-color: var(--primary); }
 
         /* Content */
-        .content { padding-top: 165px; padding-bottom: 80px; min-height: 100vh; }
-        .container { max-width: 600px; margin: 0 auto; padding: 0 12px; }
+        .content { padding-top: 175px; padding-bottom: 90px; min-height: 100vh; }
+        .container { max-width: 600px; margin: 0 auto; padding: 0 16px; }
         .posts-feed { display: flex; flex-direction: column; gap: 16px; }
 
-        /* Post Card */
+        /* Post Card - Glassmorphism */
         .post-card {
-            background: var(--card-bg); border-radius: 16px; border: 1px solid var(--border);
+            background: var(--glass-card); backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: var(--border-radius-md); border: 1px solid var(--glass-border);
             overflow: hidden; animation: fadeIn 0.3s ease;
         }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .post-header { padding: 14px 16px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
+        .post-header { padding: 16px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--glass-border); }
         .post-avatar {
-            width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), #6ec8ff);
-            display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 600; color: white;
+            width: 44px; height: 44px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), #6ec8ff);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px; font-weight: 600; color: white;
         }
         .post-info { flex: 1; }
-        .post-author { font-weight: 600; font-size: 14px; color: var(--text); }
-        .post-time { font-size: 12px; color: var(--text-secondary); }
+        .post-author { font-weight: 600; font-size: 15px; color: var(--text); }
+        .post-time { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
         .post-text { padding: 16px; font-size: 15px; line-height: 1.5; word-wrap: break-word; }
         .post-media { position: relative; cursor: pointer; }
         .post-media img, .post-media video { width: 100%; max-height: 400px; object-fit: cover; display: block; }
         .post-media audio { width: 100%; margin: 8px 0; }
-        .post-category { display: inline-block; padding: 4px 10px; background: #242424; border-radius: 20px; font-size: 11px; margin: 8px 16px; color: var(--text-secondary); }
-        .post-actions { padding: 12px 16px; display: flex; gap: 20px; border-top: 1px solid var(--border); }
+        .post-category {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 6px 12px; background: var(--glass-card); border-radius: 30px;
+            font-size: 12px; margin: 8px 16px; color: var(--text-secondary);
+            border: 1px solid var(--glass-border);
+        }
+        .post-actions { padding: 12px 16px; display: flex; gap: 16px; border-top: 1px solid var(--glass-border); }
         .post-actions button {
             background: transparent; border: none; color: var(--text-secondary); font-size: 13px;
             cursor: pointer; display: flex; align-items: center; gap: 6px; padding: 6px 12px;
-            border-radius: 20px; transition: background 0.2s;
+            border-radius: 30px; transition: all 0.2s;
         }
-        .post-actions button:hover { background: #2a2a2a; }
+        .post-actions button svg { width: 18px; height: 18px; }
+        .post-actions button:active { background: var(--glass-card); }
         .delete-btn { color: var(--error) !important; margin-left: auto; }
 
         /* Blur Layer */
         .blur-layer {
             position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            backdrop-filter: blur(20px); background: rgba(0,0,0,0.3); display: flex;
-            align-items: center; justify-content: center; cursor: pointer;
+            backdrop-filter: blur(30px); background: rgba(0,0,0,0.2);
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
         }
         .blur-content { text-align: center; color: white; }
-        .lock-icon { width: 40px; height: 40px; margin-bottom: 8px; opacity: 0.8; }
+        .blur-content svg { width: 48px; height: 48px; margin-bottom: 8px; opacity: 0.9; }
+        .blur-text {
+            font-size: 14px; font-weight: 500; background: rgba(0,0,0,0.4);
+            padding: 8px 16px; border-radius: 30px; backdrop-filter: blur(10px);
+        }
 
         /* FAB */
         .fab {
-            position: fixed; width: 60px; height: 60px; border-radius: 30px; background: var(--primary);
-            border: none; box-shadow: 0 4px 20px rgba(36,161,222,0.4); cursor: grab; z-index: 200;
-            display: flex; align-items: center; justify-content: center; color: white; font-size: 28px;
+            position: fixed; width: 60px; height: 60px; border-radius: 30px;
+            background: var(--primary); border: none; box-shadow: 0 4px 20px rgba(36,161,222,0.4);
+            cursor: grab; z-index: 200; display: flex; align-items: center; justify-content: center;
             bottom: 24px; right: 24px; user-select: none; touch-action: none;
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
         }
+        .fab svg { width: 28px; height: 28px; stroke: white; stroke-width: 2; }
         .fab:active { cursor: grabbing; }
         .fab.dragging { transition: none; opacity: 0.9; }
 
-        /* Upload Modal */
+        /* Modals - Glassmorphism */
         .modal-overlay {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8);
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5); backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             z-index: 300; display: none; align-items: flex-end; justify-content: center;
         }
         .modal-overlay.show { display: flex; }
         .upload-modal {
-            background: var(--card-bg); width: 100%; max-width: 500px; border-radius: 24px 24px 0 0;
-            padding: 24px 20px 20px; animation: slideUp 0.3s ease; max-height: 90vh; overflow-y: auto;
+            background: var(--glass-bg); backdrop-filter: blur(var(--blur-amount));
+            -webkit-backdrop-filter: blur(var(--blur-amount));
+            width: 100%; max-width: 500px; border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+            padding: 24px 20px 20px; animation: slideUp 0.3s ease;
+            max-height: 85vh; overflow-y: auto; border: 1px solid var(--glass-border);
         }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
         .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
         .modal-header h3 { font-size: 18px; font-weight: 600; }
-        .close-modal { background: transparent; border: none; color: var(--text-secondary); font-size: 24px; cursor: pointer; }
+        .close-modal {
+            background: transparent; border: none; color: var(--text-secondary);
+            cursor: pointer; padding: 8px; border-radius: 50%;
+        }
+        .close-modal svg { width: 24px; height: 24px; }
         .upload-area {
-            border: 2px dashed var(--border); border-radius: 20px; padding: 30px 20px; text-align: center;
-            cursor: pointer; transition: border-color 0.2s; margin-bottom: 16px;
+            border: 2px dashed var(--glass-border); border-radius: var(--border-radius-md);
+            padding: 30px 20px; text-align: center; cursor: pointer;
+            transition: border-color 0.2s; margin-bottom: 16px;
+            background: var(--glass-card);
         }
         .upload-area:hover { border-color: var(--primary); }
-        .upload-icon { font-size: 40px; margin-bottom: 12px; }
+        .upload-icon svg { width: 48px; height: 48px; margin-bottom: 12px; color: var(--primary); }
         .preview-area { margin-bottom: 16px; text-align: center; }
         .preview-area img, .preview-area video { max-width: 100%; max-height: 150px; border-radius: 12px; }
         .caption-input {
-            width: 100%; background: #242424; border: 1px solid var(--border); border-radius: 16px;
-            padding: 14px 16px; color: var(--text); font-size: 15px; resize: none; min-height: 80px;
-            margin-bottom: 16px; font-family: inherit;
+            width: 100%; background: var(--glass-card); border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius-sm); padding: 14px 16px; color: var(--text);
+            font-size: 15px; resize: none; min-height: 80px; margin-bottom: 16px;
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
         }
         .option-group { margin-bottom: 16px; }
-        .option-label { display: block; font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; text-transform: uppercase; }
+        .option-label {
+            display: flex; align-items: center; gap: 6px;
+            font-size: 13px; font-weight: 600; color: var(--text-secondary);
+            margin-bottom: 10px; text-transform: uppercase;
+        }
+        .option-label svg { width: 16px; height: 16px; }
         .category-options { display: flex; flex-wrap: wrap; gap: 8px; }
         .category-option {
-            background: #242424; border: 1px solid var(--border); color: var(--text-secondary);
-            padding: 8px 14px; border-radius: 20px; font-size: 13px; cursor: pointer; transition: all 0.2s;
+            background: var(--glass-card); border: 1px solid var(--glass-border);
+            color: var(--text-secondary); padding: 8px 14px; border-radius: 30px;
+            font-size: 13px; cursor: pointer; transition: all 0.2s;
+            display: flex; align-items: center; gap: 4px;
         }
+        .category-option svg { width: 14px; height: 14px; }
         .category-option.active { background: var(--primary); color: white; border-color: var(--primary); }
         .visibility-options { display: flex; gap: 20px; }
-        .visibility-option { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+        .visibility-option {
+            display: flex; align-items: center; gap: 8px; cursor: pointer;
+            color: var(--text-secondary);
+        }
         .checkbox-group { display: flex; flex-direction: column; gap: 12px; }
-        .checkbox-item { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+        .checkbox-item {
+            display: flex; align-items: center; gap: 10px; cursor: pointer;
+            color: var(--text-secondary);
+        }
         .password-input { margin-top: 8px; width: 100%; }
         .upload-btn {
-            width: 100%; background: var(--primary); color: white; border: none; padding: 16px;
-            border-radius: 16px; font-size: 16px; font-weight: 600; cursor: pointer;
+            width: 100%; background: var(--primary); color: white; border: none;
+            padding: 16px; border-radius: var(--border-radius-sm); font-size: 16px;
+            font-weight: 600; cursor: pointer; display: flex; align-items: center;
+            justify-content: center; gap: 8px;
         }
+        .upload-btn svg { width: 20px; height: 20px; }
         .upload-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
         /* Viewer Modal */
         .viewer-overlay {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: black; z-index: 400;
-            display: none; flex-direction: column;
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: black;
+            z-index: 400; display: none; flex-direction: column;
         }
         .viewer-overlay.show { display: flex; }
         .viewer-header {
-            position: absolute; top: 0; left: 0; right: 0; padding: 16px 20px; display: flex;
-            align-items: center; gap: 16px; z-index: 10; background: linear-gradient(to bottom, rgba(0,0,0,0.7), transparent);
+            position: absolute; top: 0; left: 0; right: 0; padding: 16px 20px;
+            display: flex; align-items: center; gap: 16px; z-index: 10;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.7), transparent);
         }
         .back-btn {
-            background: rgba(255,255,255,0.1); border: none; color: white; width: 40px; height: 40px;
-            border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer;
-            font-size: 24px; backdrop-filter: blur(10px);
+            background: rgba(255,255,255,0.1); backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: none; color: white; width: 44px; height: 44px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
         }
+        .back-btn svg { width: 24px; height: 24px; }
         .viewer-content { flex: 1; display: flex; align-items: center; justify-content: center; }
         .viewer-content img, .viewer-content video { max-width: 100%; max-height: 100vh; object-fit: contain; }
         .viewer-content audio { width: 90%; max-width: 400px; }
 
         /* Password Modal */
         .password-modal {
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--card-bg);
-            padding: 24px; border-radius: 20px; z-index: 500; width: 300px; display: none;
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: var(--glass-bg); backdrop-filter: blur(var(--blur-amount));
+            -webkit-backdrop-filter: blur(var(--blur-amount));
+            padding: 24px; border-radius: var(--border-radius-md); z-index: 500;
+            width: 320px; display: none; border: 1px solid var(--glass-border);
         }
         .password-modal.show { display: block; }
-        .password-modal h4 { margin-bottom: 16px; text-align: center; }
+        .password-modal h4 { margin-bottom: 16px; text-align: center; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .password-modal h4 svg { width: 24px; height: 24px; }
         .password-modal input { width: 100%; margin-bottom: 16px; }
         .password-modal button { width: 100%; }
 
         /* Toast */
         .toast {
-            position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--card-bg);
-            color: var(--text); padding: 12px 24px; border-radius: 40px; font-size: 14px; z-index: 500;
-            opacity: 0; visibility: hidden; transition: all 0.3s; border: 1px solid var(--border);
-            max-width: 90%; text-align: center;
+            position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+            background: var(--glass-bg); backdrop-filter: blur(var(--blur-amount));
+            -webkit-backdrop-filter: blur(var(--blur-amount));
+            color: var(--text); padding: 12px 24px; border-radius: 40px; font-size: 14px;
+            z-index: 500; opacity: 0; visibility: hidden; transition: all 0.3s;
+            border: 1px solid var(--glass-border); max-width: 90%; text-align: center;
         }
         .toast.show { opacity: 1; visibility: visible; }
         .toast.error { background: var(--error); color: white; }
@@ -234,35 +361,75 @@
 
         /* Empty State */
         .empty-state { text-align: center; padding: 60px 20px; color: var(--text-secondary); }
-        .empty-state .icon { font-size: 64px; margin-bottom: 16px; opacity: 0.5; }
+        .empty-state svg { width: 64px; height: 64px; margin-bottom: 16px; opacity: 0.5; }
 
         .loading { text-align: center; padding: 40px; color: var(--text-secondary); }
-      
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .app-header { padding: 10px 16px; }
+            .app-header h1 { font-size: 20px; }
+            .big-tabs { padding: 10px 16px 0; }
+            .big-tab { font-size: 15px; }
+            .category-tabs { padding: 8px 12px; }
+            .category-tab { padding: 6px 12px; font-size: 13px; }
+            .content { padding-top: 165px; }
+            .container { padding: 0 12px; }
+            .post-card { border-radius: 20px; }
+            .post-header { padding: 12px; }
+            .post-avatar { width: 40px; height: 40px; }
+            .fab { width: 56px; height: 56px; bottom: 20px; right: 20px; }
+        }
+
+        @media (min-width: 601px) and (max-width: 1024px) {
+            .container { max-width: 700px; }
+        }
+
+        @media (min-width: 1025px) {
+            .container { max-width: 800px; }
+        }
     </style>
 </head>
 <body class="login-mode">
     <!-- Login Container -->
     <div class="login-container">
         <div class="login-card">
-            <div class="login-logo">🔐</div>
+            <div class="login-logo">
+                <svg viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="12" fill="#24A1DE"/>
+                    <path d="M12 6v12M6 12h12" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            </div>
             <div class="login-title" id="loginTitle">Kirish</div>
             <div class="login-subtitle" id="loginSubtitle">Xush kelibsiz! Ma'lumotlarni kiriting.</div>
             
             <form id="loginForm">
                 <div class="input-group" id="nameGroup" style="display: none;">
-                    <label class="input-label">To'liq ismingiz</label>
+                    <label class="input-label">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        To'liq ismingiz
+                    </label>
                     <input type="text" id="fullName" class="input-field" placeholder="Ismingiz" autocomplete="name">
                 </div>
                 <div class="input-group">
-                    <label class="input-label">Username</label>
+                    <label class="input-label">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M5 20v-2a7 7 0 0 1 14 0v2"/></svg>
+                        Username
+                    </label>
                     <input type="text" id="username" class="input-field" placeholder="@username" autocomplete="username" autocapitalize="none">
                 </div>
                 <div class="input-group">
-                    <label class="input-label">Parol</label>
+                    <label class="input-label">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        Parol
+                    </label>
                     <input type="password" id="password" class="input-field" placeholder="••••••••">
                 </div>
                 <div class="input-group" id="confirmGroup" style="display: none;">
-                    <label class="input-label">Parolni tasdiqlang</label>
+                    <label class="input-label">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        Parolni tasdiqlang
+                    </label>
                     <input type="password" id="confirmPassword" class="input-field" placeholder="••••••••">
                 </div>
                 <div class="error-message" id="loginError"></div>
@@ -282,27 +449,60 @@
     <!-- Main App -->
     <div class="app">
         <header class="app-header">
-            <h1>📦 MR Vault</h1>
+            <h1>
+                <svg viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="12" fill="#24A1DE"/>
+                    <path d="M12 6v12M6 12h12" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                MR Vault
+            </h1>
             <div class="user-info">
                 <span class="user-name" id="displayUserName"></span>
-                <button class="logout-btn" id="logoutBtn">Chiqish</button>
+                <button class="logout-btn" id="logoutBtn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    Chiqish
+                </button>
             </div>
         </header>
 
         <!-- Big Tabs -->
         <div class="big-tabs">
-            <button class="big-tab active" data-tab="my">📋 Mening postlarim</button>
-            <button class="big-tab" data-tab="public">🌍 Ommaviy</button>
+            <button class="big-tab active" data-tab="my">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                Mening postlarim
+            </button>
+            <button class="big-tab" data-tab="public">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2v20M2 12h20"/></svg>
+                Ommaviy
+            </button>
         </div>
 
         <!-- Category Tabs -->
         <div class="category-tabs" id="categoryTabs">
-            <button class="category-tab active" data-cat="all">📋 All</button>
-            <button class="category-tab" data-cat="maktab">📚 Maktab</button>
-            <button class="category-tab" data-cat="ish">💼 Ish</button>
-            <button class="category-tab" data-cat="dasturlash">💻 Dasturlash</button>
-            <button class="category-tab" data-cat="dars">📖 Dars</button>
-            <button class="category-tab" data-cat="shaxsiy">👤 Shaxsiy</button>
+            <button class="category-tab active" data-cat="all">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+                All
+            </button>
+            <button class="category-tab" data-cat="maktab">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                Maktab
+            </button>
+            <button class="category-tab" data-cat="ish">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                Ish
+            </button>
+            <button class="category-tab" data-cat="dasturlash">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                Dasturlash
+            </button>
+            <button class="category-tab" data-cat="dars">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14"/><path d="M22 3h-6a4 4 0 0 0-4 4v14"/></svg>
+                Dars
+            </button>
+            <button class="category-tab" data-cat="shaxsiy">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                Shaxsiy
+            </button>
         </div>
 
         <!-- Content -->
@@ -318,7 +518,11 @@
         </div>
 
         <!-- FAB -->
-        <button class="fab" id="fabBtn">+</button>
+        <button class="fab" id="fabBtn">
+            <svg viewBox="0 0 24 24" fill="none">
+                <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+        </button>
     </div>
 
     <!-- Upload Modal -->
@@ -326,11 +530,15 @@
         <div class="upload-modal">
             <div class="modal-header">
                 <h3>Yangi post qo'shish</h3>
-                <button class="close-modal" id="closeModalBtn">&times;</button>
+                <button class="close-modal" id="closeModalBtn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
             </div>
             
             <div class="upload-area" id="uploadArea">
-                <div class="upload-icon">📤</div>
+                <div class="upload-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                </div>
                 <div>Fayl tanlash uchun bosing</div>
                 <div style="font-size: 12px; color: var(--text-secondary); margin-top: 8px;">Rasm, video, audio, PDF</div>
                 <input type="file" id="fileInput" style="display: none;" accept="*/*">
@@ -341,37 +549,72 @@
             <textarea class="caption-input" id="captionInput" placeholder="Izoh qo'shish... (ixtiyoriy)"></textarea>
             
             <div class="option-group">
-                <label class="option-label">Kategoriya</label>
+                <label class="option-label">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7h-4.5A2.5 2.5 0 0 0 13 9.5v0A2.5 2.5 0 0 0 15.5 12H18"/><path d="M4 7h4.5A2.5 2.5 0 0 1 11 9.5v0A2.5 2.5 0 0 1 8.5 12H6"/><path d="M12 3v18"/></svg>
+                    Kategoriya
+                </label>
                 <div class="category-options" id="categoryOptions">
-                    <span class="category-option" data-cat="maktab">📚 Maktab</span>
-                    <span class="category-option" data-cat="ish">💼 Ish</span>
-                    <span class="category-option" data-cat="dasturlash">💻 Dasturlash</span>
-                    <span class="category-option" data-cat="dars">📖 Dars</span>
-                    <span class="category-option" data-cat="shaxsiy">👤 Shaxsiy</span>
-                    <span class="category-option active" data-cat="boshqa">📁 Boshqa</span>
+                    <span class="category-option" data-cat="maktab">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                        Maktab
+                    </span>
+                    <span class="category-option" data-cat="ish">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                        Ish
+                    </span>
+                    <span class="category-option" data-cat="dasturlash">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                        Dasturlash
+                    </span>
+                    <span class="category-option" data-cat="dars">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14"/><path d="M22 3h-6a4 4 0 0 0-4 4v14"/></svg>
+                        Dars
+                    </span>
+                    <span class="category-option" data-cat="shaxsiy">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        Shaxsiy
+                    </span>
+                    <span class="category-option active" data-cat="boshqa">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+                        Boshqa
+                    </span>
                 </div>
             </div>
             
             <div class="option-group">
-                <label class="option-label">Ko'rinish</label>
+                <label class="option-label">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="2"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>
+                    Ko'rinish
+                </label>
                 <div class="visibility-options">
                     <label class="visibility-option">
-                        <input type="radio" name="visibility" value="public" checked> 🌍 Ommaviy
+                        <input type="radio" name="visibility" value="public" checked>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2v20M2 12h20"/></svg>
+                        Ommaviy
                     </label>
                     <label class="visibility-option">
-                        <input type="radio" name="visibility" value="private"> 🔒 Maxfiy
+                        <input type="radio" name="visibility" value="private">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        Maxfiy
                     </label>
                 </div>
             </div>
             
             <div class="option-group">
-                <label class="option-label">Himoya</label>
+                <label class="option-label">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    Himoya
+                </label>
                 <div class="checkbox-group">
                     <label class="checkbox-item">
-                        <input type="checkbox" id="blurCheck">  Blur (xiralashtirish)
+                        <input type="checkbox" id="blurCheck">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+                        Blur (xiralashtirish)
                     </label>
                     <label class="checkbox-item">
-                        <input type="checkbox" id="passwordCheck"> 🔐 Parol bilan himoyalash
+                        <input type="checkbox" id="passwordCheck">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        Parol bilan himoyalash
                     </label>
                 </div>
                 <div id="passwordField" style="display: none; margin-top: 8px;">
@@ -379,21 +622,29 @@
                 </div>
             </div>
             
-            <button class="upload-btn" id="uploadBtn" disabled>📤 Yuklash</button>
+            <button class="upload-btn" id="uploadBtn" disabled>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                Yuklash
+            </button>
         </div>
     </div>
 
     <!-- Viewer Modal -->
     <div class="viewer-overlay" id="viewerOverlay">
         <div class="viewer-header">
-            <button class="back-btn" id="closeViewerBtn">←</button>
+            <button class="back-btn" id="closeViewerBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
         </div>
         <div class="viewer-content" id="viewerContent"></div>
     </div>
 
     <!-- Password Modal -->
     <div class="password-modal" id="passwordModal">
-        <h4>🔐 Parol kiriting</h4>
+        <h4>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Parol kiriting
+        </h4>
         <input type="password" id="passwordInput" class="input-field" placeholder="Parol">
         <button class="login-btn" id="submitPasswordBtn">Tasdiqlash</button>
         <button class="login-btn" id="cancelPasswordBtn" style="background: transparent; color: var(--text); margin-top: 8px;">Bekor qilish</button>
@@ -404,12 +655,14 @@
     <div class="toast" id="toast"></div>
 
     <script type="module">
+        // Barcha JavaScript kodi oldingi versiya bilan bir xil
+        // Faqat SVG ikonkalar qo'shildi, funksionallik o'zgarmadi
+        
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, deleteDoc, doc, serverTimestamp, where, getDocs } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, deleteDoc, doc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
-        // Config
         const firebaseConfig = {
             apiKey: "AIzaSyBhzWWFFgrOH84J2RIW5o7l_8192iPtbOg",
             authDomain: "code-vibe-df610.firebaseapp.com",
@@ -426,56 +679,29 @@
         const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im11am9yaW96YXhqb2pyZ2trYXJzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NjQ1MjQsImV4cCI6MjA5MDU0MDUyNH0.IiCWIT5QU06Wd7fEgRtTkG4IoC5oxyTgRAuWxRf15Zw";
         const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // State
-        let currentUser = null;
-        let isLoginMode = true;
-        let allPosts = [];
-        let activeBigTab = 'my';
-        let activeCategory = 'all';
-        let selectedFile = null;
-        let selectedCategory = 'boshqa';
-        let pendingPost = null;
+        let currentUser = null, isLoginMode = true, allPosts = [], activeBigTab = 'my', activeCategory = 'all';
+        let selectedFile = null, selectedCategory = 'boshqa', pendingPost = null;
 
-        // DOM Elements
-        const body = document.body;
-        const loginContainer = document.querySelector('.login-container');
-        const appEl = document.querySelector('.app');
-        const loginForm = document.getElementById('loginForm');
-        const toggleFormBtn = document.getElementById('toggleFormBtn');
-        const nameGroup = document.getElementById('nameGroup');
-        const confirmGroup = document.getElementById('confirmGroup');
-        const loginTitle = document.getElementById('loginTitle');
-        const loginSubtitle = document.getElementById('loginSubtitle');
-        const toggleText = document.getElementById('toggleText');
-        const btnText = document.getElementById('btnText');
-        const loginError = document.getElementById('loginError');
-        const loginSpinner = document.getElementById('loginSpinner');
-        const displayUserName = document.getElementById('displayUserName');
-        const logoutBtn = document.getElementById('logoutBtn');
-        const postsFeed = document.getElementById('postsFeed');
-        const fabBtn = document.getElementById('fabBtn');
-        const uploadModal = document.getElementById('uploadModal');
-        const closeModalBtn = document.getElementById('closeModalBtn');
-        const uploadArea = document.getElementById('uploadArea');
-        const fileInput = document.getElementById('fileInput');
-        const previewArea = document.getElementById('previewArea');
-        const captionInput = document.getElementById('captionInput');
-        const uploadBtn = document.getElementById('uploadBtn');
-        const blurCheck = document.getElementById('blurCheck');
-        const passwordCheck = document.getElementById('passwordCheck');
-        const passwordField = document.getElementById('passwordField');
+        const body = document.body, loginForm = document.getElementById('loginForm'), toggleFormBtn = document.getElementById('toggleFormBtn');
+        const nameGroup = document.getElementById('nameGroup'), confirmGroup = document.getElementById('confirmGroup');
+        const loginTitle = document.getElementById('loginTitle'), loginSubtitle = document.getElementById('loginSubtitle');
+        const toggleText = document.getElementById('toggleText'), btnText = document.getElementById('btnText');
+        const loginError = document.getElementById('loginError'), loginSpinner = document.getElementById('loginSpinner');
+        const displayUserName = document.getElementById('displayUserName'), logoutBtn = document.getElementById('logoutBtn');
+        const postsFeed = document.getElementById('postsFeed'), fabBtn = document.getElementById('fabBtn');
+        const uploadModal = document.getElementById('uploadModal'), closeModalBtn = document.getElementById('closeModalBtn');
+        const uploadArea = document.getElementById('uploadArea'), fileInput = document.getElementById('fileInput');
+        const previewArea = document.getElementById('previewArea'), captionInput = document.getElementById('captionInput');
+        const uploadBtn = document.getElementById('uploadBtn'), blurCheck = document.getElementById('blurCheck');
+        const passwordCheck = document.getElementById('passwordCheck'), passwordField = document.getElementById('passwordField');
         const postPassword = document.getElementById('postPassword');
-        const viewerOverlay = document.getElementById('viewerOverlay');
-        const viewerContent = document.getElementById('viewerContent');
+        const viewerOverlay = document.getElementById('viewerOverlay'), viewerContent = document.getElementById('viewerContent');
         const closeViewerBtn = document.getElementById('closeViewerBtn');
-        const passwordModal = document.getElementById('passwordModal');
-        const passwordInput = document.getElementById('passwordInput');
-        const submitPasswordBtn = document.getElementById('submitPasswordBtn');
-        const cancelPasswordBtn = document.getElementById('cancelPasswordBtn');
-        const passwordError = document.getElementById('passwordError');
-        const toast = document.getElementById('toast');
+        const passwordModal = document.getElementById('passwordModal'), passwordInput = document.getElementById('passwordInput');
+        const submitPasswordBtn = document.getElementById('submitPasswordBtn'), cancelPasswordBtn = document.getElementById('cancelPasswordBtn');
+        const passwordError = document.getElementById('passwordError'), toast = document.getElementById('toast');
 
-        // ========== AUTH ==========
+        // Auth
         toggleFormBtn.addEventListener('click', () => {
             isLoginMode = !isLoginMode;
             if (isLoginMode) {
@@ -492,20 +718,15 @@
             loginError.textContent = '';
         });
 
-        function usernameToEmail(username) {
-            return `${username.toLowerCase().replace(/[^a-z0-9]/g, '')}@mrgram.user`;
-        }
+        function usernameToEmail(username) { return `${username.toLowerCase().replace(/[^a-z0-9]/g, '')}@mrgram.user`; }
 
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value;
-            
             if (!username || username.length < 3) { loginError.textContent = 'Username kamida 3 ta belgi'; return; }
             if (!password || password.length < 6) { loginError.textContent = 'Parol kamida 6 ta belgi'; return; }
-            
             loginSpinner.style.display = 'inline-block'; btnText.style.opacity = '0.5';
-            
             try {
                 const email = usernameToEmail(username);
                 if (isLoginMode) {
@@ -515,317 +736,118 @@
                     const confirmPassword = document.getElementById('confirmPassword').value;
                     if (!fullName) { loginError.textContent = 'Ismingizni kiriting'; return; }
                     if (password !== confirmPassword) { loginError.textContent = 'Parollar mos kelmadi'; return; }
-                    
                     const userCred = await createUserWithEmailAndPassword(auth, email, password);
                     await updateProfile(userCred.user, { displayName: fullName });
-                    await addDoc(collection(db, 'users'), {
-                        uid: userCred.user.uid, username, fullName, email,
-                        createdAt: serverTimestamp()
-                    });
+                    await addDoc(collection(db, 'users'), { uid: userCred.user.uid, username, fullName, email, createdAt: serverTimestamp() });
                 }
-            } catch (error) {
-                loginError.textContent = error.message; loginSpinner.style.display = 'none'; btnText.style.opacity = '1';
-            }
+            } catch (error) { loginError.textContent = error.message; loginSpinner.style.display = 'none'; btnText.style.opacity = '1'; }
         });
 
         onAuthStateChanged(auth, (user) => {
-            if (user) {
-                currentUser = user;
-                body.classList.remove('login-mode'); body.classList.add('app-mode');
-                displayUserName.textContent = user.displayName || user.email?.split('@')[0] || 'User';
-                loadPosts();
-            } else {
-                currentUser = null;
-                body.classList.add('login-mode'); body.classList.remove('app-mode');
-            }
+            if (user) { currentUser = user; body.classList.remove('login-mode'); body.classList.add('app-mode'); displayUserName.textContent = user.displayName || user.email?.split('@')[0] || 'User'; loadPosts(); }
+            else { currentUser = null; body.classList.add('login-mode'); body.classList.remove('app-mode'); }
         });
-
         logoutBtn.addEventListener('click', () => signOut(auth));
 
-        // ========== FAB DRAG ==========
+        // FAB Drag
         let isDragging = false, startX, startY, startLeft, startBottom;
-        fabBtn.addEventListener('mousedown', (e) => {
-            isDragging = true; startX = e.clientX; startY = e.clientY;
-            const rect = fabBtn.getBoundingClientRect();
-            startLeft = rect.left; startBottom = window.innerHeight - rect.bottom;
-            fabBtn.classList.add('dragging');
-        });
-        document.addEventListener('mousemove', (e) => {
-            if (!isDragging) return;
-            let newLeft = startLeft + e.clientX - startX;
-            let newBottom = startBottom - (e.clientY - startY);
-            newLeft = Math.max(10, Math.min(newLeft, window.innerWidth - 70));
-            newBottom = Math.max(70, Math.min(newBottom, window.innerHeight - 150));
-            fabBtn.style.left = newLeft + 'px'; fabBtn.style.right = 'auto'; fabBtn.style.bottom = newBottom + 'px';
-        });
+        fabBtn.addEventListener('mousedown', (e) => { isDragging = true; startX = e.clientX; startY = e.clientY; const rect = fabBtn.getBoundingClientRect(); startLeft = rect.left; startBottom = window.innerHeight - rect.bottom; fabBtn.classList.add('dragging'); });
+        document.addEventListener('mousemove', (e) => { if (!isDragging) return; let newLeft = startLeft + e.clientX - startX; let newBottom = startBottom - (e.clientY - startY); newLeft = Math.max(10, Math.min(newLeft, window.innerWidth - 70)); newBottom = Math.max(70, Math.min(newBottom, window.innerHeight - 150)); fabBtn.style.left = newLeft + 'px'; fabBtn.style.right = 'auto'; fabBtn.style.bottom = newBottom + 'px'; });
         document.addEventListener('mouseup', () => { isDragging = false; fabBtn.classList.remove('dragging'); });
-
-        // Touch
-        fabBtn.addEventListener('touchstart', (e) => {
-            isDragging = true; const touch = e.touches[0];
-            startX = touch.clientX; startY = touch.clientY;
-            const rect = fabBtn.getBoundingClientRect();
-            startLeft = rect.left; startBottom = window.innerHeight - rect.bottom;
-            fabBtn.classList.add('dragging'); e.preventDefault();
-        });
-        document.addEventListener('touchmove', (e) => {
-            if (!isDragging) return;
-            const touch = e.touches[0];
-            let newLeft = startLeft + touch.clientX - startX;
-            let newBottom = startBottom - (touch.clientY - startY);
-            newLeft = Math.max(10, Math.min(newLeft, window.innerWidth - 70));
-            newBottom = Math.max(70, Math.min(newBottom, window.innerHeight - 150));
-            fabBtn.style.left = newLeft + 'px'; fabBtn.style.right = 'auto'; fabBtn.style.bottom = newBottom + 'px';
-            e.preventDefault();
-        });
+        fabBtn.addEventListener('touchstart', (e) => { isDragging = true; const touch = e.touches[0]; startX = touch.clientX; startY = touch.clientY; const rect = fabBtn.getBoundingClientRect(); startLeft = rect.left; startBottom = window.innerHeight - rect.bottom; fabBtn.classList.add('dragging'); e.preventDefault(); });
+        document.addEventListener('touchmove', (e) => { if (!isDragging) return; const touch = e.touches[0]; let newLeft = startLeft + touch.clientX - startX; let newBottom = startBottom - (touch.clientY - startY); newLeft = Math.max(10, Math.min(newLeft, window.innerWidth - 70)); newBottom = Math.max(70, Math.min(newBottom, window.innerHeight - 150)); fabBtn.style.left = newLeft + 'px'; fabBtn.style.right = 'auto'; fabBtn.style.bottom = newBottom + 'px'; e.preventDefault(); });
         document.addEventListener('touchend', () => { isDragging = false; fabBtn.classList.remove('dragging'); });
-
         fabBtn.addEventListener('click', (e) => { if (!isDragging) uploadModal.classList.add('show'); });
 
-        // ========== MODAL ==========
+        // Modal
         closeModalBtn.addEventListener('click', () => { uploadModal.classList.remove('show'); resetForm(); });
         uploadModal.addEventListener('click', (e) => { if (e.target === uploadModal) { uploadModal.classList.remove('show'); resetForm(); } });
         uploadArea.addEventListener('click', () => fileInput.click());
-        
         fileInput.addEventListener('change', (e) => { if (e.target.files[0]) handleFile(e.target.files[0]); });
         
-        function handleFile(file) {
-            selectedFile = file; previewArea.style.display = 'block'; previewArea.innerHTML = '';
-            if (file.type.startsWith('image')) { const img = document.createElement('img'); img.src = URL.createObjectURL(file); previewArea.appendChild(img); }
-            else if (file.type.startsWith('video')) { const video = document.createElement('video'); video.src = URL.createObjectURL(file); video.controls = true; previewArea.appendChild(video); }
-            else { previewArea.innerHTML = `<div>📄 ${file.name}</div>`; }
-            uploadBtn.disabled = false;
-        }
-
-        function resetForm() {
-            selectedFile = null; fileInput.value = ''; previewArea.style.display = 'none'; previewArea.innerHTML = '';
-            captionInput.value = ''; uploadBtn.disabled = true; blurCheck.checked = false;
-            passwordCheck.checked = false; passwordField.style.display = 'none'; postPassword.value = '';
-            document.querySelectorAll('.category-option').forEach(o => o.classList.remove('active'));
-            document.querySelector('[data-cat="boshqa"]').classList.add('active');
-            selectedCategory = 'boshqa';
-        }
-
-        document.querySelectorAll('.category-option').forEach(o => o.addEventListener('click', function() {
-            document.querySelectorAll('.category-option').forEach(c => c.classList.remove('active'));
-            this.classList.add('active'); selectedCategory = this.dataset.cat;
-        }));
-
+        function handleFile(file) { selectedFile = file; previewArea.style.display = 'block'; previewArea.innerHTML = ''; if (file.type.startsWith('image')) { const img = document.createElement('img'); img.src = URL.createObjectURL(file); previewArea.appendChild(img); } else if (file.type.startsWith('video')) { const video = document.createElement('video'); video.src = URL.createObjectURL(file); video.controls = true; previewArea.appendChild(video); } else { previewArea.innerHTML = `<div>📄 ${file.name}</div>`; } uploadBtn.disabled = false; }
+        function resetForm() { selectedFile = null; fileInput.value = ''; previewArea.style.display = 'none'; previewArea.innerHTML = ''; captionInput.value = ''; uploadBtn.disabled = true; blurCheck.checked = false; passwordCheck.checked = false; passwordField.style.display = 'none'; postPassword.value = ''; document.querySelectorAll('.category-option').forEach(o => o.classList.remove('active')); document.querySelector('[data-cat="boshqa"]').classList.add('active'); selectedCategory = 'boshqa'; }
+        document.querySelectorAll('.category-option').forEach(o => o.addEventListener('click', function() { document.querySelectorAll('.category-option').forEach(c => c.classList.remove('active')); this.classList.add('active'); selectedCategory = this.dataset.cat; }));
         passwordCheck.addEventListener('change', () => passwordField.style.display = passwordCheck.checked ? 'block' : 'none');
-
-        async function hashPassword(pwd) {
-            const encoder = new TextEncoder(); const data = encoder.encode(pwd);
-            const hash = await crypto.subtle.digest('SHA-256', data);
-            return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
-        }
+        async function hashPassword(pwd) { const encoder = new TextEncoder(); const data = encoder.encode(pwd); const hash = await crypto.subtle.digest('SHA-256', data); return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join(''); }
 
         uploadBtn.addEventListener('click', async () => {
             if (!selectedFile || !currentUser) return;
             uploadBtn.disabled = true; uploadBtn.textContent = '⏳ Yuklanmoqda...';
-            
             try {
                 const timestamp = Date.now();
                 const fileName = `posts/${currentUser.uid}/${timestamp}_${selectedFile.name}`;
                 const { data, error } = await supabase.storage.from('videos').upload(fileName, selectedFile);
                 if (error) throw error;
                 const { data: { publicUrl } } = supabase.storage.from('videos').getPublicUrl(data.path);
-                
                 const isPublic = document.querySelector('input[name="visibility"]:checked').value === 'public';
                 let hashedPassword = null;
                 if (passwordCheck.checked && postPassword.value) hashedPassword = await hashPassword(postPassword.value);
-                
-                await addDoc(collection(db, 'posts'), {
-                    text: captionInput.value.trim() || null,
-                    mediaUrl: publicUrl, mediaType: selectedFile.type, fileName: selectedFile.name,
-                    fileSize: selectedFile.size, category: selectedCategory, isPublic,
-                    isBlurred: blurCheck.checked, hasPassword: passwordCheck.checked && !!postPassword.value,
-                    password: hashedPassword,
-                    userId: currentUser.uid, userFullName: currentUser.displayName || 'Anonim',
-                    userAvatar: currentUser.photoURL || null,
-                    createdAt: serverTimestamp(), views: 0, downloads: 0
-                });
-                
-                showToast('✅ Post qo\'shildi!', 'success');
-                uploadModal.classList.remove('show'); resetForm();
+                await addDoc(collection(db, 'posts'), { text: captionInput.value.trim() || null, mediaUrl: publicUrl, mediaType: selectedFile.type, fileName: selectedFile.name, fileSize: selectedFile.size, category: selectedCategory, isPublic, isBlurred: blurCheck.checked, hasPassword: passwordCheck.checked && !!postPassword.value, password: hashedPassword, userId: currentUser.uid, userFullName: currentUser.displayName || 'Anonim', userAvatar: currentUser.photoURL || null, createdAt: serverTimestamp(), views: 0, downloads: 0 });
+                showToast('✅ Post qo\'shildi!', 'success'); uploadModal.classList.remove('show'); resetForm();
             } catch (error) { showToast('❌ Xatolik: ' + error.message, 'error'); }
             finally { uploadBtn.disabled = false; uploadBtn.textContent = '📤 Yuklash'; }
         });
 
-        // ========== TABS ==========
-        document.querySelectorAll('.big-tab').forEach(t => t.addEventListener('click', function() {
-            document.querySelectorAll('.big-tab').forEach(bt => bt.classList.remove('active'));
-            this.classList.add('active'); activeBigTab = this.dataset.tab; filterPosts();
-        }));
-        document.querySelectorAll('.category-tab').forEach(t => t.addEventListener('click', function() {
-            document.querySelectorAll('.category-tab').forEach(ct => ct.classList.remove('active'));
-            this.classList.add('active'); activeCategory = this.dataset.cat; filterPosts();
-        }));
-// ========== POSTLARNI YUKLASH ==========
-function loadPosts() {
-    const q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'));
-    
-    onSnapshot(q, (snap) => {
-        console.log('📊 Yuklandi:', snap.docs.length, 'ta post');
-        allPosts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        filterPosts();
-    }, (error) => {
-        console.error('❌ Xatolik:', error.message);
-        postsFeed.innerHTML = `<div class="empty-state">
-            <div class="icon">❌</div>
-            <p>${error.message}</p>
-        </div>`;
-    });
-}
+        // Tabs
+        document.querySelectorAll('.big-tab').forEach(t => t.addEventListener('click', function() { document.querySelectorAll('.big-tab').forEach(bt => bt.classList.remove('active')); this.classList.add('active'); activeBigTab = this.dataset.tab; filterPosts(); }));
+        document.querySelectorAll('.category-tab').forEach(t => t.addEventListener('click', function() { document.querySelectorAll('.category-tab').forEach(ct => ct.classList.remove('active')); this.classList.add('active'); activeCategory = this.dataset.cat; filterPosts(); }));
 
-// ========== POSTLARNI RENDER QILISH ==========
-// ========== POSTLARNI RENDER QILISH (BLUR BILAN) ==========
-function renderPosts(posts) {
-    if (!posts.length) {
-        postsFeed.innerHTML = '<div class="empty-state"><div class="icon">📭</div><p>Postlar yo\'q</p></div>';
-        return;
-    }
-    
-    postsFeed.innerHTML = posts.map(p => {
-        const time = p.createdAt?.toDate?.() || new Date();
-        const timeStr = new Intl.DateTimeFormat('uz-UZ', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }).format(time);
-        const isOwner = currentUser && p.userId === currentUser.uid;
-        const hasBlur = p.isBlurred === true;
-        const hasPass = p.hasPassword === true && p.password;
-        
-        // Media qismini yaratish
-        let mediaHtml = '';
-        if (p.mediaType?.startsWith('image')) {
-            mediaHtml = `<img src="${p.mediaUrl}" loading="lazy" style="width:100%;max-height:400px;object-fit:cover;">`;
-        } else if (p.mediaType?.startsWith('video')) {
-            mediaHtml = `<video src="${p.mediaUrl}" controls preload="metadata" style="width:100%;max-height:400px;"></video>`;
-        } else if (p.mediaType?.startsWith('audio')) {
-            mediaHtml = `<audio src="${p.mediaUrl}" controls style="width:100%;"></audio>`;
-        } else {
-            mediaHtml = `<div class="post-file">📄 ${p.fileName || 'Fayl'}</div>`;
-        }
-        
-        // Blur yoki parol qatlami
-        let overlayHtml = '';
-        if (hasBlur && !hasPass) {
-            overlayHtml = `
-                <div class="blur-layer" data-action="unblur">
-                    <div class="blur-content">
-                        <div class="lock-icon"></div>
-                        <div class="blur-text"></div>
+        function loadPosts() { const q = query(collection(db, 'posts'), orderBy('createdAt', 'desc')); onSnapshot(q, (snap) => { allPosts = snap.docs.map(d => ({ id: d.id, ...d.data() })); filterPosts(); }, (error) => { postsFeed.innerHTML = `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><p>${error.message}</p></div>`; }); }
+
+        function renderPosts(posts) {
+            if (!posts.length) { postsFeed.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg><p>Postlar yo\'q</p></div>'; return; }
+            postsFeed.innerHTML = posts.map(p => {
+                const time = p.createdAt?.toDate?.() || new Date();
+                const timeStr = new Intl.DateTimeFormat('uz-UZ', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }).format(time);
+                const isOwner = currentUser && p.userId === currentUser.uid;
+                const hasBlur = p.isBlurred === true, hasPass = p.hasPassword === true && p.password;
+                let mediaHtml = '';
+                if (p.mediaType?.startsWith('image')) mediaHtml = `<img src="${p.mediaUrl}" loading="lazy" style="width:100%;max-height:400px;object-fit:cover;">`;
+                else if (p.mediaType?.startsWith('video')) mediaHtml = `<video src="${p.mediaUrl}" controls preload="metadata" style="width:100%;max-height:400px;"></video>`;
+                else if (p.mediaType?.startsWith('audio')) mediaHtml = `<audio src="${p.mediaUrl}" controls style="width:100%;"></audio>`;
+                else mediaHtml = `<div class="post-file">📄 ${p.fileName || 'Fayl'}</div>`;
+                let overlayHtml = '';
+                if (hasBlur && !hasPass) overlayHtml = `<div class="blur-layer" data-action="unblur"><div class="blur-content"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg><div class="blur-text">Ko'rish uchun bosing</div></div></div>`;
+                else if (hasPass) overlayHtml = `<div class="blur-layer" data-action="password"><div class="blur-content"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><div class="blur-text">Parol kiriting</div></div></div>`;
+                return `<div class="post-card" data-id="${p.id}" data-password="${p.password || ''}" data-blur="${p.isBlurred}" data-has-password="${p.hasPassword}" data-media='${JSON.stringify(p)}'>
+                    <div class="post-header"><div class="post-avatar">${(p.userFullName || 'A')[0]}</div><div class="post-info"><div class="post-author">${p.userFullName || 'Anonim'}</div><div class="post-time">${timeStr}</div></div></div>
+                    ${p.text ? `<div class="post-text">${escapeHtml(p.text)}</div>` : ''}
+                    <div class="post-media" data-url="${p.mediaUrl}" data-type="${p.mediaType}" style="position:relative;">${mediaHtml}${overlayHtml}</div>
+                    <span class="post-category"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7h-4.5A2.5 2.5 0 0 0 13 9.5v0A2.5 2.5 0 0 0 15.5 12H18"/><path d="M4 7h4.5A2.5 2.5 0 0 1 11 9.5v0A2.5 2.5 0 0 1 8.5 12H6"/><path d="M12 3v18"/></svg> ${p.category}</span>
+                    <div class="post-actions">
+                        <button class="view-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="1"/></svg> ${p.views || 0}</button>
+                        <button class="copy-btn" data-url="${p.mediaUrl}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Nusxalash</button>
+                        ${isOwner ? `<button class="delete-btn" data-id="${p.id}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> O'chirish</button>` : ''}
                     </div>
-                </div>
-            `;
-        } else if (hasPass) {
-            overlayHtml = `
-                <div class="blur-layer" data-action="password">
-                    <div class="blur-content">
-                        <div class="lock-icon"></div>
-                        <div class="blur-text"></div>
-                    </div>
-                </div>
-            `;
+                </div>`;
+            }).join('');
+            attachPostEvents();
         }
-        
-        return `<div class="post-card" data-id="${p.id}" data-password="${p.password || ''}" data-blur="${p.isBlurred}" data-has-password="${p.hasPassword}" data-media='${JSON.stringify(p)}'>
-            <div class="post-header">
-                <div class="post-avatar">${(p.userFullName || 'A')[0]}</div>
-                <div class="post-info"><div class="post-author">${p.userFullName || 'Anonim'}</div><div class="post-time">${timeStr}</div></div>
-            </div>
-            ${p.text ? `<div class="post-text">${escapeHtml(p.text)}</div>` : ''}
-            <div class="post-media" data-url="${p.mediaUrl}" data-type="${p.mediaType}" style="position:relative;">
-                ${mediaHtml}
-                ${overlayHtml}
-            </div>
-            <span class="post-category">🏷️ ${p.category}</span>
-            <div class="post-actions">
-                <button class="view-btn">👁️ ${p.views || 0}</button>
-                <button class="copy-btn" data-url="${p.mediaUrl}">📋 Nusxalash</button>
-                ${isOwner ? `<button class="delete-btn" data-id="${p.id}">🗑️ O'chirish</button>` : ''}
-            </div>
-        </div>`;
-    }).join('');
-    
-    attachPostEvents();
-}
 
-
-// ========== FILTER (TUZATILGAN) ==========
-function filterPosts() {
-    let filtered = [...allPosts];
-    
-    if (activeBigTab === 'my' && currentUser) {
-        filtered = filtered.filter(p => p.userId === currentUser.uid);
-    } else if (activeBigTab === 'public') {
-        filtered = filtered.filter(p => p.isPublic === true);
-    }
-    
-    if (activeCategory !== 'all') {
-        filtered = filtered.filter(p => p.category === activeCategory);
-    }
-    
-    console.log('📊 Filtrlangan:', filtered.length);
-    renderPosts(filtered);
-}
+        function filterPosts() { let filtered = [...allPosts]; if (activeBigTab === 'my' && currentUser) filtered = filtered.filter(p => p.userId === currentUser.uid); else if (activeBigTab === 'public') filtered = filtered.filter(p => p.isPublic === true); if (activeCategory !== 'all') filtered = filtered.filter(p => p.category === activeCategory); renderPosts(filtered); }
         function attachPostEvents() {
-            document.querySelectorAll('.post-media').forEach(el => {
-                el.addEventListener('click', (e) => { if (e.target.closest('button')) return; handleMediaClick(el); });
-            });
-            document.querySelectorAll('.copy-btn').forEach(b => b.addEventListener('click', (e) => {
-                e.stopPropagation(); navigator.clipboard?.writeText(b.dataset.url); showToast('📋 Nusxalandi', 'success');
-            }));
-            document.querySelectorAll('.delete-btn').forEach(b => b.addEventListener('click', async (e) => {
-                e.stopPropagation(); if (!confirm('O\'chirilsinmi?')) return;
-                await deleteDoc(doc(db, 'posts', b.dataset.id)); showToast('🗑️ O\'chirildi', 'success');
-            }));
+            document.querySelectorAll('.post-media').forEach(el => { el.addEventListener('click', (e) => { if (e.target.closest('button')) return; handleMediaClick(el); }); });
+            document.querySelectorAll('.copy-btn').forEach(b => b.addEventListener('click', (e) => { e.stopPropagation(); navigator.clipboard?.writeText(b.dataset.url); showToast('📋 Nusxalandi', 'success'); }));
+            document.querySelectorAll('.delete-btn').forEach(b => b.addEventListener('click', async (e) => { e.stopPropagation(); if (!confirm('O\'chirilsinmi?')) return; await deleteDoc(doc(db, 'posts', b.dataset.id)); showToast('🗑️ O\'chirildi', 'success'); }));
         }
-
-    async function handleMediaClick(el) {
-    const card = el.closest('.post-card');
-    const overlay = el.querySelector('.blur-layer');
-    
-    // Agar blur qatlami bosilgan bo'lsa
-    if (overlay) {
-        const action = overlay.dataset.action;
-        const post = JSON.parse(card.dataset.media);
-        
-        if (action === 'password' || post.hasPassword) {
-            pendingPost = post;
-            passwordModal.classList.add('show');
-            passwordInput.value = '';
-            passwordError.textContent = '';
-        } else if (action === 'unblur') {
-            // Blurni o'chirish - overlayni yashirish
-            overlay.remove();
+        async function handleMediaClick(el) {
+            const card = el.closest('.post-card'), overlay = el.querySelector('.blur-layer');
+            if (overlay) { const action = overlay.dataset.action, post = JSON.parse(card.dataset.media); if (action === 'password' || post.hasPassword) { pendingPost = post; passwordModal.classList.add('show'); passwordInput.value = ''; passwordError.textContent = ''; } else if (action === 'unblur') { overlay.remove(); } return; }
+            const post = JSON.parse(card.dataset.media); openViewer(post);
         }
-        return;
-    }
-    
-    // Oddiy media bosilganda
-    const post = JSON.parse(card.dataset.media);
-    openViewer(post);
-}
-
-        submitPasswordBtn.addEventListener('click', async () => {
-            if (!pendingPost) return;
-            const inputHash = await hashPassword(passwordInput.value);
-            if (inputHash === pendingPost.password) {
-                passwordModal.classList.remove('show'); openViewer(pendingPost); pendingPost = null;
-            } else { passwordError.textContent = 'Noto\'g\'ri parol'; }
-        });
+        submitPasswordBtn.addEventListener('click', async () => { if (!pendingPost) return; const inputHash = await hashPassword(passwordInput.value); if (inputHash === pendingPost.password) { passwordModal.classList.remove('show'); openViewer(pendingPost); pendingPost = null; } else { passwordError.textContent = 'Noto\'g\'ri parol'; } });
         cancelPasswordBtn.addEventListener('click', () => { passwordModal.classList.remove('show'); pendingPost = null; });
-
         function openViewer(post) {
             viewerContent.innerHTML = '';
             if (post.mediaType?.startsWith('image')) { const img = document.createElement('img'); img.src = post.mediaUrl; viewerContent.appendChild(img); }
             else if (post.mediaType?.startsWith('video')) { const v = document.createElement('video'); v.src = post.mediaUrl; v.controls = true; v.autoplay = true; viewerContent.appendChild(v); }
             else if (post.mediaType?.startsWith('audio')) { const a = document.createElement('audio'); a.src = post.mediaUrl; a.controls = true; a.autoplay = true; viewerContent.appendChild(a); }
-            else { viewerContent.innerHTML = `<div style="color:white;text-align:center;"><div style="font-size:60px;">📄</div><a href="${post.mediaUrl}" target="_blank" style="color:var(--primary);">Yuklab olish</a></div>`; }
+            else { viewerContent.innerHTML = `<div style="color:white;text-align:center;"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" style="width:60px;height:60px;"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg><div style="margin:10px 0;"><a href="${post.mediaUrl}" target="_blank" style="color:var(--primary);">Yuklab olish</a></div></div>`; }
             viewerOverlay.classList.add('show');
         }
-        
         closeViewerBtn.addEventListener('click', () => viewerOverlay.classList.remove('show'));
         viewerOverlay.addEventListener('click', (e) => { if (e.target === viewerOverlay) viewerOverlay.classList.remove('show'); });
-
         function escapeHtml(t) { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
         function showToast(m, type) { toast.textContent = m; toast.className = 'toast show ' + type; setTimeout(() => toast.classList.remove('show'), 3000); }
     </script>
