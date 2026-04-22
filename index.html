@@ -823,7 +823,7 @@
                 
                 const copyButton = !isProtected ? `<button class="copy-btn" data-url="${p.mediaUrl}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Havola</button>` : `<button class="copy-btn locked" disabled style="opacity:0.5;cursor:not-allowed;" title="Avval postni oching"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Qulflangan</button>`;
                 
-                return `<div class="post-card" data-id="${p.id}" data-password="${p.password || ''}" data-blur="${p.isBlurred}" data-has-password="${p.hasPassword}" data-private="${isPrivate}" data-protected="${isProtected}" data-media='${JSON.stringify(p)}'>
+                return `<div class="post-card" data-id="${p.id}" data-password="${p.password || ''}" data-blur="${p.isBlurred}" data-has-password="${p.hasPassword}" data-private="${isPrivate}" data-protected="${isProtected}" data-media='${JSON.stringify(p).replace(/'/g, "&apos;").replace(/"/g, "&quot;")}'>
                     <div class="post-header"><div class="post-avatar">${(p.userFullName || 'A')[0]}</div><div class="post-info"><div class="post-author">${p.userFullName || 'Anonim'}</div><div class="post-time">${timeStr}</div></div>${isProtected ? '<span style="margin-left:auto;font-size:12px;color:var(--text-secondary);">Himoyalangan</span>' : ''}</div>
                     ${p.text ? `<div class="post-text">${escapeHtml(p.text)}</div>` : ''}
                     <div class="post-media" data-url="${p.mediaUrl}" data-type="${p.mediaType}" data-protected="${isProtected}" style="position:relative;min-height:${isProtected ? '200px' : 'auto'};">${mediaHtml}${overlayHtml}</div>
@@ -838,46 +838,189 @@
             attachPostEvents();
         }
 
-        function attachPostEvents() {
-            document.querySelectorAll('.post-media').forEach(el => el.addEventListener('click', (e) => { if (e.target.closest('button') || e.target.closest('video') || e.target.closest('audio')) return; handleMediaClick(el); }));
-            document.querySelectorAll('.copy-btn').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); if (btn.disabled || btn.classList.contains('locked')) { showToast('Avval postni oching', 'error'); return; } navigator.clipboard?.writeText(btn.dataset.url); showToast('Havola nusxalandi', 'success'); }));
-            document.querySelectorAll('.delete-btn').forEach(btn => btn.addEventListener('click', async (e) => { e.stopPropagation(); if (!confirm("Postni o'chirmoqchimisiz?")) return; await deleteDoc(doc(db, 'posts', btn.dataset.id)); showToast('O\'chirildi', 'success'); playSound('delete'); }));
-        }
+// ========== POST EVENTS (TO'LIQ TUZATILGAN) ==========
+function attachPostEvents() {
+    document.querySelectorAll('.post-media').forEach(el => {
+        // Eski eventlarni tozalash
+        el.removeEventListener('click', handleMediaClickWrapper);
+        // Yangi event qo'shish
+        el.addEventListener('click', handleMediaClickWrapper);
+    });
+    
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.removeEventListener('click', handleCopyClick);
+        btn.addEventListener('click', handleCopyClick);
+    });
+    
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.removeEventListener('click', handleDeleteClick);
+        btn.addEventListener('click', handleDeleteClick);
+    });
+}
 
-        async function handleMediaClick(el) {
-            const card = el.closest('.post-card'), overlay = el.querySelector('.blur-layer'), post = JSON.parse(card.dataset.media);
-            if (overlay) {
-                const action = overlay.dataset.action;
-                if (action === 'password' || post.hasPassword) { pendingPost = post; passwordModal.classList.add('show'); passwordInput.value = ''; passwordError.textContent = ''; }
-                else if (action === 'unblur' || action === 'private') {
-                    overlay.style.opacity = '0';
-                    setTimeout(() => {
-                        overlay.remove();
-                        const copyBtn = card.querySelector('.copy-btn');
-                        if (copyBtn) { copyBtn.disabled = false; copyBtn.style.opacity = '1'; copyBtn.style.cursor = 'pointer'; copyBtn.title = ''; copyBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Havola`; }
-                        const mediaContainer = el;
-                        if (post.mediaType?.startsWith('image')) mediaContainer.innerHTML = `<img src="${post.mediaUrl}" alt="Post" style="width:100%;max-height:400px;object-fit:cover;">`;
-                        else if (post.mediaType?.startsWith('video')) mediaContainer.innerHTML = `<video src="${post.mediaUrl}" controls style="width:100%;max-height:400px;"></video>`;
-                        else if (post.mediaType?.startsWith('audio')) mediaContainer.innerHTML = `<audio src="${post.mediaUrl}" controls style="width:100%;"></audio>`;
-                        else { const ext = post.fileName?.split('.').pop()?.toLowerCase() || ''; mediaContainer.innerHTML = `<div class="preview-file" style="padding:20px;"><div class="file-icon">${getFileIconSVG(ext)}</div><div class="file-name">${post.fileName || 'Fayl'}</div><a href="${post.mediaUrl}" target="_blank" style="margin-top:10px;color:var(--primary);">Yuklab olish</a></div>`; }
-                    }, 300);
+// Wrapper funksiyalar
+function handleMediaClickWrapper(e) {
+    const el = e.currentTarget;
+    
+    // Agar video/audio kontroli bosilgan bo'lsa
+    if (e.target.closest('video') || e.target.closest('audio')) {
+        console.log('Video/audio control clicked');
+        return;
+    }
+    
+    // Agar tugma bosilgan bo'lsa
+    if (e.target.closest('button')) {
+        console.log('Button clicked');
+        return;
+    }
+    
+    console.log('Post media clicked, calling handleMediaClick');
+    handleMediaClick(el);
+}
+
+function handleCopyClick(e) {
+    e.stopPropagation();
+    const btn = e.currentTarget;
+    
+    if (btn.disabled || btn.classList.contains('locked')) {
+        showToast('Avval postni oching', 'error');
+        return;
+    }
+    
+    const url = btn.dataset.url;
+    if (url) {
+        navigator.clipboard?.writeText(url);
+        showToast('Havola nusxalandi', 'success');
+    }
+}
+
+function handleDeleteClick(e) {
+    e.stopPropagation();
+    const btn = e.currentTarget;
+    
+    if (!confirm("Postni o'chirmoqchimisiz?")) return;
+    
+    deleteDoc(doc(db, 'posts', btn.dataset.id))
+        .then(() => {
+            showToast('O\'chirildi', 'success');
+            playSound('delete');
+        })
+        .catch(err => {
+            showToast('Xatolik: ' + err.message, 'error');
+        });
+}
+
+// ========== HANDLE MEDIA CLICK (TO'LIQ TUZATILGAN) ==========
+function handleMediaClick(el) {
+    const card = el.closest('.post-card');
+    const overlay = el.querySelector('.blur-layer');
+    
+    // Post ma'lumotlarini olish
+    let post;
+    try {
+        post = JSON.parse(card.dataset.media);
+    } catch (e) {
+        console.error('Post ma\'lumotlarini o\'qishda xatolik:', e);
+        return;
+    }
+    
+    console.log('Media clicked - Type:', post.mediaType, 'Has overlay:', !!overlay);
+    
+    // Agar overlay (blur/lock) bo'lsa
+    if (overlay) {
+        const action = overlay.dataset.action;
+        console.log('Overlay action:', action);
+        
+        if (action === 'password' || post.hasPassword) {
+            pendingPost = post;
+            passwordModal.classList.add('show');
+            passwordInput.value = '';
+            passwordError.textContent = '';
+        } else if (action === 'unblur' || action === 'private') {
+            // Blurni o'chirish
+            overlay.style.opacity = '0';
+            setTimeout(() => {
+                overlay.remove();
+                
+                // Copy tugmasini yoqish
+                const copyBtn = card.querySelector('.copy-btn');
+                if (copyBtn) {
+                    copyBtn.disabled = false;
+                    copyBtn.style.opacity = '1';
+                    copyBtn.style.cursor = 'pointer';
+                    copyBtn.classList.remove('locked');
+                    copyBtn.title = '';
+                    copyBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Havola`;
                 }
-                return;
-            }
-            openViewer(post);
+                
+                // Medianing o'zini ko'rsatish
+                if (post.mediaType?.startsWith('image')) {
+                    el.innerHTML = `<img src="${post.mediaUrl}" alt="Post" style="width:100%;max-height:400px;object-fit:cover;">`;
+                } else if (post.mediaType?.startsWith('video')) {
+                    el.innerHTML = `<video src="${post.mediaUrl}" controls style="width:100%;max-height:400px;"></video>`;
+                } else if (post.mediaType?.startsWith('audio')) {
+                    el.innerHTML = `<audio src="${post.mediaUrl}" controls style="width:100%;"></audio>`;
+                }
+            }, 300);
         }
+        return;
+    }
+    
+    // Overlay yo'q - oddiy media, FULLSCREEN OCHISH
+    console.log('Opening viewer for:', post.mediaUrl);
+    openViewer(post);
+}
 
-        submitPasswordBtn.addEventListener('click', async () => { if (!pendingPost) return; const inputHash = await hashPassword(passwordInput.value); if (inputHash === pendingPost.password) { passwordModal.classList.remove('show'); openViewer(pendingPost); pendingPost = null; } else { passwordError.textContent = 'Parol noto\'g\'ri'; } });
-        cancelPasswordBtn.addEventListener('click', () => { passwordModal.classList.remove('show'); pendingPost = null; });
-
-        function openViewer(post) {
-            viewerContent.innerHTML = '';
-            if (post.mediaType?.startsWith('image')) { const img = document.createElement('img'); img.src = post.mediaUrl; viewerContent.appendChild(img); }
-            else if (post.mediaType?.startsWith('video')) { const v = document.createElement('video'); v.src = post.mediaUrl; v.controls = true; v.autoplay = true; viewerContent.appendChild(v); }
-            else if (post.mediaType?.startsWith('audio')) { const a = document.createElement('audio'); a.src = post.mediaUrl; a.controls = true; a.autoplay = true; viewerContent.appendChild(a); }
-            else { viewerContent.innerHTML = `<div style="color:white;text-align:center;padding:40px;"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" style="width:80px;height:80px;margin-bottom:20px;"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg><h2>Hujjat</h2><div style="margin-top:20px;"><a href="${post.mediaUrl}" target="_blank" style="background:var(--primary);color:white;padding:12px 24px;border-radius:30px;text-decoration:none;">Yuklab olish</a></div></div>`; }
-            viewerOverlay.classList.add('show');
-        }
+// ========== OPEN VIEWER (TEKSHIRILGAN) ==========
+function openViewer(post) {
+    console.log('openViewer called with:', post.mediaType, post.mediaUrl);
+    
+    viewerContent.innerHTML = '';
+    
+    if (post.mediaType?.startsWith('image')) { 
+        const img = document.createElement('img'); 
+        img.src = post.mediaUrl; 
+        img.alt = post.fileName || 'Post';
+        img.style.maxWidth = '100%';
+        img.style.maxHeight = '85vh';
+        img.style.objectFit = 'contain';
+        img.onload = () => console.log('Image loaded successfully');
+        img.onerror = (e) => console.error('Image failed to load:', e);
+        viewerContent.appendChild(img); 
+    } else if (post.mediaType?.startsWith('video')) { 
+        const v = document.createElement('video'); 
+        v.src = post.mediaUrl; 
+        v.controls = true; 
+        v.autoplay = true; 
+        v.style.maxWidth = '100%';
+        v.style.maxHeight = '85vh';
+        viewerContent.appendChild(v); 
+    } else if (post.mediaType?.startsWith('audio')) { 
+        const a = document.createElement('audio'); 
+        a.src = post.mediaUrl; 
+        a.controls = true; 
+        a.autoplay = true; 
+        a.style.width = '100%';
+        a.style.maxWidth = '500px';
+        viewerContent.appendChild(a); 
+    } else { 
+        viewerContent.innerHTML = `
+            <div style="color:white;text-align:center;padding:40px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" style="width:80px;height:80px;margin-bottom:20px;">
+                    <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/>
+                    <polyline points="13 2 13 9 20 9"/>
+                </svg>
+                <h2>${post.fileName || 'Hujjat'}</h2>
+                <div style="margin-top:20px;">
+                    <a href="${post.mediaUrl}" target="_blank" style="background:var(--primary);color:white;padding:12px 24px;border-radius:30px;text-decoration:none;">Yuklab olish</a>
+                </div>
+            </div>
+        `; 
+    }
+    
+    viewerOverlay.classList.add('show');
+    console.log('Viewer overlay is now visible');
+}
         
         closeViewerBtn.addEventListener('click', () => { viewerOverlay.classList.remove('show'); viewerContent.innerHTML = ''; });
         viewerOverlay.addEventListener('click', (e) => { if (e.target === viewerOverlay) { viewerOverlay.classList.remove('show'); viewerContent.innerHTML = ''; } });
