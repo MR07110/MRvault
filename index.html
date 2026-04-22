@@ -926,7 +926,81 @@
         uploadModal.addEventListener('click', (e) => { if (e.target === uploadModal) { uploadModal.classList.remove('show'); resetForm(); } });
         uploadArea.addEventListener('click', () => fileInput.click());
         fileInput.addEventListener('change', (e) => { if (e.target.files[0]) handleFile(e.target.files[0]); });
-        
+        // ==========================================
+// UPLOAD & MEDIA HANDLING (YANGILANGAN)
+// ==========================================
+
+// Modalni ochish va yopish
+closeModalBtn.addEventListener('click', () => { uploadModal.classList.remove('show'); resetForm(); });
+uploadModal.addEventListener('click', (e) => { if (e.target === uploadModal) { uploadModal.classList.remove('show'); resetForm(); } });
+uploadArea.addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', (e) => { if (e.target.files[0]) handleFile(e.target.files[0]); });
+
+// --- DRAG & DROP QISMI ---
+['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+    uploadArea.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+    }, false);
+});
+
+['dragenter', 'dragover'].forEach(eventName => {
+    uploadArea.addEventListener(eventName, () => {
+        uploadArea.style.borderColor = 'var(--primary)';
+        uploadArea.style.background = 'rgba(36, 161, 222, 0.1)';
+    }, false);
+});
+
+['dragleave', 'drop'].forEach(eventName => {
+    uploadArea.addEventListener(eventName, () => {
+        uploadArea.style.borderColor = 'var(--glass-border)';
+        uploadArea.style.background = 'rgba(0, 0, 0, 0.2)';
+    }, false);
+});
+
+uploadArea.addEventListener('drop', (e) => {
+    const dt = e.dataTransfer;
+    const file = dt.files[0];
+    if (file) handleFile(file);
+});
+
+// --- COPY & PASTE (CTRL+V) QISMI ---
+window.addEventListener('paste', (e) => {
+    const items = e.clipboardData.items;
+    for (let i = 0; i < items.length; i++) {
+        if (items[i].type.indexOf('image') !== -1 || items[i].type.indexOf('video') !== -1) {
+            const file = items[i].getAsFile();
+            // Agar modal yopiq bo'lsa, ochamiz
+            if (!uploadModal.classList.contains('show')) {
+                uploadModal.classList.add('show');
+            }
+            handleFile(file);
+            showToast('📋 Fayl xotiradan yuklandi', 'success');
+            break;
+        }
+    }
+});
+
+// Faylni qayta ishlash funksiyasi (o'zgarishsiz qoladi)
+function handleFile(file) { 
+    selectedFile = file; 
+    previewArea.style.display = 'block'; 
+    previewArea.innerHTML = ''; 
+    
+    if (file.type.startsWith('image')) { 
+        const img = document.createElement('img'); 
+        img.src = URL.createObjectURL(file); 
+        previewArea.appendChild(img); 
+    } else if (file.type.startsWith('video')) { 
+        const video = document.createElement('video'); 
+        video.src = URL.createObjectURL(file); 
+        video.controls = true; 
+        previewArea.appendChild(video); 
+    } else { 
+        previewArea.innerHTML = `<div style="padding:20px;">📄 ${file.name}</div>`; 
+    } 
+    uploadBtn.disabled = false; 
+}
         // Preview File
         function handleFile(file) { 
             selectedFile = file; 
