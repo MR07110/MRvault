@@ -668,11 +668,22 @@
             renderPosts(filtered);
         }
 
-        function loadPosts() {
-            const q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'));
-            onSnapshot(q, (snap) => { allPosts = snap.docs.map(d => ({ id: d.id, ...d.data() })); filterPosts(); });
-        }
-
+       function loadPosts() {
+    // Vaqtincha - barcha postlarni o'qish (test uchun)
+    const q = query(collection(db, 'posts'));
+    
+    onSnapshot(q, (snap) => {
+        console.log('📊 Postlar soni:', snap.docs.length);
+        allPosts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        filterPosts();
+    }, (error) => {
+        console.error('❌ Snapshot error:', error);
+        postsFeed.innerHTML = `<div class="empty-state">
+            <div class="icon">❌</div>
+            <p>Xatolik: ${error.message}</p>
+        </div>`;
+    });
+}
         // ========== RENDER ==========
         function renderPosts(posts) {
             if (!posts.length) { postsFeed.innerHTML = '<div class="empty-state"><div class="icon">📭</div><p>Postlar yo\'q</p></div>'; return; }
