@@ -660,33 +660,7 @@
             this.classList.add('active'); activeCategory = this.dataset.cat; filterPosts();
         }));
 
-        function filterPosts() {
-            let filtered = allPosts;
-            if (activeBigTab === 'my') filtered = filtered.filter(p => p.userId === currentUser?.uid);
-            else filtered = filtered.filter(p => p.isPublic);
-            if (activeCategory !== 'all') filtered = filtered.filter(p => p.category === activeCategory);
-            renderPosts(filtered);
-        }
-// ========== POSTLARNI YUKLASH (TUZATILGAN) ==========
-function loadPosts() {
-    const q = query(collection(db, 'posts'));
-    
-    onSnapshot(q, (snap) => {
-        console.log('📊 Yuklandi:', snap.docs.length, 'ta post');
-        allPosts = [];
-        snap.forEach(doc => {
-            allPosts.push({ id: doc.id, ...doc.data() });
-        });
-        console.log('📊 Birinchi post:', allPosts[0]);
-        filterPosts();
-    }, (error) => {
-        console.error('❌ Xatolik:', error.code, error.message);
-        postsFeed.innerHTML = `<div class="empty-state">
-            <div class="icon">❌</div>
-            <p>${error.message}</p>
-        </div>`;
-    });
-}
+
 
 // ========== FILTER (TUZATILGAN) ==========
 function filterPosts() {
