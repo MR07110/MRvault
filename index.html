@@ -1,9 +1,9 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>MR VAULT</title></title>
+    <title>MR VAULT</title>
     <link rel="icon" type="image/svg+xml" href="files.svg">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -43,7 +43,7 @@
             border: 1px solid var(--glass-border); transform: translateZ(0);
         }
         .login-logo { margin-bottom: 24px; }
-        .login-logo svg { width: 64px; height: 64px; filter: drop-shadow(0 4px 8px rgba(36, 161, 222, 0.3)); }
+        .login-logo img { width: 64px; height: 64px; filter: drop-shadow(0 4px 8px rgba(36, 161, 222, 0.3)); }
         .login-title { font-size: 28px; font-weight: 700; margin-bottom: 8px; color: var(--text); letter-spacing: -0.5px; }
         .login-subtitle { font-size: 15px; color: var(--text-secondary); margin-bottom: 32px; }
         .input-group { margin-bottom: 20px; text-align: left; }
@@ -83,7 +83,7 @@
             border-bottom: 1px solid var(--glass-border); transform: translateZ(0);
         }
         .app-header h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; display: flex; align-items: center; gap: 8px; }
-        .app-header h1 svg { width: 28px; height: 28px; filter: drop-shadow(0 2px 4px rgba(36,161,222,0.4)); }
+        .app-header h1 img { width: 28px; height: 28px; filter: drop-shadow(0 2px 4px rgba(36,161,222,0.4)); }
         .user-info { display: flex; align-items: center; gap: 12px; }
         .user-name { font-size: 15px; font-weight: 500; color: var(--text); max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .logout-btn {
@@ -349,9 +349,10 @@
 <body class="login-mode">
     <!-- Login Container -->
     <div class="login-container">
-        <div class="login-logo">
-    <img src="files.svg" alt="MR Vault" style="width: 64px; height: 64px; filter: drop-shadow(0 4px 8px rgba(36,161,222,0.3));">
-</div>
+        <div class="login-card">
+            <div class="login-logo">
+                <img src="files.svg" alt="MR Vault">
+            </div>
             <div class="login-title" id="loginTitle">Kirish</div>
             <div class="login-subtitle" id="loginSubtitle">Xush kelibsiz! Ma'lumotlarni kiriting.</div>
             <form id="loginForm">
@@ -374,14 +375,14 @@
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                         Parol
                     </label>
-                    <input type="password" id="password" class="input-field" placeholder="••••••••">
+                    <input type="password" id="password" class="input-field" placeholder="••••••••" autocomplete="current-password">
                 </div>
                 <div class="input-group" id="confirmGroup" style="display: none;">
                     <label class="input-label">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                         Parolni tasdiqlang
                     </label>
-                    <input type="password" id="confirmPassword" class="input-field" placeholder="••••••••">
+                    <input type="password" id="confirmPassword" class="input-field" placeholder="••••••••" autocomplete="new-password">
                 </div>
                 <div class="error-message" id="loginError"></div>
                 <button type="submit" class="login-btn" id="loginBtn">
@@ -399,10 +400,10 @@
     <!-- Main App -->
     <div class="app">
         <header class="app-header">
-           <h1>
-    <img src="files.svg" alt="MR Vault" style="width: 28px; height: 28px; filter: drop-shadow(0 2px 4px rgba(36,161,222,0.4));">
-    MR Vault
-</h1>
+            <h1>
+                <img src="files.svg" alt="MR Vault">
+                MR Vault
+            </h1>
             <div class="user-info">
                 <span class="user-name" id="displayUserName"></span>
                 <button class="logout-btn" id="logoutBtn">
@@ -499,7 +500,7 @@
                     <label class="checkbox-item"><input type="checkbox" id="passwordCheck"> Postga parol o'rnatish</label>
                 </div>
                 <div id="passwordField" style="display: none; margin-top: 12px;">
-                    <input type="password" id="postPassword" class="input-field" placeholder="Himoya parolini kiriting" style="width: 100%;">
+                    <input type="password" id="postPassword" class="input-field" placeholder="Himoya parolini kiriting" style="width: 100%;" autocomplete="off">
                 </div>
             </div>
             
@@ -519,7 +520,7 @@
     <!-- Password Modal -->
     <div class="password-modal" id="passwordModal">
         <h4><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Himoyalangan Post</h4>
-        <input type="password" id="passwordInput" class="input-field" placeholder="Parolni kiriting">
+        <input type="password" id="passwordInput" class="input-field" placeholder="Parolni kiriting" autocomplete="off">
         <button class="login-btn" id="submitPasswordBtn">Tasdiqlash</button>
         <button class="login-btn" id="cancelPasswordBtn" style="background: rgba(255,255,255,0.1); color: white; box-shadow: none; margin-top: 12px;">Bekor qilish</button>
         <div class="error-message" id="passwordError"></div>
@@ -574,6 +575,18 @@
         const submitPasswordBtn = document.getElementById('submitPasswordBtn'), cancelPasswordBtn = document.getElementById('cancelPasswordBtn');
         const passwordError = document.getElementById('passwordError'), toast = document.getElementById('toast');
 
+        // ========== OVOZ EFFEKTLARI ==========
+        const sounds = {
+            success: new Audio('./success.wav'),
+            notification: new Audio('./notification.wav'),
+            info: new Audio('./info.wav'),
+            click: new Audio('./click.wav'),
+            delete: new Audio('./delete.wav'),
+            error: new Audio('./error.wav')
+        };
+        Object.values(sounds).forEach(sound => { sound.load(); sound.volume = 0.4; });
+        function playSound(soundName) { const sound = sounds[soundName]; if (sound) { sound.currentTime = 0; sound.play().catch(e => console.log('Ovoz:', e)); } }
+
         // ========== AUTH ==========
         toggleFormBtn.addEventListener('click', () => {
             isLoginMode = !isLoginMode;
@@ -589,6 +602,7 @@
                 btnText.textContent = "RO'YXATDAN O'TISH";
             }
             loginError.textContent = '';
+            playSound('click');
         });
 
         function usernameToEmail(username) { return `${username.toLowerCase().replace(/[^a-z0-9]/g, '')}@mrgram.user`; }
@@ -596,22 +610,24 @@
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const username = document.getElementById('username').value.trim(), password = document.getElementById('password').value;
-            if (!username || username.length < 3) { loginError.textContent = 'Username kamida 3 ta belgi'; return; }
-            if (!password || password.length < 6) { loginError.textContent = 'Parol kamida 6 ta belgi'; return; }
+            if (!username || username.length < 3) { loginError.textContent = 'Username kamida 3 ta belgi'; playSound('error'); return; }
+            if (!password || password.length < 6) { loginError.textContent = 'Parol kamida 6 ta belgi'; playSound('error'); return; }
             loginSpinner.style.display = 'inline-block'; btnText.style.opacity = '0.5';
             try {
                 const email = usernameToEmail(username);
                 if (isLoginMode) {
                     await signInWithEmailAndPassword(auth, email, password);
+                    playSound('success');
                 } else {
                     const fullName = document.getElementById('fullName').value.trim(), confirmPassword = document.getElementById('confirmPassword').value;
-                    if (!fullName) { loginError.textContent = 'Ismingizni kiriting'; return; }
-                    if (password !== confirmPassword) { loginError.textContent = 'Parollar mos kelmadi'; return; }
+                    if (!fullName) { loginError.textContent = 'Ismingizni kiriting'; playSound('error'); return; }
+                    if (password !== confirmPassword) { loginError.textContent = 'Parollar mos kelmadi'; playSound('error'); return; }
                     const userCred = await createUserWithEmailAndPassword(auth, email, password);
                     await updateProfile(userCred.user, { displayName: fullName });
                     await addDoc(collection(db, 'users'), { uid: userCred.user.uid, username, fullName, email, createdAt: serverTimestamp() });
+                    playSound('success');
                 }
-            } catch (error) { loginError.textContent = error.message; }
+            } catch (error) { loginError.textContent = error.message; playSound('error'); }
             finally { loginSpinner.style.display = 'none'; btnText.style.opacity = '1'; }
         });
 
@@ -624,6 +640,7 @@
                 body.classList.remove('login-mode'); body.classList.add('app-mode'); 
                 displayUserName.textContent = user.displayName || user.email?.split('@')[0] || 'User'; 
                 loadPosts(); 
+                playSound('notification');
             } else { 
                 currentUser = null; 
                 if (loginContainer) loginContainer.style.display = 'block';
@@ -632,7 +649,7 @@
             } 
         });
         
-        logoutBtn.addEventListener('click', () => signOut(auth));
+        logoutBtn.addEventListener('click', () => { playSound('click'); signOut(auth); });
 
         // ========== FAB ==========
         let isDragging = false, startX, startY, startLeft, startBottom;
@@ -641,109 +658,51 @@
         function dragStart(e) { isDragging = true; const evt = e.touches ? e.touches[0] : e; startX = evt.clientX; startY = evt.clientY; const rect = fabBtn.getBoundingClientRect(); startLeft = rect.left; startBottom = window.innerHeight - rect.bottom; fabBtn.classList.add('dragging'); if(e.type === 'touchstart') e.preventDefault(); }
         function dragMove(e) { if (!isDragging) return; const evt = e.touches ? e.touches[0] : e; let newLeft = startLeft + evt.clientX - startX, newBottom = startBottom - (evt.clientY - startY); newLeft = Math.max(10, Math.min(newLeft, window.innerWidth - 70)); newBottom = Math.max(70, Math.min(newBottom, window.innerHeight - 150)); fabBtn.style.left = newLeft + 'px'; fabBtn.style.right = 'auto'; fabBtn.style.bottom = newBottom + 'px'; if(e.type === 'touchmove') e.preventDefault(); }
         function dragEnd() { isDragging = false; fabBtn.classList.remove('dragging'); }
-        fabBtn.addEventListener('click', () => { if (!fabBtn.classList.contains('dragging')) uploadModal.classList.add('show'); });
+        fabBtn.addEventListener('click', () => { if (!fabBtn.classList.contains('dragging')) { uploadModal.classList.add('show'); playSound('click'); } });
 
         // ========== MODAL ==========
-        closeModalBtn.addEventListener('click', () => { uploadModal.classList.remove('show'); resetForm(); });
+        closeModalBtn.addEventListener('click', () => { uploadModal.classList.remove('show'); resetForm(); playSound('click'); });
         uploadModal.addEventListener('click', (e) => { if (e.target === uploadModal) { uploadModal.classList.remove('show'); resetForm(); } });
-        
-        // File Input
         uploadArea.addEventListener('click', (e) => { e.stopPropagation(); fileInput.value = ''; fileInput.click(); });
         uploadArea.addEventListener('touchend', (e) => { e.preventDefault(); fileInput.value = ''; fileInput.click(); }, { passive: true });
-        
-        fileInput.addEventListener('change', (e) => { if (e.target.files && e.target.files[0]) handleFile(e.target.files[0]); });
+        fileInput.addEventListener('change', (e) => { if (e.target.files && e.target.files[0]) { handleFile(e.target.files[0]); playSound('click'); } });
 
-      // ==========================================
-// UNIVERSAL PASTE HANDLER (YANGI)
-// ==========================================
-
-function handlePasteEvent(e, options = {}) {
-    const { preventDefault = true, openModal = true } = options;
-    const items = e.clipboardData?.items;
-    
-    if (!items) return false;
-    
-    for (let i = 0; i < items.length; i++) {
-        const item = items[i];
-        
-        // Fayl tekshirish
-        if (item.kind === 'file') {
-            const file = item.getAsFile();
-            
-            if (file) {
-                if (preventDefault) e.preventDefault();
-                
-                console.log(' Paste fayl:', file.name);
-                
-                if (openModal && !uploadModal.classList.contains('show')) {
-                    uploadModal.classList.add('show');
+        // ========== PASTE ==========
+        function handlePasteEvent(e, options = {}) {
+            const { preventDefault = true, openModal = true } = options;
+            const items = e.clipboardData?.items;
+            if (!items) return false;
+            for (let i = 0; i < items.length; i++) {
+                const item = items[i];
+                if (item.kind === 'file') {
+                    const file = item.getAsFile();
+                    if (file) {
+                        if (preventDefault) e.preventDefault();
+                        if (openModal && !uploadModal.classList.contains('show')) uploadModal.classList.add('show');
+                        handleFile(file);
+                        showToast(`${file.name} yuklandi`, 'paste');
+                        playSound('success');
+                        return true;
+                    }
                 }
-                
-                handleFile(file);
-                showToast(`${file.name} yuklandi`, 'paste');
-                
-                return true;
             }
+            return false;
         }
-    }
-    
-    return false;
-}
+        captionInput.addEventListener('paste', (e) => handlePasteEvent(e, { preventDefault: true, openModal: false }));
+        window.addEventListener('paste', (e) => { if (!uploadModal.classList.contains('show')) handlePasteEvent(e, { preventDefault: true, openModal: true }); });
 
-// 1. Caption input (textarea) uchun
-captionInput.addEventListener('paste', (e) => {
-    handlePasteEvent(e, { preventDefault: true, openModal: false });
-});
-
-// 2. Global paste - modal yopiq bo'lganda ochish uchun
-window.addEventListener('paste', (e) => {
-    if (!uploadModal.classList.contains('show')) {
-        handlePasteEvent(e, { preventDefault: true, openModal: true });
-    }
-});
-
-        // ========== FORMAT ANIQLASH ==========
+        // ========== FORMAT ==========
         function getFileIcon(file) {
-            const ext = file.name.split('.').pop()?.toLowerCase() || '';
-            const type = file.type;
-            
-            // Rasmlar
-            if (type.startsWith('image/')) {
-                return { icon: 'image', color: 'var(--primary)' };
-            }
-            // Videolar
-            if (type.startsWith('video/')) {
-                return { icon: 'video', color: 'var(--primary)' };
-            }
-            // Audio
-            if (type.startsWith('audio/')) {
-                return { icon: 'audio', color: 'var(--primary)' };
-            }
-            // PDF
-            if (type === 'application/pdf' || ext === 'pdf') {
-                return { icon: 'pdf', color: 'var(--pdf-color)' };
-            }
-            // Word
-            if (ext === 'doc' || ext === 'docx' || type.includes('word')) {
-                return { icon: 'doc', color: 'var(--doc-color)' };
-            }
-            // Excel
-            if (ext === 'xls' || ext === 'xlsx' || type.includes('excel') || type.includes('spreadsheet')) {
-                return { icon: 'excel', color: '#27ae60' };
-            }
-            // PowerPoint
-            if (ext === 'ppt' || ext === 'pptx' || type.includes('presentation')) {
-                return { icon: 'ppt', color: '#e67e22' };
-            }
-            // ZIP/RAR
-            if (ext === 'zip' || ext === 'rar' || ext === '7z' || type.includes('zip') || type.includes('rar')) {
-                return { icon: 'archive', color: 'var(--archive-color)' };
-            }
-            // TXT
-            if (ext === 'txt' || type === 'text/plain') {
-                return { icon: 'txt', color: '#95a5a6' };
-            }
-            // Default
+            const ext = file.name.split('.').pop()?.toLowerCase() || '', type = file.type;
+            if (type.startsWith('image/')) return { icon: 'image', color: 'var(--primary)' };
+            if (type.startsWith('video/')) return { icon: 'video', color: 'var(--primary)' };
+            if (type.startsWith('audio/')) return { icon: 'audio', color: 'var(--primary)' };
+            if (type === 'application/pdf' || ext === 'pdf') return { icon: 'pdf', color: 'var(--pdf-color)' };
+            if (ext === 'doc' || ext === 'docx' || type.includes('word')) return { icon: 'doc', color: 'var(--doc-color)' };
+            if (ext === 'xls' || ext === 'xlsx') return { icon: 'excel', color: '#27ae60' };
+            if (ext === 'ppt' || ext === 'pptx') return { icon: 'ppt', color: '#e67e22' };
+            if (ext === 'zip' || ext === 'rar' || ext === '7z') return { icon: 'archive', color: 'var(--archive-color)' };
+            if (ext === 'txt') return { icon: 'txt', color: '#95a5a6' };
             return { icon: 'file', color: 'var(--text-secondary)' };
         }
 
@@ -767,30 +726,15 @@ window.addEventListener('paste', (e) => {
             if (!file) return;
             selectedFile = file; 
             previewArea.style.display = 'block'; 
-            
-            const fileType = file.type;
-            const fileExt = file.name.split('.').pop()?.toLowerCase() || '';
-            const fileSize = (file.size / 1024 / 1024).toFixed(2);
+            const fileType = file.type, fileExt = file.name.split('.').pop()?.toLowerCase() || '', fileSize = (file.size / 1024 / 1024).toFixed(2);
             const iconInfo = getFileIcon(file);
-            
-            // Rasm yoki video bo'lsa preview
             if (fileType.startsWith('image/')) {
                 previewArea.innerHTML = `<img src="${URL.createObjectURL(file)}" alt="Preview" style="max-width:100%;max-height:200px;border-radius:8px;" onload="URL.revokeObjectURL(this.src)">`;
             } else if (fileType.startsWith('video/')) {
                 previewArea.innerHTML = `<video src="${URL.createObjectURL(file)}" controls style="max-width:100%;max-height:200px;border-radius:8px;"></video>`;
             } else {
-                // Boshqa fayllar uchun ikonka
-                previewArea.innerHTML = `
-                    <div class="preview-file">
-                        <div class="file-icon" style="color: ${iconInfo.color}">
-                            ${getFileIconSVG(iconInfo.icon)}
-                        </div>
-                        <div class="file-name">${file.name}</div>
-                        <div class="file-size">${fileSize} MB · ${fileExt.toUpperCase()}</div>
-                    </div>
-                `;
+                previewArea.innerHTML = `<div class="preview-file"><div class="file-icon" style="color: ${iconInfo.color}">${getFileIconSVG(iconInfo.icon)}</div><div class="file-name">${file.name}</div><div class="file-size">${fileSize} MB · ${fileExt.toUpperCase()}</div></div>`;
             }
-            
             uploadBtn.disabled = false; 
         }
 
@@ -802,7 +746,6 @@ window.addEventListener('paste', (e) => {
             document.querySelector('[data-cat="boshqa"]').classList.add('active'); selectedCategory = 'boshqa'; 
         }
 
-        // Categories
         document.querySelectorAll('.category-option').forEach(option => { option.addEventListener('click', function() { document.querySelectorAll('.category-option').forEach(c => c.classList.remove('active')); this.classList.add('active'); selectedCategory = this.dataset.cat; }); });
         passwordCheck.addEventListener('change', () => passwordField.style.display = passwordCheck.checked ? 'block' : 'none');
 
@@ -826,8 +769,9 @@ window.addEventListener('paste', (e) => {
                     userId: currentUser.uid, userFullName: currentUser.displayName || 'Anonim', userAvatar: currentUser.photoURL || null, 
                     createdAt: serverTimestamp(), views: 0, downloads: 0 
                 });
-                showToast('Post muvaffaqiyatli yuklandi!', 'success'); uploadModal.classList.remove('show'); resetForm();
-            } catch (error) { showToast('Xatolik: ' + error.message, 'error'); }
+                showToast('Post muvaffaqiyatli yuklandi', 'success'); playSound('success');
+                uploadModal.classList.remove('show'); resetForm();
+            } catch (error) { showToast('Xatolik: ' + error.message, 'error'); playSound('error'); }
             finally { uploadBtn.disabled = false; uploadBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Postni Yuklash'; }
         });
 
@@ -849,214 +793,80 @@ window.addEventListener('paste', (e) => {
         }
 
         function renderPosts(posts) {
-    if (!posts.length) { 
-        postsFeed.innerHTML = `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg><p>Hozircha postlar mavjud emas</p></div>`; 
-        return; 
-    }
-    
-    postsFeed.innerHTML = posts.map(p => {
-        const time = p.createdAt?.toDate?.() || new Date();
-        const timeStr = new Intl.DateTimeFormat('uz-UZ', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }).format(time);
-        const isOwner = currentUser && p.userId === currentUser.uid;
-        const hasBlur = p.isBlurred === true;
-        const hasPass = p.hasPassword === true && p.password;
-        const isPrivate = !p.isPublic;
-        
-        // Post himoyalanganmi?
-        const isProtected = hasBlur || hasPass || isPrivate;
-        
-        // Media HTML - himoyalangan bo'lsa, umuman ko'rsatilmaydi!
-        let mediaHtml = '';
-        let overlayHtml = '';
-        
-        if (isProtected) {
-            // Himoyalangan post - faqat blur yoki lock qatlami
-            if (hasPass) {
-                overlayHtml = `
-                    <div class="blur-layer" data-action="password" style="min-height: 200px; display: flex; align-items: center; justify-content: center;">
-                        <div class="blur-content">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" style="width: 48px; height: 48px;">
-                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                            </svg>
-                            <div class="blur-text">Parol bilan himoyalangan</div>
-                        </div>
-                    </div>
-                `;
-            } else if (hasBlur) {
-                overlayHtml = `
-                    <div class="blur-layer" data-action="unblur" style="min-height: 200px; display: flex; align-items: center; justify-content: center;">
-                        <div class="blur-content">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" style="width: 48px; height: 48px;">
-                                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/>
-                                <circle cx="12" cy="12" r="3"/>
-                            </svg>
-                            <div class="blur-text">Ko'rish uchun bosing</div>
-                        </div>
-                    </div>
-                `;
-            } else if (isPrivate) {
-                overlayHtml = `
-                    <div class="blur-layer" data-action="private" style="min-height: 200px; display: flex; align-items: center; justify-content: center;">
-                        <div class="blur-content">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" style="width: 48px; height: 48px;">
-                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                            </svg>
-                            <div class="blur-text">Maxfiy post</div>
-                        </div>
-                    </div>
-                `;
-            }
-            // Media ko'rsatilmaydi - faqat overlay
-            mediaHtml = `<div style="display: none;"></div>`;
-        } else {
-            // Himoyalanmagan post - normal ko'rinadi
-            if (p.mediaType?.startsWith('image')) {
-                mediaHtml = `<img src="${p.mediaUrl}" loading="lazy" alt="Post" style="width:100%; max-height:400px; object-fit:cover;">`;
-            } else if (p.mediaType?.startsWith('video')) {
-                mediaHtml = `<video src="${p.mediaUrl}" controls preload="metadata" style="width:100%; max-height:400px;"></video>`;
-            } else if (p.mediaType?.startsWith('audio')) {
-                mediaHtml = `<audio src="${p.mediaUrl}" controls style="width:100%;"></audio>`;
-            } else {
-                const ext = p.fileName?.split('.').pop()?.toLowerCase() || '';
-                const iconInfo = { icon: 'file', color: 'var(--text-secondary)' };
-                if (ext === 'pdf') { iconInfo.icon = 'pdf'; iconInfo.color = 'var(--pdf-color)'; }
-                else if (ext === 'doc' || ext === 'docx') { iconInfo.icon = 'doc'; iconInfo.color = 'var(--doc-color)'; }
-                else if (ext === 'zip' || ext === 'rar') { iconInfo.icon = 'archive'; iconInfo.color = 'var(--archive-color)'; }
-                
-                mediaHtml = `<div class="preview-file" style="padding:20px;">
-                    <div class="file-icon" style="color: ${iconInfo.color}">${getFileIconSVG(iconInfo.icon)}</div>
-                    <div class="file-name">${p.fileName || 'Fayl'}</div>
-                </div>`;
-            }
-        }
-        
-        // Copy tugmasi - faqat himoyalanmagan postlar uchun yoki post ochilgandan keyin
-        const copyButton = !isProtected ? 
-            `<button class="copy-btn" data-url="${p.mediaUrl}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Havola</button>` : 
-            `<button class="copy-btn locked" disabled style="opacity:0.5; cursor:not-allowed;" title="Avval postni oching"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Qulflangan</button>`;
-        
-        return `<div class="post-card" data-id="${p.id}" data-password="${p.password || ''}" data-blur="${p.isBlurred}" data-has-password="${p.hasPassword}" data-private="${isPrivate}" data-protected="${isProtected}" data-media='${JSON.stringify(p)}'>
-            <div class="post-header">
-                <div class="post-avatar">${(p.userFullName || 'A')[0]}</div>
-                <div class="post-info">
-                    <div class="post-author">${p.userFullName || 'Anonim'}</div>
-                    <div class="post-time">${timeStr}</div>
-                </div>
-                ${isProtected ? '<span style="margin-left:auto; font-size:12px; color:var(--text-secondary);">Himoyalangan</span>' : ''}
-            </div>
-            ${p.text ? `<div class="post-text">${escapeHtml(p.text)}</div>` : ''}
-            <div class="post-media" data-url="${p.mediaUrl}" data-type="${p.mediaType}" data-protected="${isProtected}" style="position:relative; min-height: ${isProtected ? '200px' : 'auto'};">
-                ${mediaHtml}
-                ${overlayHtml}
-            </div>
-            <span class="post-category">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7h-4.5A2.5 2.5 0 0 0 13 9.5v0A2.5 2.5 0 0 0 15.5 12H18"/><path d="M4 7h4.5A2.5 2.5 0 0 1 11 9.5v0A2.5 2.5 0 0 1 8.5 12H6"/><path d="M12 3v18"/></svg> 
-                ${p.category}
-            </span>
-            <div class="post-actions">
-                <button class="view-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="1"/></svg> ${p.views || 0}</button>
-                ${copyButton}
-                ${isOwner ? `<button class="delete-btn" data-id="${p.id}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> O'chirish</button>` : ''}
-            </div>
-        </div>`;
-    }).join('');
-    
-    attachPostEvents();
-}
- function attachPostEvents() {
-    document.querySelectorAll('.post-media').forEach(el => {
-        el.addEventListener('click', (e) => {
-            if (e.target.closest('button') || e.target.closest('video') || e.target.closest('audio')) return;
-            handleMediaClick(el);
-        });
-    });
-    
-    document.querySelectorAll('.copy-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
+            if (!posts.length) { postsFeed.innerHTML = `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg><p>Hozircha postlar mavjud emas</p></div>`; return; }
             
-            // Agar tugma qulflangan bo'lsa
-            if (btn.disabled || btn.classList.contains('locked')) {
-                showToast('🔒 Avval postni oching', 'error');
+            postsFeed.innerHTML = posts.map(p => {
+                const time = p.createdAt?.toDate?.() || new Date();
+                const timeStr = new Intl.DateTimeFormat('uz-UZ', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }).format(time);
+                const isOwner = currentUser && p.userId === currentUser.uid, hasBlur = p.isBlurred === true, hasPass = p.hasPassword === true && p.password, isPrivate = !p.isPublic;
+                const isProtected = hasBlur || hasPass || isPrivate;
+                
+                let mediaHtml = '', overlayHtml = '';
+                if (isProtected) {
+                    if (hasPass) overlayHtml = `<div class="blur-layer" data-action="password" style="min-height:200px;display:flex;align-items:center;justify-content:center;"><div class="blur-content"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" style="width:48px;height:48px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><div class="blur-text">Parol bilan himoyalangan</div></div></div>`;
+                    else if (hasBlur) overlayHtml = `<div class="blur-layer" data-action="unblur" style="min-height:200px;display:flex;align-items:center;justify-content:center;"><div class="blur-content"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" style="width:48px;height:48px;"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg><div class="blur-text">Ko'rish uchun bosing</div></div></div>`;
+                    else if (isPrivate) overlayHtml = `<div class="blur-layer" data-action="private" style="min-height:200px;display:flex;align-items:center;justify-content:center;"><div class="blur-content"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" style="width:48px;height:48px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><div class="blur-text">Maxfiy post</div></div></div>`;
+                    mediaHtml = `<div style="display:none;"></div>`;
+                } else {
+                    if (p.mediaType?.startsWith('image')) mediaHtml = `<img src="${p.mediaUrl}" loading="lazy" alt="Post" style="width:100%;max-height:400px;object-fit:cover;">`;
+                    else if (p.mediaType?.startsWith('video')) mediaHtml = `<video src="${p.mediaUrl}" controls preload="metadata" style="width:100%;max-height:400px;"></video>`;
+                    else if (p.mediaType?.startsWith('audio')) mediaHtml = `<audio src="${p.mediaUrl}" controls style="width:100%;"></audio>`;
+                    else {
+                        const ext = p.fileName?.split('.').pop()?.toLowerCase() || '';
+                        const iconInfo = { icon: 'file', color: 'var(--text-secondary)' };
+                        if (ext === 'pdf') { iconInfo.icon = 'pdf'; iconInfo.color = 'var(--pdf-color)'; }
+                        else if (ext === 'doc' || ext === 'docx') { iconInfo.icon = 'doc'; iconInfo.color = 'var(--doc-color)'; }
+                        else if (ext === 'zip' || ext === 'rar') { iconInfo.icon = 'archive'; iconInfo.color = 'var(--archive-color)'; }
+                        mediaHtml = `<div class="preview-file" style="padding:20px;"><div class="file-icon" style="color:${iconInfo.color}">${getFileIconSVG(iconInfo.icon)}</div><div class="file-name">${p.fileName || 'Fayl'}</div></div>`;
+                    }
+                }
+                
+                const copyButton = !isProtected ? `<button class="copy-btn" data-url="${p.mediaUrl}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Havola</button>` : `<button class="copy-btn locked" disabled style="opacity:0.5;cursor:not-allowed;" title="Avval postni oching"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Qulflangan</button>`;
+                
+                return `<div class="post-card" data-id="${p.id}" data-password="${p.password || ''}" data-blur="${p.isBlurred}" data-has-password="${p.hasPassword}" data-private="${isPrivate}" data-protected="${isProtected}" data-media='${JSON.stringify(p)}'>
+                    <div class="post-header"><div class="post-avatar">${(p.userFullName || 'A')[0]}</div><div class="post-info"><div class="post-author">${p.userFullName || 'Anonim'}</div><div class="post-time">${timeStr}</div></div>${isProtected ? '<span style="margin-left:auto;font-size:12px;color:var(--text-secondary);">Himoyalangan</span>' : ''}</div>
+                    ${p.text ? `<div class="post-text">${escapeHtml(p.text)}</div>` : ''}
+                    <div class="post-media" data-url="${p.mediaUrl}" data-type="${p.mediaType}" data-protected="${isProtected}" style="position:relative;min-height:${isProtected ? '200px' : 'auto'};">${mediaHtml}${overlayHtml}</div>
+                    <span class="post-category"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7h-4.5A2.5 2.5 0 0 0 13 9.5v0A2.5 2.5 0 0 0 15.5 12H18"/><path d="M4 7h4.5A2.5 2.5 0 0 1 11 9.5v0A2.5 2.5 0 0 1 8.5 12H6"/><path d="M12 3v18"/></svg> ${p.category}</span>
+                    <div class="post-actions">
+                        <button class="view-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="1"/></svg> ${p.views || 0}</button>
+                        ${copyButton}
+                        ${isOwner ? `<button class="delete-btn" data-id="${p.id}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> O'chirish</button>` : ''}
+                    </div>
+                </div>`;
+            }).join('');
+            attachPostEvents();
+        }
+
+        function attachPostEvents() {
+            document.querySelectorAll('.post-media').forEach(el => el.addEventListener('click', (e) => { if (e.target.closest('button') || e.target.closest('video') || e.target.closest('audio')) return; handleMediaClick(el); }));
+            document.querySelectorAll('.copy-btn').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); if (btn.disabled || btn.classList.contains('locked')) { showToast('Avval postni oching', 'error'); return; } navigator.clipboard?.writeText(btn.dataset.url); showToast('Havola nusxalandi', 'success'); }));
+            document.querySelectorAll('.delete-btn').forEach(btn => btn.addEventListener('click', async (e) => { e.stopPropagation(); if (!confirm("Postni o'chirmoqchimisiz?")) return; await deleteDoc(doc(db, 'posts', btn.dataset.id)); showToast('O\'chirildi', 'success'); playSound('delete'); }));
+        }
+
+        async function handleMediaClick(el) {
+            const card = el.closest('.post-card'), overlay = el.querySelector('.blur-layer'), post = JSON.parse(card.dataset.media);
+            if (overlay) {
+                const action = overlay.dataset.action;
+                if (action === 'password' || post.hasPassword) { pendingPost = post; passwordModal.classList.add('show'); passwordInput.value = ''; passwordError.textContent = ''; }
+                else if (action === 'unblur' || action === 'private') {
+                    overlay.style.opacity = '0';
+                    setTimeout(() => {
+                        overlay.remove();
+                        const copyBtn = card.querySelector('.copy-btn');
+                        if (copyBtn) { copyBtn.disabled = false; copyBtn.style.opacity = '1'; copyBtn.style.cursor = 'pointer'; copyBtn.title = ''; copyBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Havola`; }
+                        const mediaContainer = el;
+                        if (post.mediaType?.startsWith('image')) mediaContainer.innerHTML = `<img src="${post.mediaUrl}" alt="Post" style="width:100%;max-height:400px;object-fit:cover;">`;
+                        else if (post.mediaType?.startsWith('video')) mediaContainer.innerHTML = `<video src="${post.mediaUrl}" controls style="width:100%;max-height:400px;"></video>`;
+                        else if (post.mediaType?.startsWith('audio')) mediaContainer.innerHTML = `<audio src="${post.mediaUrl}" controls style="width:100%;"></audio>`;
+                        else { const ext = post.fileName?.split('.').pop()?.toLowerCase() || ''; mediaContainer.innerHTML = `<div class="preview-file" style="padding:20px;"><div class="file-icon">${getFileIconSVG(ext)}</div><div class="file-name">${post.fileName || 'Fayl'}</div><a href="${post.mediaUrl}" target="_blank" style="margin-top:10px;color:var(--primary);">Yuklab olish</a></div>`; }
+                    }, 300);
+                }
                 return;
             }
-            
-            const url = btn.dataset.url;
-            if (url) {
-                navigator.clipboard?.writeText(url);
-                showToast('📋 Havola nusxalandi', 'success');
-            }
-        });
-    });
-    
-    document.querySelectorAll('.delete-btn').forEach(btn => {
-        btn.addEventListener('click', async (e) => {
-            e.stopPropagation();
-            if (!confirm("Postni o'chirmoqchimisiz?")) return;
-            await deleteDoc(doc(db, 'posts', btn.dataset.id));
-            showToast('🗑️ O\'chirildi', 'success');
-        });
-    });
-}
-
-    async function handleMediaClick(el) {
-    const card = el.closest('.post-card');
-    const overlay = el.querySelector('.blur-layer');
-    const post = JSON.parse(card.dataset.media);
-    const isProtected = card.dataset.protected === 'true';
-    
-    // Agar overlay (blur/lock) bo'lsa
-    if (overlay) {
-        const action = overlay.dataset.action;
-        
-        if (action === 'password' || post.hasPassword) {
-            pendingPost = post;
-            passwordModal.classList.add('show');
-            passwordInput.value = '';
-            passwordError.textContent = '';
-        } else if (action === 'unblur' || action === 'private') {
-            // Postni ochish - overlayni o'chirish
-            overlay.style.opacity = '0';
-            setTimeout(() => {
-                overlay.remove();
-                
-                // Post ochilgandan keyin copy tugmasini yoqish
-                const copyBtn = card.querySelector('.copy-btn');
-                if (copyBtn) {
-                    copyBtn.disabled = false;
-                    copyBtn.style.opacity = '1';
-                    copyBtn.style.cursor = 'pointer';
-                    copyBtn.title = '';
-                    copyBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Havola`;
-                }
-                
-                // Media ni ko'rsatish
-                const mediaContainer = el;
-                if (post.mediaType?.startsWith('image')) {
-                    mediaContainer.innerHTML = `<img src="${post.mediaUrl}" alt="Post" style="width:100%; max-height:400px; object-fit:cover;">`;
-                } else if (post.mediaType?.startsWith('video')) {
-                    mediaContainer.innerHTML = `<video src="${post.mediaUrl}" controls style="width:100%; max-height:400px;"></video>`;
-                } else if (post.mediaType?.startsWith('audio')) {
-                    mediaContainer.innerHTML = `<audio src="${post.mediaUrl}" controls style="width:100%;"></audio>`;
-                } else {
-                    // Fayl uchun
-                    const ext = post.fileName?.split('.').pop()?.toLowerCase() || '';
-                    mediaContainer.innerHTML = `<div class="preview-file" style="padding:20px;">
-                        <div class="file-icon">${getFileIconSVG(ext)}</div>
-                        <div class="file-name">${post.fileName || 'Fayl'}</div>
-                        <a href="${post.mediaUrl}" target="_blank" style="margin-top:10px; color:var(--primary);">Yuklab olish</a>
-                    </div>`;
-                }
-            }, 300);
+            openViewer(post);
         }
-        return;
-    }
-    
-    // Oddiy media bosilganda
-    openViewer(post);
-}
+
         submitPasswordBtn.addEventListener('click', async () => { if (!pendingPost) return; const inputHash = await hashPassword(passwordInput.value); if (inputHash === pendingPost.password) { passwordModal.classList.remove('show'); openViewer(pendingPost); pendingPost = null; } else { passwordError.textContent = 'Parol noto\'g\'ri'; } });
         cancelPasswordBtn.addEventListener('click', () => { passwordModal.classList.remove('show'); pendingPost = null; });
 
