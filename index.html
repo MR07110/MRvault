@@ -849,61 +849,214 @@ window.addEventListener('paste', (e) => {
         }
 
         function renderPosts(posts) {
-            if (!posts.length) { postsFeed.innerHTML = `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg><p>Hozircha postlar mavjud emas</p></div>`; return; }
-            
-            postsFeed.innerHTML = posts.map(p => {
-                const time = p.createdAt?.toDate?.() || new Date();
-                const timeStr = new Intl.DateTimeFormat('uz-UZ', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }).format(time);
-                const isOwner = currentUser && p.userId === currentUser.uid, hasBlur = p.isBlurred === true, hasPass = p.hasPassword === true && p.password;
+    if (!posts.length) { 
+        postsFeed.innerHTML = `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg><p>Hozircha postlar mavjud emas</p></div>`; 
+        return; 
+    }
+    
+    postsFeed.innerHTML = posts.map(p => {
+        const time = p.createdAt?.toDate?.() || new Date();
+        const timeStr = new Intl.DateTimeFormat('uz-UZ', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }).format(time);
+        const isOwner = currentUser && p.userId === currentUser.uid;
+        const hasBlur = p.isBlurred === true;
+        const hasPass = p.hasPassword === true && p.password;
+        const isPrivate = !p.isPublic;
+        
+        // Post himoyalanganmi?
+        const isProtected = hasBlur || hasPass || isPrivate;
+        
+        // Media HTML - himoyalangan bo'lsa, umuman ko'rsatilmaydi!
+        let mediaHtml = '';
+        let overlayHtml = '';
+        
+        if (isProtected) {
+            // Himoyalangan post - faqat blur yoki lock qatlami
+            if (hasPass) {
+                overlayHtml = `
+                    <div class="blur-layer" data-action="password" style="min-height: 200px; display: flex; align-items: center; justify-content: center;">
+                        <div class="blur-content">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" style="width: 48px; height: 48px;">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                            </svg>
+                            <div class="blur-text">Parol bilan himoyalangan</div>
+                        </div>
+                    </div>
+                `;
+            } else if (hasBlur) {
+                overlayHtml = `
+                    <div class="blur-layer" data-action="unblur" style="min-height: 200px; display: flex; align-items: center; justify-content: center;">
+                        <div class="blur-content">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" style="width: 48px; height: 48px;">
+                                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/>
+                                <circle cx="12" cy="12" r="3"/>
+                            </svg>
+                            <div class="blur-text">Ko'rish uchun bosing</div>
+                        </div>
+                    </div>
+                `;
+            } else if (isPrivate) {
+                overlayHtml = `
+                    <div class="blur-layer" data-action="private" style="min-height: 200px; display: flex; align-items: center; justify-content: center;">
+                        <div class="blur-content">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" style="width: 48px; height: 48px;">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                            </svg>
+                            <div class="blur-text">Maxfiy post</div>
+                        </div>
+                    </div>
+                `;
+            }
+            // Media ko'rsatilmaydi - faqat overlay
+            mediaHtml = `<div style="display: none;"></div>`;
+        } else {
+            // Himoyalanmagan post - normal ko'rinadi
+            if (p.mediaType?.startsWith('image')) {
+                mediaHtml = `<img src="${p.mediaUrl}" loading="lazy" alt="Post" style="width:100%; max-height:400px; object-fit:cover;">`;
+            } else if (p.mediaType?.startsWith('video')) {
+                mediaHtml = `<video src="${p.mediaUrl}" controls preload="metadata" style="width:100%; max-height:400px;"></video>`;
+            } else if (p.mediaType?.startsWith('audio')) {
+                mediaHtml = `<audio src="${p.mediaUrl}" controls style="width:100%;"></audio>`;
+            } else {
+                const ext = p.fileName?.split('.').pop()?.toLowerCase() || '';
+                const iconInfo = { icon: 'file', color: 'var(--text-secondary)' };
+                if (ext === 'pdf') { iconInfo.icon = 'pdf'; iconInfo.color = 'var(--pdf-color)'; }
+                else if (ext === 'doc' || ext === 'docx') { iconInfo.icon = 'doc'; iconInfo.color = 'var(--doc-color)'; }
+                else if (ext === 'zip' || ext === 'rar') { iconInfo.icon = 'archive'; iconInfo.color = 'var(--archive-color)'; }
                 
-                let mediaHtml = '';
-                if (p.mediaType?.startsWith('image')) mediaHtml = `<img src="${p.mediaUrl}" loading="lazy" alt="Post">`;
-                else if (p.mediaType?.startsWith('video')) mediaHtml = `<video src="${p.mediaUrl}" controls preload="metadata"></video>`;
-                else if (p.mediaType?.startsWith('audio')) mediaHtml = `<audio src="${p.mediaUrl}" controls></audio>`;
-                else {
-                    const ext = p.fileName?.split('.').pop()?.toLowerCase() || '';
-                    const iconInfo = { icon: 'file', color: 'var(--text-secondary)' };
-                    if (ext === 'pdf') { iconInfo.icon = 'pdf'; iconInfo.color = 'var(--pdf-color)'; }
-                    else if (ext === 'doc' || ext === 'docx') { iconInfo.icon = 'doc'; iconInfo.color = 'var(--doc-color)'; }
-                    else if (ext === 'zip' || ext === 'rar') { iconInfo.icon = 'archive'; iconInfo.color = 'var(--archive-color)'; }
-                    
-                    mediaHtml = `<div class="preview-file" style="padding:20px;">
-                        <div class="file-icon" style="color: ${iconInfo.color}">${getFileIconSVG(iconInfo.icon)}</div>
-                        <div class="file-name">${p.fileName || 'Fayl'}</div>
-                    </div>`;
+                mediaHtml = `<div class="preview-file" style="padding:20px;">
+                    <div class="file-icon" style="color: ${iconInfo.color}">${getFileIconSVG(iconInfo.icon)}</div>
+                    <div class="file-name">${p.fileName || 'Fayl'}</div>
+                </div>`;
+            }
+        }
+        
+        // Copy tugmasi - faqat himoyalanmagan postlar uchun yoki post ochilgandan keyin
+        const copyButton = !isProtected ? 
+            `<button class="copy-btn" data-url="${p.mediaUrl}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Havola</button>` : 
+            `<button class="copy-btn locked" disabled style="opacity:0.5; cursor:not-allowed;" title="Avval postni oching"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Qulflangan</button>`;
+        
+        return `<div class="post-card" data-id="${p.id}" data-password="${p.password || ''}" data-blur="${p.isBlurred}" data-has-password="${p.hasPassword}" data-private="${isPrivate}" data-protected="${isProtected}" data-media='${JSON.stringify(p)}'>
+            <div class="post-header">
+                <div class="post-avatar">${(p.userFullName || 'A')[0]}</div>
+                <div class="post-info">
+                    <div class="post-author">${p.userFullName || 'Anonim'}</div>
+                    <div class="post-time">${timeStr}</div>
+                </div>
+                ${isProtected ? '<span style="margin-left:auto; font-size:12px; color:var(--text-secondary);">Himoyalangan</span>' : ''}
+            </div>
+            ${p.text ? `<div class="post-text">${escapeHtml(p.text)}</div>` : ''}
+            <div class="post-media" data-url="${p.mediaUrl}" data-type="${p.mediaType}" data-protected="${isProtected}" style="position:relative; min-height: ${isProtected ? '200px' : 'auto'};">
+                ${mediaHtml}
+                ${overlayHtml}
+            </div>
+            <span class="post-category">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7h-4.5A2.5 2.5 0 0 0 13 9.5v0A2.5 2.5 0 0 0 15.5 12H18"/><path d="M4 7h4.5A2.5 2.5 0 0 1 11 9.5v0A2.5 2.5 0 0 1 8.5 12H6"/><path d="M12 3v18"/></svg> 
+                ${p.category}
+            </span>
+            <div class="post-actions">
+                <button class="view-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="1"/></svg> ${p.views || 0}</button>
+                ${copyButton}
+                ${isOwner ? `<button class="delete-btn" data-id="${p.id}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> O'chirish</button>` : ''}
+            </div>
+        </div>`;
+    }).join('');
+    
+    attachPostEvents();
+}
+ function attachPostEvents() {
+    document.querySelectorAll('.post-media').forEach(el => {
+        el.addEventListener('click', (e) => {
+            if (e.target.closest('button') || e.target.closest('video') || e.target.closest('audio')) return;
+            handleMediaClick(el);
+        });
+    });
+    
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            
+            // Agar tugma qulflangan bo'lsa
+            if (btn.disabled || btn.classList.contains('locked')) {
+                showToast('🔒 Avval postni oching', 'error');
+                return;
+            }
+            
+            const url = btn.dataset.url;
+            if (url) {
+                navigator.clipboard?.writeText(url);
+                showToast('📋 Havola nusxalandi', 'success');
+            }
+        });
+    });
+    
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            if (!confirm("Postni o'chirmoqchimisiz?")) return;
+            await deleteDoc(doc(db, 'posts', btn.dataset.id));
+            showToast('🗑️ O\'chirildi', 'success');
+        });
+    });
+}
+
+    async function handleMediaClick(el) {
+    const card = el.closest('.post-card');
+    const overlay = el.querySelector('.blur-layer');
+    const post = JSON.parse(card.dataset.media);
+    const isProtected = card.dataset.protected === 'true';
+    
+    // Agar overlay (blur/lock) bo'lsa
+    if (overlay) {
+        const action = overlay.dataset.action;
+        
+        if (action === 'password' || post.hasPassword) {
+            pendingPost = post;
+            passwordModal.classList.add('show');
+            passwordInput.value = '';
+            passwordError.textContent = '';
+        } else if (action === 'unblur' || action === 'private') {
+            // Postni ochish - overlayni o'chirish
+            overlay.style.opacity = '0';
+            setTimeout(() => {
+                overlay.remove();
+                
+                // Post ochilgandan keyin copy tugmasini yoqish
+                const copyBtn = card.querySelector('.copy-btn');
+                if (copyBtn) {
+                    copyBtn.disabled = false;
+                    copyBtn.style.opacity = '1';
+                    copyBtn.style.cursor = 'pointer';
+                    copyBtn.title = '';
+                    copyBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Havola`;
                 }
                 
-                let overlayHtml = '';
-                if (hasBlur && !hasPass) overlayHtml = `<div class="blur-layer" data-action="unblur"><div class="blur-content"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></div></div>`;
-                else if (hasPass) overlayHtml = `<div class="blur-layer" data-action="password"><div class="blur-content"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div></div>`;
-                
-                return `<div class="post-card" data-id="${p.id}" data-password="${p.password || ''}" data-blur="${p.isBlurred}" data-has-password="${p.hasPassword}" data-media='${JSON.stringify(p)}'>
-                    <div class="post-header"><div class="post-avatar">${(p.userFullName || 'A')[0]}</div><div class="post-info"><div class="post-author">${p.userFullName || 'Anonim'}</div><div class="post-time">${timeStr}</div></div></div>
-                    ${p.text ? `<div class="post-text">${escapeHtml(p.text)}</div>` : ''}
-                    <div class="post-media" data-url="${p.mediaUrl}" data-type="${p.mediaType}">${mediaHtml}${overlayHtml}</div>
-                    <span class="post-category"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7h-4.5A2.5 2.5 0 0 0 13 9.5v0A2.5 2.5 0 0 0 15.5 12H18"/><path d="M4 7h4.5A2.5 2.5 0 0 1 11 9.5v0A2.5 2.5 0 0 1 8.5 12H6"/><path d="M12 3v18"/></svg> ${p.category}</span>
-                    <div class="post-actions">
-                        <button class="view-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="1"/></svg> ${p.views || 0}</button>
-                        <button class="copy-btn" data-url="${p.mediaUrl}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Havola</button>
-                        ${isOwner ? `<button class="delete-btn" data-id="${p.id}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> O'chirish</button>` : ''}
-                    </div>
-                </div>`;
-            }).join('');
-            attachPostEvents();
+                // Media ni ko'rsatish
+                const mediaContainer = el;
+                if (post.mediaType?.startsWith('image')) {
+                    mediaContainer.innerHTML = `<img src="${post.mediaUrl}" alt="Post" style="width:100%; max-height:400px; object-fit:cover;">`;
+                } else if (post.mediaType?.startsWith('video')) {
+                    mediaContainer.innerHTML = `<video src="${post.mediaUrl}" controls style="width:100%; max-height:400px;"></video>`;
+                } else if (post.mediaType?.startsWith('audio')) {
+                    mediaContainer.innerHTML = `<audio src="${post.mediaUrl}" controls style="width:100%;"></audio>`;
+                } else {
+                    // Fayl uchun
+                    const ext = post.fileName?.split('.').pop()?.toLowerCase() || '';
+                    mediaContainer.innerHTML = `<div class="preview-file" style="padding:20px;">
+                        <div class="file-icon">${getFileIconSVG(ext)}</div>
+                        <div class="file-name">${post.fileName || 'Fayl'}</div>
+                        <a href="${post.mediaUrl}" target="_blank" style="margin-top:10px; color:var(--primary);">Yuklab olish</a>
+                    </div>`;
+                }
+            }, 300);
         }
-
-        function attachPostEvents() {
-            document.querySelectorAll('.post-media').forEach(el => el.addEventListener('click', (e) => { if (e.target.closest('button') || e.target.closest('video') || e.target.closest('audio')) return; handleMediaClick(el); }));
-            document.querySelectorAll('.copy-btn').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); navigator.clipboard?.writeText(btn.dataset.url); showToast('Havola nusxalandi', 'success'); }));
-            document.querySelectorAll('.delete-btn').forEach(btn => btn.addEventListener('click', async (e) => { e.stopPropagation(); if (!confirm("Postni o'chirmoqchimisiz?")) return; await deleteDoc(doc(db, 'posts', btn.dataset.id)); showToast('🗑O\'chirildi', 'success'); }));
-        }
-
-        async function handleMediaClick(el) {
-            const card = el.closest('.post-card'), overlay = el.querySelector('.blur-layer'), post = JSON.parse(card.dataset.media);
-            if (overlay) { const action = overlay.dataset.action; if (action === 'password' || post.hasPassword) { pendingPost = post; passwordModal.classList.add('show'); passwordInput.value = ''; passwordError.textContent = ''; } else if (action === 'unblur') { overlay.style.opacity = '0'; setTimeout(() => overlay.remove(), 300); } return; }
-            openViewer(post);
-        }
-
+        return;
+    }
+    
+    // Oddiy media bosilganda
+    openViewer(post);
+}
         submitPasswordBtn.addEventListener('click', async () => { if (!pendingPost) return; const inputHash = await hashPassword(passwordInput.value); if (inputHash === pendingPost.password) { passwordModal.classList.remove('show'); openViewer(pendingPost); pendingPost = null; } else { passwordError.textContent = 'Parol noto\'g\'ri'; } });
         cancelPasswordBtn.addEventListener('click', () => { passwordModal.classList.remove('show'); pendingPost = null; });
 
