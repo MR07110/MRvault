@@ -1,0 +1,21 @@
+<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="mrgramGradient" x1="2" y1="4" x2="22" y2="21" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#24A1DE"/> <stop offset="100%" stop-color="#1a7fb0"/> </linearGradient>
+    
+    <linearGradient id="glassGradient" x1="2" y1="4" x2="22" y2="21" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="rgba(255, 255, 255, 0.15)"/>
+      <stop offset="100%" stop-color="rgba(255, 255, 255, 0.05)"/>
+    </linearGradient>
+  </defs>
+
+  <path d="M22 19V9C22 7.89543 21.1046 7 20 7H11L9 4H4C2.89543 4 2 4.89543 2 6V19C2 20.1046 2.89543 21 4 21H20C21.1046 21 22 20.1046 22 19Z" 
+        fill="url(#glassGradient)" 
+        stroke="url(#mrgramGradient)" 
+        stroke-width="1.5"/>
+
+  <path d="M7 11H10M7 15H17M14 11H17" 
+        stroke="url(#mrgramGradient)" 
+        stroke-width="1.8" 
+        stroke-linecap="round"/>
+</svg>
