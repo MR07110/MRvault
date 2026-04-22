@@ -445,6 +445,160 @@
             .fab svg { width: 28px; height: 28px; }
             .upload-modal { padding: 20px 16px 24px; border-radius: 24px 24px 0 0;}
         }
+      /* =========================================
+   DRAG & DROP VISUAL INDICATORS
+   ========================================= */
+
+/* Upload area - default */
+.upload-area {
+    position: relative;
+    border: 2px dashed var(--glass-border);
+    border-radius: var(--border-radius-md);
+    padding: 40px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+}
+
+/* Drag over holati */
+.upload-area.drag-over {
+    border-color: var(--primary);
+    background: rgba(36, 161, 222, 0.15);
+    transform: scale(1.02);
+    box-shadow: 0 0 30px rgba(36, 161, 222, 0.3);
+}
+
+/* Drag over ichidagi ikonka animatsiyasi */
+.upload-area.drag-over .upload-icon svg {
+    animation: bounce 0.6s ease infinite;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+/* Drag overlay (butun ekran bo'ylab) */
+.drag-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(36, 161, 222, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    border: 4px dashed var(--primary);
+}
+
+.drag-overlay.show {
+    display: flex;
+}
+
+.drag-overlay-content {
+    text-align: center;
+    color: white;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    padding: 40px 60px;
+    border-radius: var(--border-radius-lg);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    animation: pulse 1.5s ease infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.drag-overlay-content svg {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 20px;
+    color: var(--primary);
+}
+
+.drag-overlay-content h2 {
+    font-size: 28px;
+    margin-bottom: 10px;
+}
+
+.drag-overlay-content p {
+    color: var(--text-secondary);
+    font-size: 16px;
+}
+
+/* =========================================
+   COPY & PASTE VISUAL INDICATORS
+   ========================================= */
+
+/* Paste toast maxsus stillari */
+.toast.paste {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 10px 40px rgba(36, 161, 222, 0.4);
+}
+
+.toast.paste svg {
+    animation: spin 0.5s ease;
+}
+
+/* Upload area da paste ishorasi */
+.upload-area .paste-hint {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 16px;
+    padding: 8px 16px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 30px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    border: 1px solid var(--glass-border);
+}
+
+.upload-area .paste-hint kbd {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--glass-border);
+    border-radius: 6px;
+    padding: 2px 8px;
+    font-family: monospace;
+    font-size: 11px;
+    color: white;
+}
+
+/* Fayl yuklanganda success animatsiyasi */
+.upload-area.upload-success {
+    border-color: var(--success);
+    background: rgba(46, 204, 113, 0.1);
+    animation: successPulse 0.5s ease;
+}
+
+@keyframes successPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+}
+
+/* Drop zone active bo'lganda */
+body.drag-active * {
+    pointer-events: none;
+}
+
+body.drag-active .upload-area,
+body.drag-active .drag-overlay {
+    pointer-events: auto;
+}
     </style>
 </head>
 <body class="login-mode">
