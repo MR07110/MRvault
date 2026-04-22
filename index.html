@@ -982,25 +982,7 @@ window.addEventListener('paste', (e) => {
 });
 
 // Faylni qayta ishlash funksiyasi (o'zgarishsiz qoladi)
-function handleFile(file) { 
-    selectedFile = file; 
-    previewArea.style.display = 'block'; 
-    previewArea.innerHTML = ''; 
-    
-    if (file.type.startsWith('image')) { 
-        const img = document.createElement('img'); 
-        img.src = URL.createObjectURL(file); 
-        previewArea.appendChild(img); 
-    } else if (file.type.startsWith('video')) { 
-        const video = document.createElement('video'); 
-        video.src = URL.createObjectURL(file); 
-        video.controls = true; 
-        previewArea.appendChild(video); 
-    } else { 
-        previewArea.innerHTML = `<div style="padding:20px;">📄 ${file.name}</div>`; 
-    } 
-    uploadBtn.disabled = false; 
-}
+
         // Preview File
         function handleFile(file) { 
             selectedFile = file; 
