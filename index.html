@@ -894,7 +894,7 @@ window.addEventListener('paste', (e) => {
 
         function attachPostEvents() {
             document.querySelectorAll('.post-media').forEach(el => el.addEventListener('click', (e) => { if (e.target.closest('button') || e.target.closest('video') || e.target.closest('audio')) return; handleMediaClick(el); }));
-            document.querySelectorAll('.copy-btn').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); navigator.clipboard?.writeText(btn.dataset.url); showToast('📋 Havola nusxalandi', 'success'); }));
+            document.querySelectorAll('.copy-btn').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); navigator.clipboard?.writeText(btn.dataset.url); showToast('Havola nusxalandi', 'success'); }));
             document.querySelectorAll('.delete-btn').forEach(btn => btn.addEventListener('click', async (e) => { e.stopPropagation(); if (!confirm("Postni o'chirmoqchimisiz?")) return; await deleteDoc(doc(db, 'posts', btn.dataset.id)); showToast('🗑️ O\'chirildi', 'success'); }));
         }
 
