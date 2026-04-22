@@ -237,6 +237,7 @@
         .empty-state .icon { font-size: 64px; margin-bottom: 16px; opacity: 0.5; }
 
         .loading { text-align: center; padding: 40px; color: var(--text-secondary); }
+      
     </style>
 </head>
 <body class="login-mode">
@@ -367,7 +368,7 @@
                 <label class="option-label">Himoya</label>
                 <div class="checkbox-group">
                     <label class="checkbox-item">
-                        <input type="checkbox" id="blurCheck"> 🌫️ Blur (xiralashtirish)
+                        <input type="checkbox" id="blurCheck">  Blur (xiralashtirish)
                     </label>
                     <label class="checkbox-item">
                         <input type="checkbox" id="passwordCheck"> 🔐 Parol bilan himoyalash
@@ -677,6 +678,7 @@ function loadPosts() {
 }
 
 // ========== POSTLARNI RENDER QILISH ==========
+// ========== POSTLARNI RENDER QILISH (BLUR BILAN) ==========
 function renderPosts(posts) {
     if (!posts.length) {
         postsFeed.innerHTML = '<div class="empty-state"><div class="icon">📭</div><p>Postlar yo\'q</p></div>';
@@ -687,6 +689,42 @@ function renderPosts(posts) {
         const time = p.createdAt?.toDate?.() || new Date();
         const timeStr = new Intl.DateTimeFormat('uz-UZ', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }).format(time);
         const isOwner = currentUser && p.userId === currentUser.uid;
+        const hasBlur = p.isBlurred === true;
+        const hasPass = p.hasPassword === true && p.password;
+        
+        // Media qismini yaratish
+        let mediaHtml = '';
+        if (p.mediaType?.startsWith('image')) {
+            mediaHtml = `<img src="${p.mediaUrl}" loading="lazy" style="width:100%;max-height:400px;object-fit:cover;">`;
+        } else if (p.mediaType?.startsWith('video')) {
+            mediaHtml = `<video src="${p.mediaUrl}" controls preload="metadata" style="width:100%;max-height:400px;"></video>`;
+        } else if (p.mediaType?.startsWith('audio')) {
+            mediaHtml = `<audio src="${p.mediaUrl}" controls style="width:100%;"></audio>`;
+        } else {
+            mediaHtml = `<div class="post-file">📄 ${p.fileName || 'Fayl'}</div>`;
+        }
+        
+        // Blur yoki parol qatlami
+        let overlayHtml = '';
+        if (hasBlur && !hasPass) {
+            overlayHtml = `
+                <div class="blur-layer" data-action="unblur">
+                    <div class="blur-content">
+                        <div class="lock-icon"></div>
+                        <div class="blur-text"></div>
+                    </div>
+                </div>
+            `;
+        } else if (hasPass) {
+            overlayHtml = `
+                <div class="blur-layer" data-action="password">
+                    <div class="blur-content">
+                        <div class="lock-icon"></div>
+                        <div class="blur-text"></div>
+                    </div>
+                </div>
+            `;
+        }
         
         return `<div class="post-card" data-id="${p.id}" data-password="${p.password || ''}" data-blur="${p.isBlurred}" data-has-password="${p.hasPassword}" data-media='${JSON.stringify(p)}'>
             <div class="post-header">
@@ -694,11 +732,9 @@ function renderPosts(posts) {
                 <div class="post-info"><div class="post-author">${p.userFullName || 'Anonim'}</div><div class="post-time">${timeStr}</div></div>
             </div>
             ${p.text ? `<div class="post-text">${escapeHtml(p.text)}</div>` : ''}
-            <div class="post-media" data-url="${p.mediaUrl}" data-type="${p.mediaType}">
-                ${p.mediaType?.startsWith('image') ? `<img src="${p.mediaUrl}" loading="lazy">` : ''}
-                ${p.mediaType?.startsWith('video') ? `<video src="${p.mediaUrl}" controls preload="metadata"></video>` : ''}
-                ${p.mediaType?.startsWith('audio') ? `<audio src="${p.mediaUrl}" controls></audio>` : ''}
-                ${!p.mediaType?.startsWith('image') && !p.mediaType?.startsWith('video') && !p.mediaType?.startsWith('audio') ? `<div class="post-file">📄 ${p.fileName || 'Fayl'}</div>` : ''}
+            <div class="post-media" data-url="${p.mediaUrl}" data-type="${p.mediaType}" style="position:relative;">
+                ${mediaHtml}
+                ${overlayHtml}
             </div>
             <span class="post-category">🏷️ ${p.category}</span>
             <div class="post-actions">
@@ -743,21 +779,31 @@ function filterPosts() {
             }));
         }
 
-        async function handleMediaClick(el) {
-            const card = el.closest('.post-card');
-            const post = JSON.parse(card.dataset.media);
-            
-            if (post.hasPassword && post.password) {
-                pendingPost = post;
-                passwordModal.classList.add('show');
-                passwordInput.value = ''; passwordError.textContent = '';
-            } else if (post.isBlurred) {
-                // Blur ko'rsatish (soddalashtirilgan)
-                openViewer(post);
-            } else {
-                openViewer(post);
-            }
+    async function handleMediaClick(el) {
+    const card = el.closest('.post-card');
+    const overlay = el.querySelector('.blur-layer');
+    
+    // Agar blur qatlami bosilgan bo'lsa
+    if (overlay) {
+        const action = overlay.dataset.action;
+        const post = JSON.parse(card.dataset.media);
+        
+        if (action === 'password' || post.hasPassword) {
+            pendingPost = post;
+            passwordModal.classList.add('show');
+            passwordInput.value = '';
+            passwordError.textContent = '';
+        } else if (action === 'unblur') {
+            // Blurni o'chirish - overlayni yashirish
+            overlay.remove();
         }
+        return;
+    }
+    
+    // Oddiy media bosilganda
+    const post = JSON.parse(card.dataset.media);
+    openViewer(post);
+}
 
         submitPasswordBtn.addEventListener('click', async () => {
             if (!pendingPost) return;
