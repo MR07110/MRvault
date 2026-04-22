@@ -659,7 +659,58 @@
             document.querySelectorAll('.category-tab').forEach(ct => ct.classList.remove('active'));
             this.classList.add('active'); activeCategory = this.dataset.cat; filterPosts();
         }));
+// ========== POSTLARNI YUKLASH ==========
+function loadPosts() {
+    const q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'));
+    
+    onSnapshot(q, (snap) => {
+        console.log('📊 Yuklandi:', snap.docs.length, 'ta post');
+        allPosts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        filterPosts();
+    }, (error) => {
+        console.error('❌ Xatolik:', error.message);
+        postsFeed.innerHTML = `<div class="empty-state">
+            <div class="icon">❌</div>
+            <p>${error.message}</p>
+        </div>`;
+    });
+}
 
+// ========== POSTLARNI RENDER QILISH ==========
+function renderPosts(posts) {
+    if (!posts.length) {
+        postsFeed.innerHTML = '<div class="empty-state"><div class="icon">📭</div><p>Postlar yo\'q</p></div>';
+        return;
+    }
+    
+    postsFeed.innerHTML = posts.map(p => {
+        const time = p.createdAt?.toDate?.() || new Date();
+        const timeStr = new Intl.DateTimeFormat('uz-UZ', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }).format(time);
+        const isOwner = currentUser && p.userId === currentUser.uid;
+        
+        return `<div class="post-card" data-id="${p.id}" data-password="${p.password || ''}" data-blur="${p.isBlurred}" data-has-password="${p.hasPassword}" data-media='${JSON.stringify(p)}'>
+            <div class="post-header">
+                <div class="post-avatar">${(p.userFullName || 'A')[0]}</div>
+                <div class="post-info"><div class="post-author">${p.userFullName || 'Anonim'}</div><div class="post-time">${timeStr}</div></div>
+            </div>
+            ${p.text ? `<div class="post-text">${escapeHtml(p.text)}</div>` : ''}
+            <div class="post-media" data-url="${p.mediaUrl}" data-type="${p.mediaType}">
+                ${p.mediaType?.startsWith('image') ? `<img src="${p.mediaUrl}" loading="lazy">` : ''}
+                ${p.mediaType?.startsWith('video') ? `<video src="${p.mediaUrl}" controls preload="metadata"></video>` : ''}
+                ${p.mediaType?.startsWith('audio') ? `<audio src="${p.mediaUrl}" controls></audio>` : ''}
+                ${!p.mediaType?.startsWith('image') && !p.mediaType?.startsWith('video') && !p.mediaType?.startsWith('audio') ? `<div class="post-file">📄 ${p.fileName || 'Fayl'}</div>` : ''}
+            </div>
+            <span class="post-category">🏷️ ${p.category}</span>
+            <div class="post-actions">
+                <button class="view-btn">👁️ ${p.views || 0}</button>
+                <button class="copy-btn" data-url="${p.mediaUrl}">📋 Nusxalash</button>
+                ${isOwner ? `<button class="delete-btn" data-id="${p.id}">🗑️ O'chirish</button>` : ''}
+            </div>
+        </div>`;
+    }).join('');
+    
+    attachPostEvents();
+}
 
 
 // ========== FILTER (TUZATILGAN) ==========
