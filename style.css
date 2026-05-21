@@ -2141,7 +2141,17 @@ body {
   height: 180px;
   background: linear-gradient(145deg, #1a2340 0%, #0d1525 50%, #1a1030 100%);
   position: relative;
+  overflow: visible;
+}
+
+/* clip the gradient overlay but not the avatar */
+.up-cover::before {
+  content: '';
+  position: absolute;
+  inset: 0;
   overflow: hidden;
+  border-radius: 0;
+  z-index: 0;
 }
 
 .up-cover::after {
@@ -2151,6 +2161,7 @@ body {
   background: radial-gradient(ellipse 90% 120% at 40% 110%, rgba(91,142,245,0.22) 0%, transparent 65%),
               radial-gradient(ellipse 60% 80% at 80% 20%, rgba(140,80,220,0.12) 0%, transparent 60%);
   pointer-events: none;
+  clip-path: inset(0);
 }
 
 .up-cover-glow { display: none; }
@@ -2567,3 +2578,223 @@ body {
   margin-top: 6px;
   font-family: var(--mono);
 }
+
+/* ═══════════════════════════════════════════════
+   DESKTOP SIDEBAR LAYOUT  (≥ 768px)
+   ═══════════════════════════════════════════════ */
+
+/* ── Sidebar-only elements: hidden on mobile ── */
+.sb-top, .sb-search-row, .sb-tabs, .sb-bottom, .sb-create-label { display: none; }
+
+@media (min-width: 768px) {
+  :root {
+    --sidebar: 220px;
+  }
+
+  /* ── Hide top header on desktop ── */
+  .app-hdr { display: none !important; }
+
+  /* ── Bot-nav → Left Sidebar ── */
+  .bot-nav {
+    top: 0; left: 0; bottom: 0; right: auto;
+    width: var(--sidebar);
+    height: 100dvh;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    gap: 2px;
+    padding: 20px 10px 20px;
+    border-top: none;
+    border-right: 1px solid var(--glass-border);
+    border-bottom: none;
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+  .bot-nav::before {
+    top: 0; bottom: 0; left: auto; right: 0; width: 1px; height: auto;
+    background: linear-gradient(180deg, transparent, rgba(91,142,245,0.12), transparent);
+  }
+
+  /* ── Sidebar top: logo + search + tabs ── */
+  .sb-top { display: flex; flex-direction: column; gap: 14px; padding: 0 4px 16px; margin-bottom: 8px; }
+
+  .sb-logo-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 4px 2px;
+  }
+  .sb-brand-text {
+    font-weight: 700; font-size: 17px; letter-spacing: -0.3px;
+    background: linear-gradient(135deg, #fff, var(--blue2));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+
+  /* ── Search input always visible in sidebar ── */
+  .sb-search-row {
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 8px 12px;
+    transition: var(--transition);
+    color: var(--text3);
+  }
+  .sb-search-row:focus-within {
+    border-color: rgba(91,142,245,0.3);
+    background: rgba(91,142,245,0.04);
+    color: var(--blue);
+  }
+  .sb-search-input {
+    background: none; border: none; outline: none;
+    color: var(--text); font-family: var(--font); font-size: 13px;
+    width: 100%;
+  }
+  .sb-search-input::placeholder { color: var(--text3); font-size: 12px; }
+
+  /* ── Tabs ── */
+  .sb-tabs {
+    display: flex; gap: 4px;
+    background: var(--bg3);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 3px;
+  }
+  .sb-tab {
+    flex: 1; padding: 6px 0; border-radius: 8px;
+    font-size: 12px; font-weight: 500; font-family: var(--font);
+    cursor: pointer; border: none; background: none; color: var(--text2);
+    transition: var(--transition);
+  }
+  .sb-tab.on {
+    background: linear-gradient(135deg, var(--blue3), var(--blue));
+    color: #fff;
+  }
+
+  /* ── Nav buttons: horizontal → vertical ── */
+  .nav-btn {
+    flex-direction: row;
+    justify-content: flex-start;
+    width: 100%;
+    padding: 10px 12px;
+    gap: 12px;
+    border-radius: 14px;
+  }
+  .nav-btn:hover { transform: none; background: rgba(255,255,255,0.05); }
+  .nav-btn svg { width: 20px; height: 20px; flex-shrink: 0; }
+  .nav-btn span { font-size: 13px; font-weight: 500; letter-spacing: -0.1px; }
+  .nav-btn.on { background: rgba(91,142,245,0.1); }
+  .nav-btn.on svg { stroke: var(--blue); }
+  .nav-btn.on span { color: var(--blue); }
+
+  /* ── Create button: pill style in sidebar ── */
+  .nav-center-btn {
+    width: 100%;
+    height: 44px;
+    border-radius: 14px;
+    margin: 4px 0;
+    flex-direction: row;
+    justify-content: flex-start;
+    padding: 0 12px;
+    gap: 12px;
+    order: unset;
+  }
+  .nav-center-btn::after { display: none; }
+  .sb-create-label {
+    display: block;
+    font-size: 13px; font-weight: 500; color: #fff; letter-spacing: -0.1px;
+  }
+
+  /* ── Bottom spacer + mute ── */
+  .sb-bottom {
+    display: flex; flex-direction: column; margin-top: auto; padding-top: 12px;
+    border-top: 1px solid var(--line);
+  }
+  .sb-mute-btn {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 12px; border-radius: 14px;
+    background: none; border: none; color: var(--text2);
+    cursor: pointer; font-family: var(--font); font-size: 13px; font-weight: 500;
+    width: 100%; transition: var(--transition);
+  }
+  .sb-mute-btn:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+  .sb-mute-btn.is-unmuted { color: var(--blue); }
+  .sb-mute-btn.is-unmuted svg { stroke: var(--blue); }
+
+  /* ── Shift all content right by sidebar width ── */
+  #homeView, #followingView, #reelsView, #profileView {
+    margin-left: var(--sidebar);
+    padding-bottom: 24px;
+  }
+  #homeView, #followingView {
+    padding-top: 24px;
+  }
+  #reelsView {
+    padding-top: 0;
+  }
+
+  /* ── Feed: max-width on desktop ── */
+  .feed {
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 0 16px;
+  }
+
+  /* ── Post cards get a border on desktop ── */
+  .post {
+    border-radius: 16px;
+    border: 1px solid var(--line);
+    background: var(--bg2);
+    margin-bottom: 16px;
+    padding: 14px;
+  }
+  .post-media { margin: 10px -14px; border-radius: 0; }
+
+  /* ── Profile view: center on desktop ── */
+  #profileView {
+    max-width: 900px;
+    margin-left: calc(var(--sidebar) + auto);
+    padding-top: 24px;
+  }
+  /* actually let it fill and center content */
+  #profileView { margin-left: var(--sidebar); }
+
+  /* ── Reels mute button: adjust for sidebar ── */
+  .reels-mute-btn {
+    left: calc(var(--sidebar) + 14px);
+    right: auto;
+  }
+
+  /* ── Following view ── */
+  #followingView .feed {
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 0 16px;
+  }
+
+  /* ── Detail modal: center on desktop, wider ── */
+  #detailContent {
+    max-width: 600px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+  }
+  #detailModal {
+    padding-left: var(--sidebar);
+  }
+
+  /* ── User profile modal: account for sidebar ── */
+  #userProfileModal {
+    left: var(--sidebar);
+  }
+  .up-back { left: calc(var(--sidebar) + 14px); }
+}
+
+/* ── Profile avatar overflow fix (all screens) ── */
+.up-cover {
+  overflow: visible !important;
+}
+.up-cover > *:not(.up-avi-wrap) {
+  overflow: hidden;
+}
+
+/* ── Detail modal above user profile modal ── */
+#detailModal { z-index: 400 !important; }
+

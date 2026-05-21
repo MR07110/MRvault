@@ -1816,9 +1816,13 @@ const UNMUTE_SVG = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" 
 function updateMuteBtnUI() {
   const icon = globalMuted ? MUTE_SVG : UNMUTE_SVG;
   const tip  = globalMuted ? 'Unmute' : 'Mute';
-  const gb = $('globalMuteBtn'), rb = $('reelsMuteBtn');
+  const gb = $('globalMuteBtn'), rb = $('reelsMuteBtn'), sb = $('sbMuteBtn');
   if (gb) { gb.innerHTML = icon; gb.title = tip; gb.classList.toggle('is-unmuted', !globalMuted); }
   if (rb) { rb.innerHTML = icon; rb.title = tip; rb.classList.toggle('is-unmuted', !globalMuted); }
+  if (sb) {
+    sb.innerHTML = icon + `<span>${globalMuted ? 'Unmute' : 'Mute'}</span>`;
+    sb.classList.toggle('is-unmuted', !globalMuted);
+  }
 }
 
 function toggleGlobalMute() {
@@ -1852,8 +1856,40 @@ function switchView(v) {
 
 document.querySelectorAll('.nav-btn[data-v]').forEach(b => b.addEventListener('click', () => switchView(b.dataset.v)));
 
+/* ── Desktop sidebar search ── */
+const sbSearchInput = $('sbSearchInput');
+if (sbSearchInput) {
+  sbSearchInput.oninput = e => {
+    search = e.target.value;
+    // Sync with header search too
+    const hi = $('searchInput');
+    if (hi) hi.value = search;
+    clearTimeout(window._sT);
+    window._sT = setTimeout(() => {
+      visibleN = 8;
+      view === 'home' ? renderFeed() : view === 'following' && renderFollowing();
+    }, 300);
+  };
+}
+
+/* ── Desktop sidebar tabs ── */
+document.querySelectorAll('.sb-tab[data-stab]').forEach(b => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('.sb-tab').forEach(x => x.classList.remove('on'));
+    // Also sync header tabs
+    document.querySelectorAll('.hdr-tab').forEach(x => {
+      x.classList.toggle('on', x.dataset.tab === b.dataset.stab);
+    });
+    b.classList.add('on');
+    tab = b.dataset.stab;
+    visibleN = 8;
+    renderFeed();
+  });
+});
+
 document.querySelectorAll('.hdr-tab').forEach(b => b.addEventListener('click', () => {
   document.querySelectorAll('.hdr-tab').forEach(x => x.classList.remove('on'));
+  document.querySelectorAll('.sb-tab').forEach(x => x.classList.toggle('on', x.dataset.stab === b.dataset.tab));
   b.classList.add('on'); tab = b.dataset.tab; visibleN = 8; renderFeed();
 }));
 
