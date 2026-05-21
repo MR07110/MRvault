@@ -225,7 +225,7 @@ export async function renderUserProfileModal(uid) {
   const isF            = state.myFollowing.has(uid);
 
   const gridHTML = userPublicPosts.length === 0
-    ? '<div style="grid-column:1/-1;padding:32px;text-align:center;color:var(--text3);font-size:13px">Ommaviy post yo'q</div>'
+    ? '<div style="grid-column:1/-1;padding:32px;text-align:center;color:var(--text3);font-size:13px">Ommaviy post yo\'q</div>'
     : userPublicPosts.map(p => {
         let c = '';
         if (p.mediaUrl && p.mediaType?.startsWith('image'))
