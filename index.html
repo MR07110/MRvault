@@ -28,7 +28,7 @@
   </div>
 </div>
 
-<!-- AUTH STATE LOADER: shown until Firebase resolves, then removed -->
+<!-- AUTH STATE LOADER -->
 <div id="authStateLoader" style="position:fixed;inset:0;background:#050508;z-index:9999;display:flex;align-items:center;justify-content:center">
   <div style="display:flex;flex-direction:column;align-items:center;gap:14px">
     <svg width="36" height="36" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
@@ -65,7 +65,6 @@
 
 <!-- APP -->
 <div id="app">
-  <!-- HEADER -->
   <header class="app-hdr" id="appHdr">
     <div class="hdr-logo">
       <svg width="26" height="26" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
@@ -82,18 +81,17 @@
       <button class="hdr-tab on" data-tab="all">All</button>
       <button class="hdr-tab"    data-tab="mine">My</button>
     </div>
-    <button class="hdr-mute-btn" id="globalMuteBtn" title="Unmute" onclick="toggleGlobalMute()">
+    <button class="hdr-mute-btn" id="globalMuteBtn" title="Unmute">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="11,5 6,9 2,9 2,15 6,15 11,19"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
     </button>
   </header>
 
-  <!-- VIEWS -->
   <div class="view on" id="homeView">
     <div class="feed" id="feed"><div class="spin-wrap"><div class="spinner"></div></div></div>
   </div>
 
   <div class="view" id="reelsView">
-    <button class="reels-mute-btn" id="reelsMuteBtn" title="Unmute" onclick="toggleGlobalMute()" style="display:none">
+    <button class="reels-mute-btn" id="reelsMuteBtn" title="Unmute" style="display:none">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="11,5 6,9 2,9 2,15 6,15 11,19"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
     </button>
     <div class="reels-wrap" id="reelsWrap"></div>
@@ -131,9 +129,7 @@
     <div class="profile-grid" id="profileGrid"></div>
   </div>
 
-  <!-- BOTTOM NAV / DESKTOP SIDEBAR -->
   <nav class="bot-nav">
-    <!-- Desktop only: brand + search + tabs -->
     <div class="sb-top">
       <div class="sb-logo-row">
         <svg width="26" height="26" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
@@ -177,9 +173,8 @@
       <span>Profile</span>
     </button>
 
-    <!-- Desktop: mute at bottom -->
     <div class="sb-bottom">
-      <button class="sb-mute-btn" id="sbMuteBtn" onclick="toggleGlobalMute()">
+      <button class="sb-mute-btn" id="sbMuteBtn" data-tip="Mute">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="11,5 6,9 2,9 2,15 6,15 11,19"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
         <span>Mute</span>
       </button>
@@ -187,131 +182,25 @@
   </nav>
 </div>
 
-<!-- UPLOAD SHEET -->
-<div class="overlay" id="uploadOverlay">
-  <div class="sheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-title">New Post</div>
-    <div class="upload-drop" id="uploadDrop">
-      <div class="upload-drop-icon">
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-      </div>
-      <div class="upload-drop-text">Select or drop a file</div>
-      <div class="upload-drop-sub">Image · Video · PDF · DOC · TXT · ZIP</div>
-      <input type="file" id="fileInput" style="display:none" accept="image/*,video/*,.pdf,.doc,.docx,.txt,.zip,.rar">
-    </div>
-    <div id="previewArea" style="display:none"></div>
-    <textarea class="ta" id="captionInput" rows="3" placeholder="Add a caption... (optional)"></textarea>
-    <div class="visibility-row">
-      <div>
-        <div class="visibility-label">
-          <svg class="vis-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          Private
-        </div>
-        <div class="visibility-desc" id="visDesc">Only you can see this</div>
-      </div>
-      <label class="toggle">
-        <input type="checkbox" id="pubToggle">
-        <div class="toggle-track"></div>
-      </label>
-    </div>
-    <div class="size-limit" id="sizeWarn" style="color:var(--red)"></div>
-    <button class="btn-primary" id="uploadBtn" disabled>Post</button>
-    <button class="btn-ghost"   id="cancelUpload">Cancel</button>
-  </div>
-</div>
+<!-- MODALS (qisqartirilgan) -->
+<div class="overlay" id="uploadOverlay"><div class="sheet"><div class="sheet-handle"></div><div class="sheet-title">New Post</div><div class="upload-drop" id="uploadDrop"><div class="upload-drop-icon"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div><div class="upload-drop-text">Select or drop a file</div><div class="upload-drop-sub">Image · Video · PDF · DOC · TXT · ZIP</div><input type="file" id="fileInput" style="display:none" accept="image/*,video/*,.pdf,.doc,.docx,.txt,.zip,.rar"></div><div id="previewArea" style="display:none"></div><textarea class="ta" id="captionInput" rows="3" placeholder="Add a caption... (optional)"></textarea><div class="visibility-row"><div><div class="visibility-label"><svg class="vis-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Private</div><div class="visibility-desc" id="visDesc">Only you can see this</div></div><label class="toggle"><input type="checkbox" id="pubToggle"><div class="toggle-track"></div></label></div><div class="size-limit" id="sizeWarn"></div><button class="btn-primary" id="uploadBtn" disabled>Post</button><button class="btn-ghost" id="cancelUpload">Cancel</button></div></div>
 
-<!-- COMMENTS MODAL -->
-<div class="overlay" id="cmtModal">
-  <div class="sheet" style="display:flex;flex-direction:column;max-height:82dvh;padding-bottom:max(env(safe-area-inset-bottom,0px),12px)">
-    <div class="sheet-handle"></div>
-    <div class="cmt-modal-hdr">
-      <span class="cmt-modal-title">Comments</span>
-      <button class="cmt-modal-close" id="cmtModalClose">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-    </div>
-    <div class="cmt-modal-list" id="cmtModalList"></div>
-    <div class="cmt-input-row">
-      <div class="cmt-my-avi" id="cmtMyAvi"></div>
-      <input class="cmt-input" id="cmtModalInput" placeholder="Write a comment..." maxlength="300">
-      <span class="cmt-char-count" id="cmtCharCount">300</span>
-      <button class="cmt-send" id="cmtModalSend">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-      </button>
-    </div>
-  </div>
-</div>
+<div class="overlay" id="cmtModal"><div class="sheet" style="display:flex;flex-direction:column;max-height:82dvh;padding-bottom:max(env(safe-area-inset-bottom,0px),12px)"><div class="sheet-handle"></div><div class="cmt-modal-hdr"><span class="cmt-modal-title">Comments</span><button class="cmt-modal-close" id="cmtModalClose"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div><div class="cmt-modal-list" id="cmtModalList"></div><div class="cmt-input-row"><div class="cmt-my-avi" id="cmtMyAvi"></div><input class="cmt-input" id="cmtModalInput" placeholder="Write a comment..." maxlength="300"><span class="cmt-char-count" id="cmtCharCount">300</span><button class="cmt-send" id="cmtModalSend"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button></div></div></div>
 
-<!-- REEL CAPTION SHEET -->
-<div class="overlay" id="reelCapSheet">
-  <div class="sheet" style="padding-bottom:max(env(safe-area-inset-bottom,0px),20px)">
-    <div class="sheet-handle"></div>
-    <div class="rcap-user-row" id="rcapUserRow"></div>
-    <div class="rcap-text" id="rcapText"></div>
-  </div>
-</div>
+<div class="overlay" id="reelCapSheet"><div class="sheet" style="padding-bottom:max(env(safe-area-inset-bottom,0px),20px)"><div class="sheet-handle"></div><div class="rcap-user-row" id="rcapUserRow"></div><div class="rcap-text" id="rcapText"></div></div></div>
 
-<!-- PROFILE EDIT -->
-<div class="overlay" id="profileEditOverlay">
-  <div class="sheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-title">Edit Profile</div>
-    <input class="field" type="text" id="editName"     placeholder="Full name">
-    <textarea class="ta" id="editBioInput" rows="2"    placeholder="Bio..."></textarea>
-    <button class="btn-primary" id="saveProfileBtn">Save</button>
-    <button class="btn-ghost"   id="cancelEditBtn">Cancel</button>
-    <div class="divider" style="margin:12px 0"></div>
-    <button class="btn-danger"  id="logoutBtn">Sign out</button>
-  </div>
-</div>
+<div class="overlay" id="profileEditOverlay"><div class="sheet"><div class="sheet-handle"></div><div class="sheet-title">Edit Profile</div><input class="field" type="text" id="editName" placeholder="Full name"><textarea class="ta" id="editBioInput" rows="2" placeholder="Bio..."></textarea><button class="btn-primary" id="saveProfileBtn">Save</button><button class="btn-ghost" id="cancelEditBtn">Cancel</button><div class="divider" style="margin:12px 0"></div><button class="btn-danger" id="logoutBtn">Sign out</button></div></div>
 
-<!-- ZOOM MODAL -->
-<div id="zoomModal">
-  <button class="zoom-x" id="zoomClose">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-  </button>
-  <img   id="zoomImg"   style="display:none">
-  <video id="zoomVideo" controls style="display:none"></video>
-</div>
+<div id="zoomModal"><button class="zoom-x" id="zoomClose"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button><img id="zoomImg" style="display:none"><video id="zoomVideo" controls style="display:none"></video></div>
 
-<!-- DETAIL MODAL -->
-<div id="detailModal" onclick="if(event.target===this)this.classList.remove('show')">
-  <div id="detailContent"></div>
-</div>
+<div id="detailModal" onclick="if(event.target===this)this.classList.remove('show')"><div id="detailContent"></div></div>
 
-<!-- USER PROFILE MODAL -->
-<div id="userProfileModal">
-  <button class="up-back" id="upBack">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M19 12H5m7-7-7 7 7 7"/></svg>
-  </button>
-  <div class="up-body" id="upBody"></div>
-</div>
+<div id="userProfileModal"><button class="up-back" id="upBack"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M19 12H5m7-7-7 7 7 7"/></svg></button><div class="up-body" id="upBody"></div></div>
 
-<!-- CUSTOM CONFIRM MODAL -->
-<div class="overlay" id="confirmOverlay">
-  <div class="sheet" style="max-width:320px;margin:auto">
-    <div class="sheet-title" id="confirmTitle">Are you sure?</div>
-    <div id="confirmMsg" style="font-size:14px;color:var(--text2);margin-bottom:20px;text-align:center"></div>
-    <button class="btn-danger" id="confirmOkBtn">Confirm</button>
-    <button class="btn-ghost"  id="confirmCancelBtn">Cancel</button>
-  </div>
-</div>
+<div class="overlay" id="confirmOverlay"><div class="sheet" style="max-width:320px;margin:auto"><div class="sheet-title" id="confirmTitle">Are you sure?</div><div id="confirmMsg" style="font-size:14px;color:var(--text2);margin-bottom:20px;text-align:center"></div><button class="btn-danger" id="confirmOkBtn">Confirm</button><button class="btn-ghost" id="confirmCancelBtn">Cancel</button></div></div>
 
-<!-- DESKTOP SEARCH PANEL -->
-<div id="sbSearchPanel">
-  <div class="sb-panel-title">Search</div>
-  <div class="sb-panel-input-wrap">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-    <input type="text" class="sb-panel-input" id="sbPanelInput" placeholder="Search posts, people...">
-  </div>
-  <div class="sb-panel-tabs">
-    <button class="sb-panel-tab on" data-stab="all">All</button>
-    <button class="sb-panel-tab" data-stab="mine">My posts</button>
-  </div>
-</div>
+<div id="sbSearchPanel"><div class="sb-panel-title">Search</div><div class="sb-panel-input-wrap"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input type="text" class="sb-panel-input" id="sbPanelInput" placeholder="Search posts, people..."></div><div class="sb-panel-tabs"><button class="sb-panel-tab on" data-stab="all">All</button><button class="sb-panel-tab" data-stab="mine">My posts</button></div></div>
 
-<!-- TOAST -->
 <div id="toast"></div>
 
 <script type="module" src="./script.js"></script>
