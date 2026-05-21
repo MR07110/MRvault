@@ -2,6 +2,7 @@ import { db, state }                                from './config.js';
 import { $, esc, defAvi }                          from './utils.js';
 import { toast }                                   from './toast.js';
 import { cmtCountCache }                           from './cache.js';
+import { isAdmin }                                 from './auth.js';
 import {
   collection, query, orderBy, doc, getDoc,
   getDocs, addDoc, deleteDoc, serverTimestamp
@@ -59,7 +60,7 @@ export async function loadCmtModal(postId) {
   list.innerHTML = cmts.map(c => `<div class="cmt-row">
     <div class="cmt-avi user-avi-btn" data-uid="${c.userId}"><img src="${aMap[c.userId]}" onerror="this.style.display='none'"></div>
     <div class="cmt-body"><div class="cmt-name">${esc(c.userName)}</div><div class="cmt-text">${esc(c.text)}</div></div>
-    ${(state.me.uid === c.userId || state.me.email === 'admin@gmail.com')
+    ${(state.me.uid === c.userId || isAdmin(state.me.uid))
       ? `<button class="cmt-del" data-post="${postId}" data-cmt="${c.id}">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M9 6V4h6v2"/>

@@ -20,6 +20,8 @@ import { getFirestore }    from 'https://www.gstatic.com/firebasejs/10.7.1/fireb
 import { createClient }    from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
 const fbApp = initializeApp({
+  // ⚠️  XAVF: Bu kalitlar ochiq kodda ko'rinib turibdi!
+  // Production ga chiqishdan oldin .env + build tool orqali yashiring.
   apiKey:            'AIzaSyBhzWWFFgrOH84J2RIW5o7l_8192iPtbOg',
   authDomain:        'code-vibe-df610.firebaseapp.com',
   projectId:         'code-vibe-df610',

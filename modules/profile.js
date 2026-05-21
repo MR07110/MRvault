@@ -40,14 +40,14 @@ export async function renderProfile() {
     inp.onchange = async e => {
       const f = e.target.files[0];
       if (!f || !f.type.startsWith('image/')) return;
-      if (f.size > 5*1024*1024) { toast('Avatar must be under 5 MB', 'error'); return; }
+      if (f.size > 5*1024*1024) { toast('Avatar 5 MB dan kichik bo\'lsin', 'error'); return; }
       const path = `avatars/${state.me.uid}/${Date.now()}`;
       const {data, error} = await sb.storage.from('videos').upload(path, f, {upsert:true, contentType: f.type});
-      if (error) { toast('Error: '+error.message, 'error'); return; }
+      if (error) { toast('Xato: '+error.message, 'error'); return; }
       const {data:{publicUrl}} = sb.storage.from('videos').getPublicUrl(data.path);
       await updateDoc(doc(db,'users',state.me.uid), {avatar: publicUrl});
       userCache.delete(state.me.uid);
-      renderProfile(); toast('Avatar updated', 'success');
+      renderProfile(); toast('Avatar yangilandi', 'success');
     };
     inp.click();
   };
@@ -61,8 +61,7 @@ export function renderProfileGrid(posts) {
       <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" style="opacity:.3;margin:0 auto 10px;display:block">
         <rect x="3" y="3" width="18" height="18" rx="2"/><path d="m3 9 4-4 4 4 4-4 4 4"/>
       </svg>
-      No posts yet
-    </div>`;
+      Hali post yo'q\n    </div>`;
     return;
   }
   $('profileGrid').innerHTML = posts.map(p => {
@@ -119,7 +118,7 @@ export async function openDetail(id) {
   if (p.mediaUrl && p.mediaType?.startsWith('image')) {
     mediaHtml = `<div class="dm-media"><img src="${esc(p.mediaUrl)}" loading="lazy"></div>`;
   } else if (p.mediaUrl && p.mediaType?.startsWith('video')) {
-    mediaHtml = `<div class="dm-media"><div class="vid-wrap"><video src="${esc(p.mediaUrl)}" preload="metadata" playsinline></video><div class="vid-overlay" onclick="toggleVidPlay(this)"></div><div class="vid-controls"><button class="vc-play" onclick="toggleVidPlay(this.closest('.vid-wrap'))"><svg class="ic-play" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg><svg class="ic-pause" viewBox="0 0 24 24" fill="currentColor" style="display:none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg></button><div class="vc-progress" onclick="seekVid(event,this)"><div class="vc-bar"><div class="vc-fill"></div></div></div><span class="vc-time">0:00</span><button class="vc-mute" onclick="toggleMute(this.closest('.vid-wrap'))"><svg class="ic-vol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11,5 6,9 2,9 2,15 6,15 11,19"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg><svg class="ic-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><polygon points="11,5 6,9 2,9 2,15 6,15 11,19"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg></button><button class="vc-fs" onclick="reqFullscreen(this.closest('.vid-wrap'))"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15,3 21,3 21,9"/><polyline points="9,21 3,21 3,15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg></button></div></div></div>`;
+    mediaHtml = `<div class="dm-media"><div class="vid-wrap"><video src="${esc(p.mediaUrl)}" preload="metadata" playsinline></video><div class="vid-overlay"></div><div class="vid-controls"><button class="vc-play"><svg class="ic-play" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg><svg class="ic-pause" viewBox="0 0 24 24" fill="currentColor" style="display:none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg></button><div class="vc-progress"><div class="vc-bar"><div class="vc-fill"></div></div></div><span class="vc-time">0:00</span><button class="vc-mute"><svg class="ic-vol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11,5 6,9 2,9 2,15 6,15 11,19"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg><svg class="ic-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><polygon points="11,5 6,9 2,9 2,15 6,15 11,19"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg></button><button class="vc-fs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15,3 21,3 21,9"/><polyline points="9,21 3,21 3,15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg></button></div></div></div>`;
   }
 
   const likeColor = isLiked ? '#f04060' : 'currentColor';
@@ -130,7 +129,7 @@ export async function openDetail(id) {
     <div class="dm-head">
       <div class="dm-avi${isOwn?'':' dm-avi-link'}" ${isOwn?'':('data-uid="'+p.userId+'"')}><img src="${av}" onerror="this.style.display='none'"></div>
       <div class="dm-meta">
-        <div class="dm-name${isOwn?'':' dm-name-link'}" ${isOwn?'':('data-uid="'+p.userId+'"')}>${esc(ud.fullName||'Anonymous')}</div>
+        <div class="dm-name${isOwn?'':' dm-name-link'}" ${isOwn?'':('data-uid="'+p.userId+'"')}>${esc(ud.fullName||'Anonim')}</div>
         <div class="dm-time">${fmt(p.createdAt)}</div>
       </div>
       <button class="dm-close" id="dmClose"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
@@ -176,7 +175,7 @@ export async function openDetail(id) {
     closeDetail();
     import('./comments.js').then(({ openCmtModal }) => openCmtModal(id));
   };
-  $('dmShareBtn')?.addEventListener('click', () => { navigator.clipboard?.writeText(p.mediaUrl); toast('Link copied','info'); });
+  $('dmShareBtn')?.addEventListener('click', () => { navigator.clipboard?.writeText(p.mediaUrl); toast('Havola nusxalandi','info'); });
   $('detailContent').querySelectorAll('.dm-avi-link,.dm-name-link').forEach(el => {
     el.addEventListener('click', () => { closeDetail(); openUserProfileModal(el.dataset.uid); });
   });
@@ -191,10 +190,12 @@ export async function doLikeGen(id, btn) {
   const svg      = btn.querySelector('svg');
   if (wasLiked) {
     state.myLikedPosts.delete(id);
+    state._knownUnliked.add(id);   // FIX: doFeedLike bilan sinxronlash
     await Promise.all([deleteDoc(lRef), updateDoc(pRef,{likes:Math.max(0,cur-1)})]);
     btn.classList.remove('liked'); svg.setAttribute('fill','none'); svg.setAttribute('stroke','currentColor');
   } else {
     state.myLikedPosts.add(id);
+    state._knownUnliked.delete(id); // FIX: doFeedLike bilan sinxronlash
     await Promise.all([setDoc(lRef,{userId:state.me.uid,createdAt:serverTimestamp()}), updateDoc(pRef,{likes:cur+1})]);
     btn.classList.add('liked'); svg.setAttribute('fill','#f04060'); svg.setAttribute('stroke','#f04060');
   }
@@ -224,7 +225,7 @@ export async function renderUserProfileModal(uid) {
   const isF            = state.myFollowing.has(uid);
 
   const gridHTML = userPublicPosts.length === 0
-    ? '<div style="grid-column:1/-1;padding:32px;text-align:center;color:var(--text3);font-size:13px">No public posts</div>'
+    ? '<div style="grid-column:1/-1;padding:32px;text-align:center;color:var(--text3);font-size:13px">Ommaviy post yo'q</div>'
     : userPublicPosts.map(p => {
         let c = '';
         if (p.mediaUrl && p.mediaType?.startsWith('image'))
@@ -252,16 +253,16 @@ export async function renderUserProfileModal(uid) {
   $('upBody').innerHTML = `
     <div class="up-cover"><div class="up-avi-wrap"><div class="up-avi"><img src="${av}" onerror="this.src='${defAvi(ud.fullName || 'U')}'" style="width:100%;height:100%;object-fit:cover"></div></div></div>
     <div class="up-info">
-      <div class="up-name">${esc(ud.fullName||'Anonymous')}</div>
+      <div class="up-name">${esc(ud.fullName||'Anonim')}</div>
       ${ud.bio ? `<div class="up-bio">${esc(ud.bio)}</div>` : ''}
       <div class="up-stats">
-        <div class="up-stat"><div class="up-stat-val">${userPublicPosts.length}</div><div class="up-stat-lbl">posts</div></div>
-        <div class="up-stat"><div class="up-stat-val">${totalLikes}</div><div class="up-stat-lbl">likes</div></div>
-        <div class="up-stat"><div class="up-stat-val">${followersCount}</div><div class="up-stat-lbl">followers</div></div>
-        <div class="up-stat"><div class="up-stat-val">${followingCount}</div><div class="up-stat-lbl">following</div></div>
+        <div class="up-stat"><div class="up-stat-val">${userPublicPosts.length}</div><div class="up-stat-lbl">postlar</div></div>
+        <div class="up-stat"><div class="up-stat-val">${totalLikes}</div><div class="up-stat-lbl">layklar</div></div>
+        <div class="up-stat"><div class="up-stat-val">${followersCount}</div><div class="up-stat-lbl">kuzatuvchilar</div></div>
+        <div class="up-stat"><div class="up-stat-val">${followingCount}</div><div class="up-stat-lbl">kuzatilayotgan</div></div>
       </div>
       <button class="up-follow-btn ${isF?'is-following':'not-following'}" id="upFollowBtn" data-uid="${uid}">
-        ${isF ? 'Following' : 'Follow'}
+        ${isF ? 'Kuzatilmoqda' : 'Kuzatish'}
       </button>
       <div class="up-posts-tab">
         <span class="up-posts-tab-item">
@@ -279,12 +280,12 @@ export async function renderUserProfileModal(uid) {
       if (currently) {
         state.myFollowing.delete(uid);
         followBtn.className   = 'up-follow-btn not-following';
-        followBtn.textContent = 'Follow';
+        followBtn.textContent = 'Kuzatish';
         unfollow(uid).catch(() => {});
       } else {
         state.myFollowing.add(uid);
         followBtn.className   = 'up-follow-btn is-following';
-        followBtn.textContent = 'Following';
+        followBtn.textContent = 'Kuzatilmoqda';
         follow(uid).catch(() => {});
       }
       refreshReelFollowButtons();

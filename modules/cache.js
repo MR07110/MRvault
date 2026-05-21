@@ -52,7 +52,7 @@ export async function trackView(postId, userId) {
     const statsEl = document.querySelector(`.post[data-id="${postId}"] .post-stats span:first-child`);
     if (statsEl) {
       const cur = parseInt(statsEl.textContent) || 0;
-      statsEl.textContent = `${cur + 1} views`;
+      statsEl.textContent = `${cur + 1} ta ko'rish`;
     }
     // Update reel view counter
     const reelViewEl = document.querySelector(`.reel[data-id="${postId}"] .rvc-count`);
