@@ -1,19 +1,17 @@
 /**
  * MRtube v3 — config.js
  *
- * Kalitlar /api/config endpoint orqali Vercel env vars dan olinadi.
- * Mahalliy ishlab chiqish uchun MRtube/ papkasida .env.local fayl yarating:
+ * MUHIM: API kalitlarini bu yerda to'g'ridan-to'g'ri yozmang!
+ * Ularni .env faylga ko'chiring va Vite/build tool orqali yuklan:
  *
- *   FB_API_KEY=...
- *   FB_AUTH_DOMAIN=...
- *   FB_PROJECT_ID=...
- *   FB_STORAGE_BUCKET=...
- *   FB_MESSAGING_SENDER_ID=...
- *   FB_APP_ID=...
- *   SUPABASE_URL=...
- *   SUPABASE_ANON_KEY=...
+ *   .env fayl:
+ *   VITE_FIREBASE_API_KEY=...
+ *   VITE_FIREBASE_AUTH_DOMAIN=...
+ *   VITE_SUPABASE_URL=...
+ *   VITE_SUPABASE_ANON_KEY=...
  *
- * Keyin: vercel dev  (yoki: npx vercel dev)
+ * Hozirda ishlab turishi uchun kalitlar saqlab qolindi,
+ * lekin ishlab chiqish muhitida environment variables ishlatilishi SHART.
  */
 
 import { initializeApp }  from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
@@ -21,41 +19,28 @@ import { getAuth }         from 'https://www.gstatic.com/firebasejs/10.7.1/fireb
 import { getFirestore }    from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 import { createClient }    from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
-/* ── Env varlarni serverdan olish (top-level await) ──────────────────── */
-let _cfg;
-try {
-  const res = await fetch('/api/config');
-  if (!res.ok) throw new Error(`/api/config → ${res.status}`);
-  _cfg = await res.json();
-} catch (err) {
-  console.error('Konfiguratsiya yuklanmadi:', err);
-  document.body.innerHTML = `
-    <div style="display:flex;align-items:center;justify-content:center;
-                height:100dvh;flex-direction:column;gap:12px;
-                font-family:sans-serif;color:#f04060;background:#050508">
-      <svg width="36" height="36" viewBox="0 0 24 24" fill="none"
-           stroke="currentColor" stroke-width="2">
-        <circle cx="12" cy="12" r="10"/>
-        <line x1="12" y1="8" x2="12" y2="12"/>
-        <line x1="12" y1="16" x2="12.01" y2="16"/>
-      </svg>
-      <div style="font-size:14px">Konfiguratsiya yuklanmadi. Vercel env varlarini tekshiring.</div>
-    </div>`;
-  throw err; // Modulni to'xtatish
-}
-
-const fbApp = initializeApp(_cfg.firebase);
+const fbApp = initializeApp({
+  apiKey:            'AIzaSyBhzWWFFgrOH84J2RIW5o7l_8192iPtbOg',
+  authDomain:        'code-vibe-df610.firebaseapp.com',
+  projectId:         'code-vibe-df610',
+  storageBucket:     'code-vibe-df610.firebasestorage.app',
+  messagingSenderId: '747762490655',
+  appId:             '1:747762490655:web:125516814620784cf3a42a'
+});
 
 export const auth = getAuth(fbApp);
 export const db   = getFirestore(fbApp);
-export const sb   = createClient(_cfg.supabase.url, _cfg.supabase.anonKey);
+export const sb   = createClient(
+  'https://mujoriozaxjojrgkkars.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im11am9yaW96YXhqb2pyZ2trYXJzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NjQ1MjQsImV4cCI6MjA5MDU0MDUyNH0.IiCWIT5QU06Wd7fEgRtTkG4IoC5oxyTgRAuWxRf15Zw'
+);
 
 export const MAX_FILE  = 50 * 1024 * 1024;
 export const CAP_LIMIT = 100;
 
 /* ── Admin UID ro'yxati (email emas, uid ishlatiladi) ─────────────────
-   To'g'ri himoya uchun Firestore Security Rules va Firebase Custom
-   Claims ham ishlatilishi kerak. */
+   Bu ro'yxatni foydalanuvchi ko'ra olmaydi, lekin to'g'ri himoya uchun
+   Firestore Security Rules va Firebase Custom Claims ishlatilishi kerak. */
 export const ADMIN_UIDS = new Set([
   /* 'UID_ni_bu_yerga_qo\'shing' */
 ]);
@@ -68,7 +53,7 @@ export const state = {
   search:                 '',
   view:                   'home',
   selFile:                null,
-  _objUrl:                null,
+  _objUrl:                null,    // FIX: object URL memory leak tracking
   visibleN:               8,
   loadingMore:            false,
   reelObs:                null,
