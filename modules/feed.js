@@ -1,6 +1,6 @@
 import { db, ADMIN_EMAIL } from './config.js';
 import { doc, collection, query, orderBy, onSnapshot, getDoc, setDoc, deleteDoc, updateDoc, increment } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
-import { escapeHtml, formatDate, formatFileSize, showHeartBurst, getDefaultAvatar, getMuteState, setMuteState } from './utils.js';
+import { escapeHtml, formatDate, formatFileSize, showHeartBurst, getDefaultAvatar, getMuteState } from './utils.js';
 import { showToast, showConfirm, showSkeletons } from './ui.js';
 import { getUserFromCache, setUserCache, getCommentCount, setCommentCount, hasViewedPost, markPostViewed } from './cache.js';
 import { openCommentsModal } from './comments.js';
@@ -190,7 +190,7 @@ export async function renderFeedTo(container, posts, limit = null) {
     const displayPosts = limit ? posts.slice(0, limit) : posts;
     
     if (!displayPosts.length) {
-        container.innerHTML = `<div class="empty"><div class="empty-icon">📭</div><div>No posts yet</div></div>`;
+        container.innerHTML = `<div class="empty"><div class="empty-icon"></div><div>No posts yet</div></div>`;
         return;
     }
     
@@ -494,4 +494,63 @@ function setupInfiniteScroll() {
 export function loadViewedPostsFromStorage() {
     import('./cache.js').then(({ loadViewedFromStorage }) => loadViewedFromStorage());
 }
-export { renderFollowingFeed };
+
+// Global video controls for HTML onclick
+window.toggleVidPlay = (el) => {
+    const wrap = el.closest ? el.closest('.vid-wrap') : el;
+    const video = wrap?.querySelector('video');
+    if (!video) return;
+    if (video.paused) {
+        video.play().catch(() => {});
+    } else {
+        video.pause();
+    }
+};
+
+window.seekVid = (e, bar) => {
+    const wrap = bar.closest('.vid-wrap');
+    const video = wrap?.querySelector('video');
+    if (!video || !video.duration) return;
+    const rect = bar.getBoundingClientRect();
+    video.currentTime = ((e.clientX - rect.left) / rect.width) * video.duration;
+};
+
+window.toggleMute = (wrap) => {
+    const video = wrap?.querySelector('video');
+    if (!video) return;
+    video.muted = !video.muted;
+    import('./utils.js').then(({ setMuteState, getMuteState }) => {
+        if (video.muted !== getMuteState()) setMuteState(video.muted);
+    });
+    const volIcon = wrap.querySelector('.ic-vol');
+    const mutedIcon = wrap.querySelector('.ic-muted');
+    if (volIcon) volIcon.style.display = video.muted ? 'none' : '';
+    if (mutedIcon) mutedIcon.style.display = video.muted ? '' : 'none';
+};
+
+window.reqFullscreen = (wrap) => {
+    const video = wrap?.querySelector('video');
+    if (!video) return;
+    if (video.requestFullscreen) video.requestFullscreen();
+    else if (video.webkitRequestFullscreen) video.webkitRequestFullscreen();
+};
+
+window.downloadFile = async (url, name) => {
+    showToast('Downloading...', 'info', 8000);
+    try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('Network error');
+        const blob = await response.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = name || 'file';
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => { URL.revokeObjectURL(blobUrl); a.remove(); }, 1000);
+        showToast('Downloaded!', 'success');
+    } catch (e) {
+        window.open(url, '_blank');
+        showToast('Opened in new tab', 'info');
+    }
+};
