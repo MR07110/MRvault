@@ -31,10 +31,15 @@ let selFile = null, visibleN = 8, loadingMore = false;
 let reelObs = null, viewedSet = new Set();
 let myFollowing = new Set();
 let myLikedPosts = new Set();
+let _knownUnliked = new Set(); // posts user has NOT liked (cached)
 let cmtPostId = null;
 let pendingReelId = null;
 let pendingReelTime = 0;
 let _lastPostIds = '';
+
+// ── Caches ──────────────────────────────────────────────────────────────
+const userCache = new Map();   // uid → {fullName, avatar}
+const cmtCountCache = new Map(); // postId → count (updated when comments loaded)
 
 // User profile modal uchun state
 let currentViewingUserId = null;
@@ -109,8 +114,8 @@ function buildSkeletons(n = 3) {
 
 setTimeout(() => {
   $('splash').classList.add('out');
-  setTimeout(() => $('splash').style.display = 'none', 600);
-}, 1800);
+  setTimeout(() => $('splash').style.display = 'none', 400);
+}, 400);
 
 function showHeartBurst(x, y, container) {
   const el = document.createElement('div');
@@ -385,18 +390,34 @@ async function renderFeedTo(feedEl, posts) {
     return;
   }
 
+  // ── 1. User docs — only fetch uncached ─────────────────────────────
   const uids = [...new Set(posts.map(p => p.userId))];
-  const uDs  = await Promise.all(uids.map(u => getDoc(doc(db,'users',u))));
+  const uncachedUids = uids.filter(u => !userCache.has(u));
+  if (uncachedUids.length) {
+    const docs = await Promise.all(uncachedUids.map(u => getDoc(doc(db,'users',u))));
+    uncachedUids.forEach((u,i) => {
+      const d = docs[i].data()||{};
+      userCache.set(u, { fullName: d.fullName, avatar: d.avatar || defAvi(d.fullName) });
+    });
+  }
   const uMap = {};
-  uids.forEach((u,i) => { const d = uDs[i].data()||{}; uMap[u] = { fullName: d.fullName, avatar: d.avatar||defAvi(d.fullName) }; });
+  uids.forEach(u => { uMap[u] = userCache.get(u) || { fullName:'Anonymous', avatar: defAvi('U') }; });
 
-  const lS = await Promise.all(posts.map(p => getDoc(doc(db,'posts',p.id,'likes',me.uid))));
-  posts.forEach((p,i) => { if (lS[i].exists()) myLikedPosts.add(p.id); });
-  const likedSet = new Set(posts.filter((_,i) => lS[i].exists()).map(p => p.id));
+  // ── 2. Like status — only fetch truly unknown posts ──────────────────
+  const unknownPosts = posts.filter(p => !myLikedPosts.has(p.id) && !_knownUnliked.has(p.id));
+  if (unknownPosts.length) {
+    const lS = await Promise.all(unknownPosts.map(p => getDoc(doc(db,'posts',p.id,'likes',me.uid))));
+    unknownPosts.forEach((p,i) => {
+      if (lS[i].exists()) myLikedPosts.add(p.id);
+      else _knownUnliked.add(p.id);
+    });
+  }
+  const likedSet = new Set(posts.filter(p => myLikedPosts.has(p.id)).map(p => p.id));
 
-  const cC = await Promise.all(posts.map(p => getDocs(collection(db,'posts',p.id,'comments'))));
+  // ── 3. Comment counts — use cache (updated lazily when comments open) ─
+  // Avoids N extra getDocs calls on every feed render
   const cMap = {};
-  posts.forEach((p,i) => cMap[p.id] = cC[i].size);
+  posts.forEach(p => { cMap[p.id] = cmtCountCache.get(p.id) ?? 0; });
 
   let html = '';
   for (const p of posts) {
@@ -452,8 +473,9 @@ async function renderFeedTo(feedEl, posts) {
 async function renderFeed() {
   if (!me) return;
   const feedEl = $('feed');
-  if (!allPosts.length) feedEl.innerHTML = buildSkeletons(3);
   const posts = filtered().slice(0, visibleN);
+  // Show skeletons instantly only when no content yet — avoids flicker on updates
+  if (!feedEl.querySelector('.post')) feedEl.innerHTML = buildSkeletons(3);
   await renderFeedTo(feedEl, posts);
   if (visibleN < filtered().length) {
     feedEl.insertAdjacentHTML('beforeend', '<div class="spin-wrap"><div class="spinner"></div></div>');
@@ -464,8 +486,8 @@ async function renderFeed() {
 async function renderFollowing() {
   if (!me) return;
   const feedEl = $('followingFeed');
-  if (!allPosts.length) feedEl.innerHTML = buildSkeletons(2);
   const posts = filteredFollowing().slice(0, visibleN);
+  if (!feedEl.querySelector('.post')) feedEl.innerHTML = buildSkeletons(2);
   await renderFeedTo(feedEl, posts);
   if (visibleN < filteredFollowing().length) {
     feedEl.insertAdjacentHTML('beforeend', '<div class="spin-wrap"><div class="spinner"></div></div>');
@@ -694,7 +716,10 @@ async function doDelete(id) {
 /* ═══════════════════════ COMMENTS MODAL ═══════════════════════ */
 async function openCmtModal(postId) {
   cmtPostId = postId;
-  $('cmtModalList').innerHTML = '<div class="cmt-empty"><div class="spinner" style="margin:0 auto 8px"></div></div>';
+  // Show skeleton comment rows immediately — no spinner
+  $('cmtModalList').innerHTML = `
+    <div class="cmt-skel-row"><div class="skel skel-avi" style="width:32px;height:32px;flex-shrink:0"></div><div style="flex:1;display:flex;flex-direction:column;gap:6px"><div class="skel skel-line" style="width:45%"></div><div class="skel skel-line" style="width:75%;height:9px;opacity:.6"></div></div></div>
+    <div class="cmt-skel-row" style="animation-delay:60ms"><div class="skel skel-avi" style="width:32px;height:32px;flex-shrink:0"></div><div style="flex:1;display:flex;flex-direction:column;gap:6px"><div class="skel skel-line" style="width:35%"></div><div class="skel skel-line" style="width:60%;height:9px;opacity:.6"></div></div></div>`;
   const inp = $('cmtModalInput');
   inp.value = '';
   $('cmtCharCount').textContent = '300';
@@ -716,6 +741,11 @@ async function loadCmtModal(postId) {
   const list = $('cmtModalList');
   const snap = await getDocs(query(collection(db,'posts',postId,'comments'), orderBy('createdAt','asc')));
   const cmts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+  // Update cache
+  cmtCountCache.set(postId, cmts.length);
+  const ccSpanFeed = document.getElementById(`cc-${postId}`);
+  if (ccSpanFeed) ccSpanFeed.textContent = `${cmts.length} comments`;
 
   if (!cmts.length) {
     list.innerHTML = `<div class="cmt-empty">
@@ -963,21 +993,23 @@ async function renderFilteredReels(filteredReels, startPostId) {
   const cMap = {}; filteredReels.forEach((p,i) => cMap[p.id] = cC[i].size);
   
   let html = '';
-  for (const p of filteredReels) {
+  for (let idx = 0; idx < filteredReels.length; idx++) {
+    const p = filteredReels[idx];
     const u = uMap[p.userId] || {};
     const liked = likedSet.has(p.id);
     const isF = myFollowing.has(p.userId);
     const isMine = me.uid === p.userId;
-    
+
+    const eager = idx < 3;
     const med = p.mediaType?.startsWith('video')
-      ? `<video src="${esc(p.mediaUrl)}" loop playsinline preload="metadata" muted></video>`
-      : `<img src="${esc(p.mediaUrl)}" loading="lazy">`;
-    
+      ? `<video src="${esc(p.mediaUrl)}" loop playsinline preload="${eager ? 'auto' : 'none'}" muted></video>`
+      : `<img src="${esc(p.mediaUrl)}" loading="${eager ? 'eager' : 'lazy'}">`;
+
     const capText = p.text || '';
     const capPreview = capText.length > 80 ? capText.substring(0,80) : capText;
     const hasMore = capText.length > 80;
     
-    html += `<div class="reel" data-id="${p.id}" data-uid="${p.userId}">
+    html += `<div class="reel" data-id="${p.id}" data-uid="${p.userId}" data-idx="${idx}">
       ${med}
       <div class="reel-grad"></div>
       <div class="reel-progress"><div class="reel-progress-track"><div class="reel-progress-fill" id="rp-${p.id}"></div></div></div>
@@ -1068,28 +1100,35 @@ async function renderReels() {
   reels.forEach((p,i) => { if (lS[i].exists()) myLikedPosts.add(p.id); });
   const likedSet = new Set(reels.filter((_,i) => lS[i].exists()).map(p => p.id));
   const uids = [...new Set(reels.map(p => p.userId))];
-  const uDs  = await Promise.all(uids.map(u => getDoc(doc(db,'users',u))));
+  const uncachedReelUids = uids.filter(u => !userCache.has(u));
+  if (uncachedReelUids.length) {
+    const uDs = await Promise.all(uncachedReelUids.map(u => getDoc(doc(db,'users',u))));
+    uncachedReelUids.forEach((u,i) => { const d = uDs[i].data()||{}; userCache.set(u, { fullName: d.fullName, avatar: d.avatar||defAvi(d.fullName) }); });
+  }
   const uMap = {};
-  uids.forEach((u,i) => { const d = uDs[i].data()||{}; uMap[u] = { fullName: d.fullName, avatar: d.avatar||defAvi(d.fullName) }; });
+  uids.forEach(u => { uMap[u] = userCache.get(u) || { fullName:'Anonymous', avatar: defAvi('U') }; });
   const cC = await Promise.all(reels.map(p => getDocs(collection(db,'posts',p.id,'comments'))));
   const cMap = {}; reels.forEach((p,i) => cMap[p.id] = cC[i].size);
 
   let html = '';
-  for (const p of reels) {
+  for (let idx = 0; idx < reels.length; idx++) {
+    const p = reels[idx];
     const u = uMap[p.userId] || {};
     const liked = likedSet.has(p.id);
     const isF   = myFollowing.has(p.userId);
     const isMine = me.uid === p.userId;
 
+    // First 3 reels: preload aggressively so content shows instantly
+    const eager = idx < 3;
     const med = p.mediaType?.startsWith('video')
-      ? `<video src="${esc(p.mediaUrl)}" loop playsinline preload="metadata" muted></video>`
-      : `<img src="${esc(p.mediaUrl)}" loading="lazy">`;
+      ? `<video src="${esc(p.mediaUrl)}" loop playsinline preload="${eager ? 'auto' : 'none'}" muted></video>`
+      : `<img src="${esc(p.mediaUrl)}" loading="${eager ? 'eager' : 'lazy'}">`;
 
     const capText = p.text || '';
     const capPreview = capText.length > 80 ? capText.substring(0,80) : capText;
     const hasMore = capText.length > 80;
 
-    html += `<div class="reel" data-id="${p.id}" data-uid="${p.userId}">
+    html += `<div class="reel" data-id="${p.id}" data-uid="${p.userId}" data-idx="${idx}">
       ${med}
       <div class="reel-grad"></div>
       <div class="reel-progress"><div class="reel-progress-track"><div class="reel-progress-fill" id="rp-${p.id}"></div></div></div>
@@ -1300,6 +1339,14 @@ function bindReelEvents(reels, uMap) {
             const fill = document.getElementById(`rp-${reelId}`);
             if (fill) fill.style.width = '0%';
           };
+        }
+        // ── Proactively preload next reel so it's instant on scroll ─────
+        const nextReel = en.target.nextElementSibling;
+        if (nextReel) {
+          const nv = nextReel.querySelector('video');
+          if (nv && nv.preload === 'none') { nv.preload = 'auto'; nv.load(); }
+          const ni = nextReel.querySelector('img[loading="lazy"]');
+          if (ni) ni.loading = 'eager';
         }
       } else {
         if (vid) {
