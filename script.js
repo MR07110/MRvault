@@ -31,11 +31,12 @@ let selFile = null, visibleN = 8, loadingMore = false;
 let reelObs = null, viewedSet = new Set();
 let myFollowing = new Set();
 let myLikedPosts = new Set();
-let _knownUnliked = new Set(); // posts user has NOT liked (cached)
+let _knownUnliked = new Set();
 let cmtPostId = null;
 let pendingReelId = null;
 let pendingReelTime = 0;
 let _lastPostIds = '';
+let globalMuted = true; // Global sound state — shared across all views
 
 // ── Caches ──────────────────────────────────────────────────────────────
 const userCache = new Map();   // uid → {fullName, avatar}
@@ -539,6 +540,11 @@ function initVidWrap(wrap) {
   const vid = wrap.querySelector('video');
   if (vid._inited) return;
   vid._inited = true;
+  // Apply global mute state
+  vid.muted = globalMuted;
+  const volIc = wrap.querySelector('.ic-vol'), mutedIc = wrap.querySelector('.ic-muted');
+  if (volIc)   volIc.style.display   = globalMuted ? 'none' : '';
+  if (mutedIc) mutedIc.style.display = globalMuted ? '' : 'none';
   vid.addEventListener('loadedmetadata', () => {
     const ratio = vid.videoWidth / vid.videoHeight;
     wrap.style.aspectRatio = ratio.toFixed(4);
@@ -568,7 +574,12 @@ window.toggleVidPlay = (el) => {
   const wrap = el.closest ? el.closest('.vid-wrap') : el;
   const vid = wrap.querySelector('video');
   if (!vid) return;
-  vid.paused ? vid.play() : vid.pause();
+  if (vid.paused) {
+    vid.muted = globalMuted; // Always respect global mute state when starting
+    vid.play();
+  } else {
+    vid.pause();
+  }
 };
 window.seekVid = (e, bar) => {
   const wrap = bar.closest('.vid-wrap');
@@ -581,8 +592,10 @@ window.toggleMute = (wrap) => {
   const vid = wrap.querySelector('video');
   if (!vid) return;
   vid.muted = !vid.muted;
+  globalMuted = vid.muted; // Keep global state in sync
   wrap.querySelector('.ic-vol').style.display = vid.muted ? 'none' : '';
   wrap.querySelector('.ic-muted').style.display = vid.muted ? '' : 'none';
+  updateMuteBtnUI();
 };
 window.reqFullscreen = (wrap) => {
   const vid = wrap.querySelector('video');
@@ -629,7 +642,7 @@ function setupFeedVideoObs(feedEl) {
       const vid = wrap.querySelector('video');
       if (!vid) return;
       if (en.isIntersecting && en.intersectionRatio >= 0.5) {
-        vid.muted = true;
+        vid.muted = globalMuted;
         vid.play().catch(() => {});
       } else {
         vid.pause();
@@ -1327,8 +1340,8 @@ function bindReelEvents(reels, uMap) {
           await trackView(en.target.dataset.id, me.uid);
         }
         if (vid) {
-          vid.muted = false;
-          vid.play().catch(() => { vid.muted = true; vid.play().catch(() => {}); });
+          vid.muted = globalMuted;
+          vid.play().catch(() => { vid.muted = true; globalMuted = true; updateMuteBtnUI(); vid.play().catch(() => {}); });
           // Progress bar
           const reelId = en.target.dataset.id;
           vid.ontimeupdate = () => {
@@ -1350,7 +1363,8 @@ function bindReelEvents(reels, uMap) {
         }
       } else {
         if (vid) {
-          vid.pause(); vid.muted = true;
+          vid.pause();
+          // Don't force mute — globalMuted remembers user preference
           vid.ontimeupdate = null;
           const fill = document.getElementById(`rp-${en.target.dataset.id}`);
           if (fill) fill.style.width = '0%';
@@ -1753,14 +1767,46 @@ $('logoutBtn').onclick = () => {
 $('profileEditOverlay').onclick = e => { if (e.target === $('profileEditOverlay')) $('profileEditOverlay').classList.remove('show'); };
 
 /* ═══════════════════════ VIEW SWITCHING ═══════════════════════ */
+/* ═══════════════════════ GLOBAL MUTE CONTROL ═══════════════════════ */
+const MUTE_SVG = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+  <polygon points="11,5 6,9 2,9 2,15 6,15 11,19"/>
+  <line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/>
+</svg>`;
+const UNMUTE_SVG = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+  <polygon points="11,5 6,9 2,9 2,15 6,15 11,19"/>
+  <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+  <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+</svg>`;
+
+function updateMuteBtnUI() {
+  const icon = globalMuted ? MUTE_SVG : UNMUTE_SVG;
+  const tip  = globalMuted ? 'Unmute' : 'Mute';
+  const gb = $('globalMuteBtn'), rb = $('reelsMuteBtn');
+  if (gb) { gb.innerHTML = icon; gb.title = tip; gb.classList.toggle('is-unmuted', !globalMuted); }
+  if (rb) { rb.innerHTML = icon; rb.title = tip; rb.classList.toggle('is-unmuted', !globalMuted); }
+}
+
+function toggleGlobalMute() {
+  globalMuted = !globalMuted;
+  // Apply to all currently playing videos immediately
+  document.querySelectorAll('video').forEach(v => {
+    if (!v.paused) v.muted = globalMuted;
+  });
+  updateMuteBtnUI();
+}
+
 function switchView(v) {
   view = v;
-  document.querySelectorAll('video').forEach(x => { x.pause(); x.muted = true; });
+  // Only PAUSE videos on view switch — do NOT force mute (globalMuted controls sound)
+  document.querySelectorAll('video').forEach(x => x.pause());
   document.querySelectorAll('.view').forEach(x => x.classList.remove('on'));
   document.querySelectorAll('.nav-btn[data-v]').forEach(x => x.classList.remove('on'));
   document.getElementById(`${v}View`)?.classList.add('on');
   document.querySelector(`.nav-btn[data-v="${v}"]`)?.classList.add('on');
-  $('appHdr').style.display = v === 'reels' ? 'none' : 'flex';
+  const isReels = v === 'reels';
+  $('appHdr').style.display = isReels ? 'none' : 'flex';
+  $('reelsMuteBtn').style.display = isReels ? 'flex' : 'none';
+  updateMuteBtnUI();
   window.scrollTo({ top: 0 });
   if (v === 'home')      { visibleN = 8; renderFeed(); }
   if (v === 'reels')     renderReels();
@@ -1786,4 +1832,4 @@ $('searchInput').oninput = e => {
 
 // detailBack hidden — close handled by dmClose and backdrop click
 
-setTimeout(() => { if (!me) $('authWrap').classList.add('show'); }, 100);
+setTimeout(() => { if (!me) $('authWrap').classList.add('show'); updateMuteBtnUI(); }, 100);

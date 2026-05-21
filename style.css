@@ -478,6 +478,47 @@ body {
   color: #fff;
 }
 
+/* ── Global mute button (header top-right) ── */
+.hdr-mute-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: none;
+  background: var(--bg3);
+  color: var(--text2);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: var(--transition);
+}
+.hdr-mute-btn:active { transform: scale(0.88); }
+.hdr-mute-btn.is-unmuted { color: var(--blue); background: rgba(91,142,245,0.12); }
+
+/* ── Reels floating mute button (top-right) ── */
+.reels-mute-btn {
+  position: fixed;
+  top: max(env(safe-area-inset-top, 0px) + 14px, 14px);
+  right: 14px;
+  z-index: 120;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0,0,0,0.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s var(--ease), background 0.15s;
+}
+.reels-mute-btn:active { transform: scale(0.86); }
+.reels-mute-btn.is-unmuted { background: rgba(91,142,245,0.55); }
+
 /* ═══════════════════════
    VIEWS
    ═══════════════════════ */
