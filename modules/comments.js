@@ -39,14 +39,14 @@ export async function loadCmtModal(postId) {
 
   cmtCountCache.set(postId, cmts.length);
   const ccSpanFeed = document.getElementById(`cc-${postId}`);
-  if (ccSpanFeed) ccSpanFeed.textContent = `${cmts.length} comments`;
+  if (ccSpanFeed) ccSpanFeed.textContent = `${cmts.length} ta izoh`;
 
   if (!cmts.length) {
     list.innerHTML = `<div class="cmt-empty">
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:.3;margin-bottom:8px">
         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
       </svg>
-      No comments yet
+      Hozircha izoh yo'q
     </div>`;
     return;
   }
@@ -70,7 +70,7 @@ export async function loadCmtModal(postId) {
   list.querySelectorAll('.cmt-del').forEach(b => b.addEventListener('click', async () => {
     await deleteDoc(doc(db,'posts',b.dataset.post,'comments',b.dataset.cmt));
     await loadCmtModal(b.dataset.post);
-    toast('Comment deleted', 'success');
+    toast('Izoh o\'chirildi', 'success');
   }));
   list.querySelectorAll('.user-avi-btn').forEach(b => b.addEventListener('click', async () => {
     if (b.dataset.uid !== state.me?.uid) {
@@ -87,6 +87,7 @@ export async function sendCmtModal() {
   const inp  = $('cmtModalInput');
   const text = inp?.value.trim();
   if (!text || !state.cmtPostId) return;
+  if (text.length > 300) { toast('Izoh 300 belgidan oshmasin', 'error'); return; }
   const uD = await getDoc(doc(db,'users',state.me.uid));
   const ud = uD.data() || {};
   await addDoc(collection(db,'posts',state.cmtPostId,'comments'), {
@@ -96,14 +97,11 @@ export async function sendCmtModal() {
     createdAt: serverTimestamp()
   });
   inp.value = '';
+  $('cmtCharCount').textContent = '300';
+  $('cmtCharCount').className   = 'cmt-char-count';
   await loadCmtModal(state.cmtPostId);
-  toast('Comment posted', 'success');
+  toast('Izoh qo\'shildi', 'success');
 
-  const ccSpan = document.getElementById(`cc-${state.cmtPostId}`);
-  if (ccSpan) {
-    const current = parseInt(ccSpan.textContent) || 0;
-    ccSpan.textContent = `${current + 1} comments`;
-  }
   const rccSpan = document.querySelector(`.rcmt-${state.cmtPostId}`);
   if (rccSpan) {
     const current = parseInt(rccSpan.textContent) || 0;
@@ -113,12 +111,21 @@ export async function sendCmtModal() {
 
 /* ── Modal event listeners ───────────────────────────────────────────── */
 $('cmtModalSend').onclick = sendCmtModal;
-$('cmtModalInput').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); sendCmtModal(); } });
+
+/* FIX: Enter = yuborish, Shift+Enter = yangi qator */
+$('cmtModalInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendCmtModal();
+  }
+});
+
 $('cmtModalInput').addEventListener('input', () => {
   const len = $('cmtModalInput').value.length;
   const cnt = $('cmtCharCount');
   cnt.textContent = 300 - len;
   cnt.className   = 'cmt-char-count' + (len >= 270 ? (len >= 300 ? ' over' : ' warn') : '');
 });
+
 $('cmtModalClose').onclick = () => $('cmtModal').classList.remove('show');
 $('cmtModal').addEventListener('click', e => { if (e.target === $('cmtModal')) $('cmtModal').classList.remove('show'); });

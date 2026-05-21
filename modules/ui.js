@@ -13,13 +13,16 @@ const UNMUTE_SVG = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" 
 </svg>`;
 
 export function updateMuteBtnUI() {
-  const icon = state.globalMuted ? MUTE_SVG : UNMUTE_SVG;
-  const tip  = state.globalMuted ? 'Unmute' : 'Mute';
+  /* FIX: Tugma holat nomini ko'rsatadi (harakat emas): 
+     ovoz o'chiq bo'lsa "Ovoz o'chiq" (yoqish uchun bosish kerakligi aniq) */
+  const icon  = state.globalMuted ? MUTE_SVG   : UNMUTE_SVG;
+  const label = state.globalMuted ? 'Ovoz o\'chiq' : 'Ovoz yoqiq';
+  const tip   = state.globalMuted ? 'Ovozni yoqish' : 'Ovozni o\'chirish';
   const gb = $('globalMuteBtn'), rb = $('reelsMuteBtn'), sb = $('sbMuteBtn');
   if (gb) { gb.innerHTML = icon; gb.title = tip; gb.classList.toggle('is-unmuted', !state.globalMuted); }
   if (rb) { rb.innerHTML = icon; rb.title = tip; rb.classList.toggle('is-unmuted', !state.globalMuted); }
   if (sb) {
-    sb.innerHTML = icon + `<span>${state.globalMuted ? 'Unmute' : 'Mute'}</span>`;
+    sb.innerHTML = icon + `<span>${label}</span>`;
     sb.classList.toggle('is-unmuted', !state.globalMuted);
   }
 }
@@ -29,9 +32,7 @@ export function toggleGlobalMute() {
   document.querySelectorAll('video').forEach(v => { if (!v.paused) v.muted = state.globalMuted; });
   updateMuteBtnUI();
 }
-window.toggleGlobalMute = toggleGlobalMute;
 
-// Sync all feed per-video mute icons on mutestatechange
 document.addEventListener('mutestatechange', updateMuteBtnUI);
 
 /* ── View switching ──────────────────────────────────────────────────── */
@@ -129,7 +130,13 @@ async function _doSearch(val) {
   window._sT = setTimeout(async () => {
     state.visibleN = 8;
     const { renderFeed, renderFollowing } = await import('./feed.js');
-    state.view === 'home' ? renderFeed() : state.view === 'following' && renderFollowing();
+    /* FIX: faqat home va following da ishlaydi, reels/profile da qidiruvni yashirish */
+    if (state.view === 'home')      renderFeed();
+    if (state.view === 'following') renderFollowing();
+    /* Agar boshqa viewda bo'lsa, home ga o'tib search ko'rsatish */
+    if (state.view !== 'home' && state.view !== 'following' && val) {
+      switchView('home');
+    }
   }, 300);
 }
 
@@ -137,11 +144,10 @@ async function _doSearch(val) {
 const searchInput = $('searchInput');
 if (searchInput) searchInput.oninput = e => _doSearch(e.target.value);
 
-// Sidebar search input (desktop wide mode)
 const sbSearchInput = $('sbSearchInput');
 if (sbSearchInput) sbSearchInput.oninput = e => _doSearch(e.target.value);
 
-/* ── Desktop: search toggle → show header search bar ───────────────── */
+/* ── Desktop: search toggle ─────────────────────────────────────────── */
 const sbSearchToggle = $('sbSearchToggle');
 const appHdr         = $('appHdr');
 const hdrSearchClose = $('hdrSearchClose');

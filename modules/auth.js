@@ -1,5 +1,5 @@
-import { auth, db, state }                         from './config.js';
-import { $, esc, defAvi, uToEmail }                from './utils.js';
+import { auth, db, state, ADMIN_UIDS }             from './config.js';
+import { $, esc, defAvi, uToEmail, validateUsername } from './utils.js';
 import { toast }                                   from './toast.js';
 import { userCache }                               from './cache.js';
 import {
@@ -10,8 +10,29 @@ import {
 import {
   collection, query, orderBy, onSnapshot,
   doc, getDoc, setDoc, serverTimestamp,
-  updateDoc, arrayUnion, arrayRemove
+  updateDoc, arrayUnion, arrayRemove, where, getDocs
 } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+/* ── FIX: Firebase xato kodlarini o'zbek tiliga tarjima ─────────────── */
+const AUTH_ERRORS = {
+  'auth/user-not-found':         'Bunday foydalanuvchi topilmadi',
+  'auth/wrong-password':         'Parol noto\'g\'ri',
+  'auth/invalid-credential':     'Username yoki parol noto\'g\'ri',
+  'auth/email-already-in-use':   'Bu username allaqachon band',
+  'auth/weak-password':          'Parol kamida 6 ta belgi bo\'lsin',
+  'auth/too-many-requests':      'Juda ko\'p urinish. Biroz kuting',
+  'auth/network-request-failed': 'Internet aloqasi yo\'q',
+  'auth/user-disabled':          'Bu akkaunt bloklangan',
+};
+
+function authErrMsg(err) {
+  return AUTH_ERRORS[err.code] || 'Xatolik yuz berdi. Qayta urinib ko\'ring';
+}
+
+/* ── Admin tekshiruvi (UID asosida, email emas) ──────────────────────── */
+export function isAdmin(uid) {
+  return ADMIN_UIDS.has(uid);
+}
 
 /* ── Render callbacks injected by script.js ──────────────────────────── */
 let _cb = {};
@@ -24,27 +45,42 @@ let isLogin = true;
 
 $('authSwitchBtn').onclick = () => {
   isLogin = !isLogin;
-  $('authTitle').textContent      = isLogin ? 'Sign in to your account' : 'Create an account';
-  $('authBtn').textContent        = isLogin ? 'Sign in' : 'Sign up';
-  $('authSwitchText').textContent = isLogin ? 'No account? ' : 'Have an account? ';
-  $('authSwitchBtn').textContent  = isLogin ? 'Sign up' : 'Sign in';
+  $('authTitle').textContent      = isLogin ? 'Tizimga kirish' : 'Akkaunt yaratish';
+  $('authBtn').textContent        = isLogin ? 'Kirish' : 'Ro\'yxatdan o\'tish';
+  $('authSwitchText').textContent = isLogin ? 'Akkaunt yo\'qmi? ' : 'Akkaunt bormi? ';
+  $('authSwitchBtn').textContent  = isLogin ? 'Ro\'yxatdan o\'ting' : 'Kirish';
   $('nameRow').style.display      = isLogin ? 'none' : 'block';
   $('confirmRow').style.display   = isLogin ? 'none' : 'block';
   $('authErr').textContent = '';
 };
 
 $('authBtn').onclick = async () => {
-  const u = $('aUsername').value.trim(), p = $('aPassword').value, e = $('authErr');
-  if (!u || u.length < 3) { e.textContent = 'Username must be at least 3 characters'; return; }
-  if (!p || p.length < 6) { e.textContent = 'Password must be at least 6 characters'; return; }
+  const u = $('aUsername').value.trim();
+  const p = $('aPassword').value;
+  const e = $('authErr');
   e.textContent = '';
+
+  /* FIX: validateUsername funksiyasi bilan qat'iy tekshiruv */
+  const uErr = validateUsername(u);
+  if (uErr) { e.textContent = uErr; return; }
+  if (!p || p.length < 6) { e.textContent = 'Parol kamida 6 ta belgi bo\'lsin'; return; }
+
+  $('authBtn').disabled = true;
+  $('authBtn').textContent = isLogin ? 'Kirilmoqda...' : 'Yaratilmoqda...';
+
   try {
     if (isLogin) {
       await signInWithEmailAndPassword(auth, uToEmail(u), p);
     } else {
-      const fn = $('aFullname').value.trim(), c = $('aConfirm').value;
-      if (!fn) { e.textContent = 'Enter your name'; return; }
-      if (p !== c) { e.textContent = 'Passwords do not match'; return; }
+      const fn = $('aFullname').value.trim();
+      const c  = $('aConfirm').value;
+      if (!fn) { e.textContent = 'Ismingizni kiriting'; return; }
+      if (p !== c) { e.textContent = 'Parollar mos emas'; return; }
+
+      /* FIX: Username band ekanligini tekshirish */
+      const existing = await getDocs(query(collection(db,'users'), where('username','==', u)));
+      if (!existing.empty) { e.textContent = 'Bu username allaqachon band'; return; }
+
       const cr = await createUserWithEmailAndPassword(auth, uToEmail(u), p);
       await fbUpdateProfile(cr.user, { displayName: fn });
       await setDoc(doc(db,'users',cr.user.uid), {
@@ -52,9 +88,14 @@ $('authBtn').onclick = async () => {
         email: uToEmail(u), bio: '', avatar: defAvi(fn),
         followers: [], following: [], createdAt: serverTimestamp()
       });
-      toast('Account created!', 'success');
+      toast('Akkaunt yaratildi!', 'success');
     }
-  } catch(err) { e.textContent = err.message; }
+  } catch(err) {
+    e.textContent = authErrMsg(err);
+  } finally {
+    $('authBtn').disabled = false;
+    $('authBtn').textContent = isLogin ? 'Kirish' : 'Ro\'yxatdan o\'tish';
+  }
 };
 
 ['aUsername','aPassword','aConfirm'].forEach(id => {
@@ -131,7 +172,8 @@ export async function follow(uid) {
     updateDoc(doc(db,'users',state.me.uid), { following: arrayUnion(uid) }),
     updateDoc(doc(db,'users',uid),          { followers: arrayUnion(state.me.uid) })
   ]);
-  toast('Now following', 'success');
+  state.myFollowing.add(uid);
+  toast('Kuzatilmoqda', 'success');
 }
 
 export async function unfollow(uid) {
@@ -139,7 +181,8 @@ export async function unfollow(uid) {
     updateDoc(doc(db,'users',state.me.uid), { following: arrayRemove(uid) }),
     updateDoc(doc(db,'users',uid),          { followers: arrayRemove(state.me.uid) })
   ]);
-  toast('Unfollowed', 'info');
+  state.myFollowing.delete(uid);
+  toast('Kuzatish bekor qilindi', 'info');
 }
 
 /* ── Profile edit / logout ───────────────────────────────────────────── */
@@ -152,18 +195,19 @@ $('editProfileBtn').onclick = async () => {
 
 $('saveProfileBtn').onclick = async () => {
   const fn = $('editName').value.trim();
-  if (!fn) { toast('Enter your name', 'error'); return; }
+  if (!fn) { toast('Ismingizni kiriting', 'error'); return; }
   await updateDoc(doc(db,'users',state.me.uid), { fullName: fn, bio: $('editBioInput').value.trim() });
   await fbUpdateProfile(state.me, { displayName: fn });
+  userCache.delete(state.me.uid);
   $('profileEditOverlay').classList.remove('show');
-  toast('Profile updated', 'success');
+  toast('Profil yangilandi', 'success');
   _cb.renderProfile?.();
 };
 
 $('cancelEditBtn').onclick = () => $('profileEditOverlay').classList.remove('show');
 $('logoutBtn').onclick = async () => {
   const { showConfirm } = await import('./utils.js');
-  showConfirm('You will need to sign in again.', () => signOut(auth), 'Sign out?');
+  showConfirm('Tizimdan chiqasizmi?', () => signOut(auth), 'Chiqish');
 };
 $('profileEditOverlay').onclick = e => {
   if (e.target === $('profileEditOverlay')) $('profileEditOverlay').classList.remove('show');

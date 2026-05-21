@@ -1,3 +1,19 @@
+/**
+ * MRtube v3 — config.js
+ *
+ * MUHIM: API kalitlarini bu yerda to'g'ridan-to'g'ri yozmang!
+ * Ularni .env faylga ko'chiring va Vite/build tool orqali yuklan:
+ *
+ *   .env fayl:
+ *   VITE_FIREBASE_API_KEY=...
+ *   VITE_FIREBASE_AUTH_DOMAIN=...
+ *   VITE_SUPABASE_URL=...
+ *   VITE_SUPABASE_ANON_KEY=...
+ *
+ * Hozirda ishlab turishi uchun kalitlar saqlab qolindi,
+ * lekin ishlab chiqish muhitida environment variables ishlatilishi SHART.
+ */
+
 import { initializeApp }  from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
 import { getAuth }         from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 import { getFirestore }    from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
@@ -22,6 +38,13 @@ export const sb   = createClient(
 export const MAX_FILE  = 50 * 1024 * 1024;
 export const CAP_LIMIT = 100;
 
+/* ── Admin UID ro'yxati (email emas, uid ishlatiladi) ─────────────────
+   Bu ro'yxatni foydalanuvchi ko'ra olmaydi, lekin to'g'ri himoya uchun
+   Firestore Security Rules va Firebase Custom Claims ishlatilishi kerak. */
+export const ADMIN_UIDS = new Set([
+  /* 'UID_ni_bu_yerga_qo\'shing' */
+]);
+
 /** Shared mutable application state — imported and mutated by all modules. */
 export const state = {
   me:                     null,
@@ -30,6 +53,7 @@ export const state = {
   search:                 '',
   view:                   'home',
   selFile:                null,
+  _objUrl:                null,    // FIX: object URL memory leak tracking
   visibleN:               8,
   loadingMore:            false,
   reelObs:                null,
