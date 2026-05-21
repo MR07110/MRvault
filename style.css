@@ -2586,22 +2586,11 @@ body {
 /* sidebar-only elements: hidden on mobile */
 .sb-top, .sb-search-row, .sb-tabs, .sb-bottom, .sb-create-label { display: none; }
 
-/* Search flyout panel (desktop) */
-#sbSearchPanel {
-  display: none;
-  position: fixed;
-  top: 0; bottom: 0;
-  left: 68px;
-  width: 320px;
-  background: var(--bg2);
-  border-right: 1px solid var(--glass-border);
-  z-index: 90;
-  flex-direction: column;
-  padding: 28px 16px 20px;
-  gap: 14px;
-  box-shadow: 4px 0 24px rgba(0,0,0,0.3);
-}
-#sbSearchPanel.open { display: flex; }
+/* Hide search button in mobile footer nav */
+.sb-search-toggle { display: none; }
+
+/* Search flyout panel — disabled, header search used instead */
+#sbSearchPanel { display: none !important; }
 
 .sb-panel-title {
   font-size: 20px; font-weight: 700; letter-spacing: -0.4px;
@@ -2645,7 +2634,35 @@ body {
   :root { --sidebar: 68px; }
 
   /* ── Hide top header ── */
+  /* Header: normally hidden on desktop, shown when search is active */
   .app-hdr { display: none !important; }
+  .app-hdr.search-open {
+    display: flex !important;
+    position: fixed;
+    top: 0; left: var(--sidebar); right: 0;
+    z-index: 100;
+  }
+  /* When search is open on desktop, hide logo/tabs — show only search + close */
+  .app-hdr.search-open .hdr-logo,
+  .app-hdr.search-open .hdr-tabs,
+  .app-hdr.search-open .hdr-mute-btn { display: none; }
+  .app-hdr.search-open .hdr-search { flex: 1; max-width: 100%; }
+  .app-hdr.search-open .hdr-search-close { display: flex; }
+  /* Close button (hidden by default) */
+  .hdr-search-close {
+    display: none;
+    align-items: center; justify-content: center;
+    width: 36px; height: 36px;
+    background: none; border: none;
+    color: var(--text2); cursor: pointer;
+    border-radius: 10px;
+    flex-shrink: 0;
+    transition: var(--transition);
+  }
+  .hdr-search-close:hover { background: rgba(255,255,255,0.07); color: var(--text); }
+  /* Search toggle active state */
+  #sbSearchToggle.search-active { background: rgba(91,142,245,0.12); }
+  #sbSearchToggle.search-active svg { stroke: var(--blue); }
 
   /* ── Nav → narrow left sidebar ── */
   .bot-nav {

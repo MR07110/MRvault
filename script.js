@@ -5,7 +5,7 @@
 
 import { state }             from './modules/config.js';
 import { $ }                 from './modules/utils.js';
-import { updateMuteBtnUI }   from './modules/ui.js';
+import { updateMuteBtnUI, toggleGlobalMute } from './modules/ui.js';
 import {
   setRenderCallbacks,
   listenPosts
@@ -36,9 +36,9 @@ setRenderCallbacks({
 /* ── Lazy-import remaining modules so they self-register event listeners ─ */
 import('./modules/upload.js');
 
-/* ── Global mute button ──────────────────────────────────────────────── */
-$('globalMuteBtn')?.addEventListener('click', () => window.toggleGlobalMute?.());
-$('reelsMuteBtn')?.addEventListener('click',  () => window.toggleGlobalMute?.());
-$('sbMuteBtn')?.addEventListener('click',     () => window.toggleGlobalMute?.());
+/* ── Global mute buttons ─────────────────────────────────────────────── */
+['globalMuteBtn','reelsMuteBtn','sbMuteBtn'].forEach(id =>
+  $(id)?.addEventListener('click', toggleGlobalMute)
+);
 
 updateMuteBtnUI();

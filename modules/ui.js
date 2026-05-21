@@ -133,34 +133,38 @@ async function _doSearch(val) {
   }, 300);
 }
 
+/* ── Mobile header search input ────────────────────────────────────── */
 const searchInput = $('searchInput');
 if (searchInput) searchInput.oninput = e => _doSearch(e.target.value);
 
-const sbPanelInput  = $('sbPanelInput');
-const sbSearchPanel = $('sbSearchPanel');
+/* ── Desktop: search toggle → show header search bar ───────────────── */
 const sbSearchToggle = $('sbSearchToggle');
+const appHdr         = $('appHdr');
+const hdrSearchClose = $('hdrSearchClose');
+const hdrSearchInput = $('searchInput');
 
-if (sbSearchToggle && sbSearchPanel) {
+function openDesktopSearch() {
+  appHdr?.classList.add('search-open');
+  sbSearchToggle?.classList.add('search-active');
+  setTimeout(() => hdrSearchInput?.focus(), 60);
+}
+
+function closeDesktopSearch() {
+  appHdr?.classList.remove('search-open');
+  sbSearchToggle?.classList.remove('search-active');
+  if (hdrSearchInput) { hdrSearchInput.value = ''; _doSearch(''); }
+}
+
+if (sbSearchToggle) {
   sbSearchToggle.addEventListener('click', e => {
     e.stopPropagation();
-    const isOpen = sbSearchPanel.classList.toggle('open');
-    sbSearchToggle.classList.toggle('on', isOpen);
-    if (isOpen && sbPanelInput) setTimeout(() => sbPanelInput.focus(), 60);
-  });
-  document.addEventListener('click', e => {
-    if (!sbSearchPanel.contains(e.target) && e.target !== sbSearchToggle) {
-      sbSearchPanel.classList.remove('open');
-      sbSearchToggle.classList.remove('on');
-    }
+    const isOpen = appHdr?.classList.contains('search-open');
+    isOpen ? closeDesktopSearch() : openDesktopSearch();
   });
 }
 
-if (sbPanelInput) {
-  sbPanelInput.oninput = e => {
-    const hi = $('searchInput');
-    if (hi) hi.value = e.target.value;
-    _doSearch(e.target.value);
-  };
+if (hdrSearchClose) {
+  hdrSearchClose.addEventListener('click', closeDesktopSearch);
 }
 
 /* ── Init mute UI ────────────────────────────────────────────────────── */
