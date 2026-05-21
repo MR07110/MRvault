@@ -905,7 +905,7 @@ body {
 
 .reel video {
   width: 100%; height: 100%;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .reel img {
@@ -947,7 +947,7 @@ body {
 }
 
 .reel-avi:hover { border-color: rgba(255,255,255,0.5); transform: scale(1.02); }
-.reel-avi img { width: 100%; height: 100%; object-fit: cover; }
+.reel-avi img { width: 100%; height: 100%; object-fit: contain; }
 
 .reel-uname {
   font-size: 14px;
