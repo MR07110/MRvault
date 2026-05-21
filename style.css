@@ -1,9 +1,16 @@
 /* ═══════════════════════════════════════════
    MRtube — Master Stylesheet
-   Barcha stillar CSS/ papkasida joylashgan
+   @import MUST be at the very top
    ═══════════════════════════════════════════ */
 
-/* ── Global Reset & CSS Variables ── */
+/* ── CSS Modullari — eng birinchi import ── */
+@import url('./CSS/splash.css');
+@import url('./CSS/loading.css');
+@import url('./CSS/feed.css');
+@import url('./CSS/profile.css');
+@import url('./CSS/nav.css');
+
+/* ── Global Reset ── */
 *, *::before, *::after {
   margin: 0;
   padding: 0;
@@ -30,7 +37,7 @@
   --text3:       #44445a;
   --text4:       #2a2a38;
 
-  /* ── Accent Palette (Sky Blue + White) ── */
+  /* ── Accent Palette ── */
   --blue:        #5b8ef5;
   --blue2:       #7ba5ff;
   --blue3:       #3a6bd4;
@@ -56,26 +63,25 @@
   --nav:         64px;
   --hdr:         56px;
 
-  /* ── Motion (Ultra Smooth) ── */
+  /* ── Motion ── */
   --ease:        cubic-bezier(0.25, 0.46, 0.45, 0.94);
   --ease-back:   cubic-bezier(0.34, 1.56, 0.64, 1);
   --ease-out:    cubic-bezier(0.33, 1, 0.68, 1);
   --transition:  all 0.25s var(--ease);
 
-  /* ── Glass Effect ── */
+  /* ── Glass ── */
   --glass:       rgba(12,12,20,0.82);
   --glass-border:rgba(255,255,255,0.06);
   --glass-shine: rgba(255,255,255,0.02);
 }
 
-/* ── Smooth Scrollbar ── */
+/* ── Scrollbar ── */
 ::-webkit-scrollbar { width: 3px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--line2); border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--line3); }
 
-/* ── Base ── */
-html { 
+html {
   background: var(--bg);
   scroll-behavior: smooth;
 }
@@ -89,12 +95,3 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background-image: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(91,142,245,0.04) 0%, transparent 70%);
 }
-
-/* ═══════════════════════════════════════════
-   CSS Modullari — CSS/ papkasidan import
-   ═══════════════════════════════════════════ */
-@import url('./CSS/splash.css');
-@import url('./CSS/loading.css');
-@import url('./CSS/feed.css');
-@import url('./CSS/profile.css');
-@import url('./CSS/nav.css');
