@@ -149,7 +149,10 @@
     <textarea class="ta" id="captionInput" rows="3" placeholder="Add a caption... (optional)"></textarea>
     <div class="visibility-row">
       <div>
-        <div class="visibility-label">Public</div>
+        <div class="visibility-label">
+          <svg class="vis-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Private
+        </div>
         <div class="visibility-desc" id="visDesc">Only you can see this</div>
       </div>
       <label class="toggle">
@@ -175,7 +178,9 @@
     </div>
     <div class="cmt-modal-list" id="cmtModalList"></div>
     <div class="cmt-input-row">
-      <input class="cmt-input" id="cmtModalInput" placeholder="Write a comment...">
+      <div class="cmt-my-avi" id="cmtMyAvi"></div>
+      <input class="cmt-input" id="cmtModalInput" placeholder="Write a comment..." maxlength="300">
+      <span class="cmt-char-count" id="cmtCharCount">300</span>
       <button class="cmt-send" id="cmtModalSend">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
       </button>

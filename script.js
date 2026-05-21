@@ -77,12 +77,33 @@ function showConfirm(msg, onOk, title = 'Are you sure?') {
   cancel.onclick = close;
 }
 
-function toast(msg, dur = 2200) {
+/* ─── Toast with types: 'success' | 'error' | 'info' | default ─── */
+function toast(msg, type = '', dur = 2200) {
   const t = $('toast');
   t.textContent = msg;
-  t.classList.add('show');
+  t.className = 'show' + (type ? ` toast-${type}` : '');
   clearTimeout(t._t);
-  t._t = setTimeout(() => t.classList.remove('show'), dur);
+  t._t = setTimeout(() => { t.classList.remove('show'); }, dur);
+}
+
+/* ─── Skeleton cards while feed is loading ─── */
+function buildSkeletons(n = 3) {
+  return Array.from({ length: n }, (_, i) => `
+    <div class="skeleton-post" style="animation-delay:${i * 80}ms">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <div class="skel skel-avi"></div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:7px">
+          <div class="skel skel-line" style="width:42%"></div>
+          <div class="skel skel-line" style="width:26%;height:9px;opacity:.6"></div>
+        </div>
+      </div>
+      <div class="skel skel-media"></div>
+      <div style="padding:12px 0;display:flex;flex-direction:column;gap:7px">
+        <div class="skel skel-line" style="width:88%"></div>
+        <div class="skel skel-line" style="width:65%"></div>
+      </div>
+      <div class="skel skel-actions"></div>
+    </div>`).join('');
 }
 
 setTimeout(() => {
@@ -214,7 +235,7 @@ $('authBtn').onclick = async () => {
         email: uToEmail(u), bio: '', avatar: defAvi(fn),
         followers: [], following: [], createdAt: serverTimestamp()
       });
-      toast('Account created!');
+      toast('Account created!', 'success');
     }
   } catch(err) { e.textContent = err.message; }
 };
@@ -340,14 +361,26 @@ function buildCaption(text, postId) {
 async function renderFeedTo(feedEl, posts) {
   if (!me || !feedEl) return;
   if (!posts.length) {
-    feedEl.innerHTML = `<div class="empty">
-      <div class="empty-icon">
-        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
-          <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
-        </svg>
-      </div>
-      No posts yet
-    </div>`;
+    if (search) {
+      feedEl.innerHTML = `<div class="empty-search">
+        <div class="empty-search-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+          </svg>
+        </div>
+        <div>No results for "<strong>${esc(search)}</strong>"</div>
+        <div class="empty-search-hint">Try different keywords</div>
+      </div>`;
+    } else {
+      feedEl.innerHTML = `<div class="empty">
+        <div class="empty-icon">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+            <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+          </svg>
+        </div>
+        No posts yet
+      </div>`;
+    }
     return;
   }
 
@@ -418,6 +451,7 @@ async function renderFeedTo(feedEl, posts) {
 async function renderFeed() {
   if (!me) return;
   const feedEl = $('feed');
+  if (!allPosts.length) feedEl.innerHTML = buildSkeletons(3);
   const posts = filtered().slice(0, visibleN);
   await renderFeedTo(feedEl, posts);
   if (visibleN < filtered().length) {
@@ -429,6 +463,7 @@ async function renderFeed() {
 async function renderFollowing() {
   if (!me) return;
   const feedEl = $('followingFeed');
+  if (!allPosts.length) feedEl.innerHTML = buildSkeletons(2);
   const posts = filteredFollowing().slice(0, visibleN);
   await renderFeedTo(feedEl, posts);
   if (visibleN < filteredFollowing().length) {
@@ -452,7 +487,7 @@ function buildMedia(p) {
 window.dlFile = (url, name) => {
   const a = document.createElement('a');
   a.href = url; a.download = name; a.click();
-  toast('Download started');
+  toast('Download started', 'info');
 };
 
 function bindFeedEvents(feedEl) {
@@ -460,7 +495,7 @@ function bindFeedEvents(feedEl) {
   feedEl.querySelectorAll('.del-btn') .forEach(b => b.addEventListener('click', () => doDelete(b.dataset.id)));
   feedEl.querySelectorAll('.cmt-open-btn').forEach(b => b.addEventListener('click', () => openCmtModal(b.dataset.id)));
   feedEl.querySelectorAll('.share-btn').forEach(b => b.addEventListener('click', () => {
-    navigator.clipboard?.writeText(b.dataset.url); toast('Link copied');
+    navigator.clipboard?.writeText(b.dataset.url); toast('Link copied', 'info');
   }));
   feedEl.querySelectorAll('.post-media').forEach(m => m.addEventListener('click', e => {
     if (e.target.closest('.file-dl')) return;
@@ -548,7 +583,7 @@ async function doLike(postId, btn) {
 async function doDelete(id) {
   showConfirm('This post will be permanently deleted.', async () => {
     await deleteDoc(doc(db,'posts',id));
-    toast('Post deleted');
+    toast('Post deleted', 'success');
   }, 'Delete post?');
 }
 
@@ -556,8 +591,20 @@ async function doDelete(id) {
 async function openCmtModal(postId) {
   cmtPostId = postId;
   $('cmtModalList').innerHTML = '<div class="cmt-empty"><div class="spinner" style="margin:0 auto 8px"></div></div>';
-  $('cmtModalInput').value = '';
+  const inp = $('cmtModalInput');
+  inp.value = '';
+  $('cmtCharCount').textContent = '300';
+  $('cmtCharCount').className = 'cmt-char-count';
   $('cmtModal').classList.add('show');
+
+  // Show current user's avatar in input row
+  if (me) {
+    getDoc(doc(db,'users',me.uid)).then(s => {
+      const av = s.data()?.avatar || defAvi(s.data()?.fullName || 'U');
+      $('cmtMyAvi').innerHTML = `<img src="${av}" onerror="this.style.display='none'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+    }).catch(() => {});
+  }
+
   await loadCmtModal(postId);
 }
 
@@ -595,7 +642,7 @@ async function loadCmtModal(postId) {
   list.querySelectorAll('.cmt-del').forEach(b => b.addEventListener('click', async () => {
     await deleteDoc(doc(db,'posts',b.dataset.post,'comments',b.dataset.cmt));
     await loadCmtModal(b.dataset.post);
-    toast("Comment deleted");
+    toast('Comment deleted', 'success');
   }));
   list.querySelectorAll('.user-avi-btn').forEach(b => b.addEventListener('click', () => {
     if (b.dataset.uid !== me?.uid) { 
@@ -618,7 +665,7 @@ async function sendCmtModal() {
   });
   inp.value = '';
   await loadCmtModal(cmtPostId);
-  toast("Comment posted");
+  toast('Comment posted', 'success');
   
   const ccSpan = document.getElementById(`cc-${cmtPostId}`);
   if (ccSpan) {
@@ -634,6 +681,12 @@ async function sendCmtModal() {
 
 $('cmtModalSend').onclick = sendCmtModal;
 $('cmtModalInput').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); sendCmtModal(); } });
+$('cmtModalInput').addEventListener('input', () => {
+  const len = $('cmtModalInput').value.length;
+  const cnt = $('cmtCharCount');
+  cnt.textContent = 300 - len;
+  cnt.className = 'cmt-char-count' + (len >= 270 ? (len >= 300 ? ' over' : ' warn') : '');
+});
 $('cmtModalClose').onclick = () => $('cmtModal').classList.remove('show');
 $('cmtModal').addEventListener('click', e => { if (e.target === $('cmtModal')) $('cmtModal').classList.remove('show'); });
 
@@ -693,7 +746,20 @@ async function renderUserProfileModal(uid) {
         } else {
           c = `<div class="up-grid-cell-txt">${esc((p.text||p.fileName||'').substring(0,40))}</div>`;
         }
-        return `<div class="up-grid-cell" data-id="${p.id}" data-uid="${uid}">${c}</div>`;
+        const isVid = p.mediaType?.startsWith('video');
+        return `<div class="up-grid-cell" data-id="${p.id}" data-uid="${uid}">${c}
+          ${isVid ? `<div class="grid-play-badge"><svg width="10" height="10" viewBox="0 0 24 24" fill="white"><path d="m5 3 14 9-14 9V3z"/></svg></div>` : ''}
+          <div class="up-grid-cell-overlay">
+            <div class="grid-stat">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="white"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+              ${p.likes||0}
+            </div>
+            <div class="grid-stat">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              ${p.views||0}
+            </div>
+          </div>
+        </div>`;
       }).join('');
   
   $('upBody').innerHTML = `
@@ -764,7 +830,7 @@ function openUserReelsWithFilter(userId, startPostId) {
   );
   
   if (userReels.length === 0) {
-    toast("No public reels from this user");
+    toast('No public reels from this user', 'info');
     return;
   }
   
@@ -810,6 +876,7 @@ async function renderFilteredReels(filteredReels, startPostId) {
     html += `<div class="reel" data-id="${p.id}" data-uid="${p.userId}">
       ${med}
       <div class="reel-grad"></div>
+      <div class="reel-progress"><div class="reel-progress-fill" id="rp-${p.id}"></div></div>
       <div class="reel-pause-icon" id="rpause-${p.id}">
         <svg width="28" height="28" viewBox="0 0 24 24" fill="rgba(255,255,255,0.9)">
           <rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/>
@@ -921,6 +988,7 @@ async function renderReels() {
     html += `<div class="reel" data-id="${p.id}" data-uid="${p.userId}">
       ${med}
       <div class="reel-grad"></div>
+      <div class="reel-progress"><div class="reel-progress-fill" id="rp-${p.id}"></div></div>
       <div class="reel-pause-icon" id="rpause-${p.id}">
         <svg width="28" height="28" viewBox="0 0 24 24" fill="rgba(255,255,255,0.9)">
           <rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/>
@@ -984,7 +1052,7 @@ function bindReelEvents(reels, uMap) {
     e.stopPropagation(); openCmtModal(b.dataset.id);
   }));
   document.querySelectorAll('.reel-share').forEach(b => b.addEventListener('click', e => {
-    e.stopPropagation(); navigator.clipboard?.writeText(b.dataset.url); toast('Link copied');
+    e.stopPropagation(); navigator.clipboard?.writeText(b.dataset.url); toast('Link copied', 'info');
   }));
   document.querySelectorAll('.reel-dl').forEach(b => b.addEventListener('click', e => {
     e.stopPropagation(); dlFile(b.dataset.url, b.dataset.name);
@@ -1077,9 +1145,24 @@ function bindReelEvents(reels, uMap) {
         if (vid) {
           vid.muted = false;
           vid.play().catch(() => { vid.muted = true; vid.play().catch(() => {}); });
+          // Progress bar
+          const reelId = en.target.dataset.id;
+          vid.ontimeupdate = () => {
+            const fill = document.getElementById(`rp-${reelId}`);
+            if (fill && vid.duration) fill.style.width = `${(vid.currentTime / vid.duration) * 100}%`;
+          };
+          vid.onended = () => {
+            const fill = document.getElementById(`rp-${reelId}`);
+            if (fill) fill.style.width = '0%';
+          };
         }
       } else {
-        if (vid) { vid.pause(); vid.muted = true; }
+        if (vid) {
+          vid.pause(); vid.muted = true;
+          vid.ontimeupdate = null;
+          const fill = document.getElementById(`rp-${en.target.dataset.id}`);
+          if (fill) fill.style.width = '0%';
+        }
       }
     });
   }, { root: $('reelsWrap'), threshold: 0.6 });
@@ -1170,7 +1253,7 @@ async function follow(uid) {
     updateDoc(doc(db,'users',me.uid), { following: arrayUnion(uid) }),
     updateDoc(doc(db,'users',uid),    { followers: arrayUnion(me.uid) })
   ]);
-  toast('Now following');
+  toast('Now following', 'success');
 }
 
 async function unfollow(uid) {
@@ -1179,7 +1262,7 @@ async function unfollow(uid) {
     updateDoc(doc(db,'users',me.uid), { following: arrayRemove(uid) }),
     updateDoc(doc(db,'users',uid),    { followers: arrayRemove(me.uid) })
   ]);
-  toast('Unfollowed');
+  toast('Unfollowed', 'info');
 }
 
 /* ═══════════════════════ MY PROFILE ═══════════════════════ */
@@ -1208,13 +1291,13 @@ async function renderProfile() {
     inp.onchange = async e => {
       const f = e.target.files[0];
       if (!f || !f.type.startsWith('image/')) return;
-      if (f.size > 5*1024*1024) { toast('Avatar must be under 5 MB'); return; }
+      if (f.size > 5*1024*1024) { toast('Avatar must be under 5 MB', 'error'); return; }
       const path = `avatars/${me.uid}/${Date.now()}`;
       const {data, error} = await sb.storage.from('videos').upload(path, f, {upsert:true, contentType: f.type});
-      if (error) { toast('Error: '+error.message); return; }
+      if (error) { toast('Error: '+error.message, 'error'); return; }
       const {data:{publicUrl}} = sb.storage.from('videos').getPublicUrl(data.path);
       await updateDoc(doc(db,'users',me.uid), {avatar: publicUrl});
-      renderProfile(); toast('Avatar updated');
+      renderProfile(); toast('Avatar updated', 'success');
     };
     inp.click();
   };
@@ -1237,11 +1320,17 @@ function renderProfileGrid(posts) {
     if (p.mediaUrl && p.mediaType?.startsWith('image')) c = `<img src="${esc(p.mediaUrl)}" loading="lazy">`;
     else if (p.mediaUrl && p.mediaType?.startsWith('video')) c = `<video src="${esc(p.mediaUrl)}" preload="metadata" muted></video>`;
     else c = `<div class="grid-cell-txt">${esc((p.text||p.fileName||'').substring(0,60))}</div>`;
+    const isVid = p.mediaType?.startsWith('video');
     return `<div class="grid-cell" data-id="${p.id}">${c}
+      ${isVid ? `<div class="grid-play-badge"><svg width="10" height="10" viewBox="0 0 24 24" fill="white"><path d="m5 3 14 9-14 9V3z"/></svg></div>` : ''}
       <div class="grid-cell-overlay">
-        <div class="grid-like">
+        <div class="grid-stat">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="white"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
           ${p.likes||0}
+        </div>
+        <div class="grid-stat">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          ${p.views||0}
         </div>
       </div>
     </div>`;
@@ -1301,7 +1390,7 @@ async function openDetail(id) {
     $('detailModal').classList.remove('show'); openCmtModal(id);
   });
   $('detailContent').querySelector('#det-share')?.addEventListener('click', () => {
-    navigator.clipboard?.writeText(p.mediaUrl); toast('Link copied');
+    navigator.clipboard?.writeText(p.mediaUrl); toast('Link copied', 'info');
   });
   $('detailContent').querySelectorAll('.user-avi-btn').forEach(b => b.addEventListener('click', () => {
     if (b.dataset.uid !== me?.uid) openUserProfileModal(b.dataset.uid);
@@ -1348,11 +1437,22 @@ window.addEventListener('paste', e => {
 });
 
 $('pubToggle').onchange = e => {
-  $('visDesc').textContent = e.target.checked ? 'All logged-in users can see this' : 'Only you can see this';
+  const row   = $('pubToggle').closest('.visibility-row');
+  const label = row.querySelector('.visibility-label');
+  const desc  = $('visDesc');
+  if (e.target.checked) {
+    label.innerHTML = `<svg class="vis-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>Public`;
+    desc.textContent = 'All logged-in users can see this';
+    row.classList.add('is-public');
+  } else {
+    label.innerHTML = `<svg class="vis-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Private`;
+    desc.textContent = 'Only you can see this';
+    row.classList.remove('is-public');
+  }
 };
 
 function pickFile(f) {
-  if (f.size > MAX_FILE) { $('sizeWarn').textContent = `File is ${fmtSz(f.size)} — limit 50 MB`; toast('File exceeds 50 MB'); return; }
+  if (f.size > MAX_FILE) { $('sizeWarn').textContent = `File is ${fmtSz(f.size)} — limit 50 MB`; toast('File exceeds 50 MB', 'error'); return; }
   $('sizeWarn').textContent = ''; selFile = f; $('uploadBtn').disabled = false;
   $('previewArea').style.display = 'block';
   if (f.type.startsWith('image'))
@@ -1378,7 +1478,11 @@ window.clearFile = () => { selFile = null; $('previewArea').style.display='none'
 function resetUpload() {
   selFile = null; $('fileInput').value = ''; $('previewArea').style.display = 'none';
   $('captionInput').value = ''; $('pubToggle').checked = false;
-  $('visDesc').textContent = "Only you can see this"; $('uploadBtn').disabled = true; $('sizeWarn').textContent = '';
+  const row = $('pubToggle').closest('.visibility-row');
+  row.classList.remove('is-public');
+  row.querySelector('.visibility-label').innerHTML = `<svg class="vis-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Private`;
+  $('visDesc').textContent = 'Only you can see this';
+  $('uploadBtn').disabled = true; $('sizeWarn').textContent = '';
 }
 
 $('uploadBtn').onclick = async () => {
@@ -1397,8 +1501,8 @@ $('uploadBtn').onclick = async () => {
       userId: me.uid, userFullName: ud.fullName || me.displayName || 'User',
       createdAt: serverTimestamp(), views: 0, likes: 0
     });
-    toast('Posted!'); $('uploadOverlay').classList.remove('show'); resetUpload();
-  } catch(err) { toast('Error: '+err.message); }
+    toast('Posted!', 'success'); $('uploadOverlay').classList.remove('show'); resetUpload();
+  } catch(err) { toast('Error: '+err.message, 'error'); }
   finally { $('uploadBtn').disabled = false; $('uploadBtn').textContent = 'Post'; }
 };
 
@@ -1413,10 +1517,10 @@ $('editProfileBtn').onclick = async () => {
 };
 
 $('saveProfileBtn').onclick = async () => {
-  const fn = $('editName').value.trim(); if (!fn) { toast('Enter your name'); return; }
+  const fn = $('editName').value.trim(); if (!fn) { toast('Enter your name', 'error'); return; }
   await updateDoc(doc(db,'users',me.uid), { fullName: fn, bio: $('editBioInput').value.trim() });
   await fbUpdateProfile(me, { displayName: fn });
-  $('profileEditOverlay').classList.remove('show'); toast('Profile updated'); renderProfile();
+  $('profileEditOverlay').classList.remove('show'); toast('Profile updated', 'success'); renderProfile();
 };
 
 $('cancelEditBtn').onclick = () => $('profileEditOverlay').classList.remove('show');
@@ -1454,7 +1558,7 @@ $('searchInput').oninput = e => {
   window._sT = setTimeout(() => {
     visibleN = 8;
     view === 'home' ? renderFeed() : view === 'following' && renderFollowing();
-  }, 150);
+  }, 300);
 };
 
 $('detailBack').onclick = () => $('detailModal').classList.remove('show');
