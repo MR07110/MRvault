@@ -172,10 +172,17 @@ async function trackView(postId, userId) {
   // increment() — read shart emas, atomic, race condition yo'q
   try {
     await updateDoc(doc(db, 'posts', postId), { views: increment(1) });
+    // Feed post stats
     const statsEl = document.querySelector(`.post[data-id="${postId}"] .post-stats span:first-child`);
     if (statsEl) {
       const cur = parseInt(statsEl.textContent) || 0;
       statsEl.textContent = `${cur + 1} views`;
+    }
+    // Reel view counter (eye icon)
+    const reelViewEl = document.querySelector(`.reel[data-id="${postId}"] .rvc-count`);
+    if (reelViewEl) {
+      const cur = parseInt(reelViewEl.textContent) || 0;
+      reelViewEl.textContent = `${cur + 1}`;
     }
   } catch(e) {}
 
@@ -253,6 +260,7 @@ $('authBtn').onclick = async () => {
 });
 
 onAuthStateChanged(auth, async user => {
+  $('authStateLoader')?.remove(); // remove initial loader if present
   if (user) {
     me = user;
     $('authWrap').classList.remove('show');
@@ -1079,6 +1087,12 @@ async function renderFilteredReels(filteredReels, startPostId) {
             <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
           </svg>
         </button>
+        <div class="reel-act" style="cursor:default;pointer-events:none">
+          <svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.75)" stroke-width="2">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+          </svg>
+          <span class="rvc-count" style="color:rgba(255,255,255,0.75)">${p.views||0}</span>
+        </div>
       </div>
     </div>`;
   }
@@ -1198,6 +1212,12 @@ async function renderReels() {
             <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
           </svg>
         </button>
+        <div class="reel-act" style="cursor:default;pointer-events:none">
+          <svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.75)" stroke-width="2">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+          </svg>
+          <span class="rvc-count" style="color:rgba(255,255,255,0.75)">${p.views||0}</span>
+        </div>
       </div>
     </div>`;
   }
@@ -1848,4 +1868,4 @@ $('searchInput').oninput = e => {
 
 // detailBack hidden — close handled by dmClose and backdrop click
 
-setTimeout(() => { if (!me) $('authWrap').classList.add('show'); updateMuteBtnUI(); }, 100);
+updateMuteBtnUI();
