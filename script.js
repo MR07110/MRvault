@@ -530,10 +530,25 @@ function buildMedia(p) {
   </div>`;
 }
 
-window.dlFile = (url, name) => {
-  const a = document.createElement('a');
-  a.href = url; a.download = name; a.click();
-  toast('Download started', 'info');
+window.dlFile = async (url, name) => {
+  toast('Downloading...', 'info', 8000);
+  try {
+    const res  = await fetch(url);
+    if (!res.ok) throw new Error('Network error');
+    const blob = await res.blob();
+    const burl = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = burl;
+    a.download = name || 'file';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { URL.revokeObjectURL(burl); a.remove(); }, 1000);
+    toast('Downloaded!', 'success');
+  } catch (e) {
+    // Fallback: open in new tab
+    window.open(url, '_blank');
+    toast('Opened in new tab', 'info');
+  }
 };
 
 function initVidWrap(wrap) {
@@ -1794,6 +1809,7 @@ function toggleGlobalMute() {
   });
   updateMuteBtnUI();
 }
+window.toggleGlobalMute = toggleGlobalMute;
 
 function switchView(v) {
   view = v;
