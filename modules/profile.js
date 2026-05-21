@@ -437,3 +437,4 @@ export function initProfile() {
         });
     }
 }
+export { renderProfile };

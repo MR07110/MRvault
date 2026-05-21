@@ -24,6 +24,8 @@ export function showConfirm(message, onConfirm, title = 'Are you sure?') {
     const okBtn = document.getElementById('confirmOkBtn');
     const cancelBtn = document.getElementById('confirmCancelBtn');
     
+    if (!overlay) return;
+    
     titleEl.textContent = title;
     msgEl.textContent = message;
     overlay.classList.add('show');
@@ -34,12 +36,6 @@ export function showConfirm(message, onConfirm, title = 'Are you sure?') {
     
     okBtn.onclick = handleOk;
     cancelBtn.onclick = handleCancel;
-    
-    // Cleanup old listeners
-    const cleanup = () => {
-        okBtn.removeEventListener('click', handleOk);
-        cancelBtn.removeEventListener('click', handleCancel);
-    };
 }
 
 // Loading skeletons
@@ -84,11 +80,16 @@ export function switchView(viewName, appState) {
     
     // Update view visibility
     document.querySelectorAll('.view').forEach(v => v.classList.remove('on'));
-    document.getElementById(`${viewName}View`)?.classList.add('on');
+    const targetView = document.getElementById(`${viewName}View`);
+    if (targetView) targetView.classList.add('on');
     
     // Update nav buttons
     document.querySelectorAll('.nav-btn[data-v]').forEach(btn => {
-        btn.classList.toggle('on', btn.dataset.v === viewName);
+        if (btn.dataset.v === viewName) {
+            btn.classList.add('on');
+        } else {
+            btn.classList.remove('on');
+        }
     });
     
     // Update header visibility
@@ -103,10 +104,31 @@ export function switchView(viewName, appState) {
 
 export function initUI() {
     hideSplash();
+    
     // Setup global click handlers for modals
     document.querySelectorAll('.overlay').forEach(overlay => {
         overlay.addEventListener('click', (e) => {
             if (e.target === overlay) overlay.classList.remove('show');
         });
     });
+    
+    // Zoom modal close
+    const zoomModal = document.getElementById('zoomModal');
+    const zoomClose = document.getElementById('zoomClose');
+    if (zoomClose) {
+        zoomClose.onclick = () => {
+            const video = document.getElementById('zoomVideo');
+            if (video) video.pause();
+            zoomModal.classList.remove('show');
+        };
+    }
+    if (zoomModal) {
+        zoomModal.onclick = (e) => {
+            if (e.target === zoomModal) {
+                const video = document.getElementById('zoomVideo');
+                if (video) video.pause();
+                zoomModal.classList.remove('show');
+            }
+        };
+    }
 }

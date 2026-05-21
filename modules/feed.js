@@ -494,3 +494,4 @@ function setupInfiniteScroll() {
 export function loadViewedPostsFromStorage() {
     import('./cache.js').then(({ loadViewedFromStorage }) => loadViewedFromStorage());
 }
+export { renderFollowingFeed };

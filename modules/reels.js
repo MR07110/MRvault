@@ -490,3 +490,4 @@ export async function initReels() {
         await renderReels();
     }
 }
+export { renderReels };
