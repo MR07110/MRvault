@@ -598,16 +598,13 @@ body {
 .post-media img {
   width: 100%;
   height: auto;
-  max-height: 72vh;
-  object-fit: contain;
   display: block;
   background: #000;
 }
 
 .post-media video {
   width: 100%;
-  aspect-ratio: 16 / 9;
-  object-fit: contain;
+  height: auto;
   display: block;
   background: #000;
 }
