@@ -1,6 +1,6 @@
 import { db } from './config.js';
-import { doc, getDoc, getDocs, collection, updateDoc, increment, setDoc, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
-import { escapeHtml, getDefaultAvatar, showHeartBurst, formatDate } from './utils.js';
+import { doc, getDoc, getDocs, collection, updateDoc, increment, setDoc, deleteDoc, arrayUnion, arrayRemove } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import { escapeHtml, getDefaultAvatar, showHeartBurst, getMuteState } from './utils.js';
 import { showToast } from './ui.js';
 import { getUserFromCache, setUserCache, hasViewedPost, markPostViewed } from './cache.js';
 import { openCommentsModal } from './comments.js';
@@ -23,6 +23,7 @@ export async function refreshReelsFollowing() {
 }
 
 export function setReelsData(posts) {
+    if (!currentUser) return;
     allReels = posts.filter(p => 
         p.mediaUrl && 
         (p.mediaType?.startsWith('image') || p.mediaType?.startsWith('video')) &&
@@ -116,7 +117,7 @@ export async function renderReels() {
         const eager = idx < 3;
         
         const mediaHtml = reel.mediaType?.startsWith('video')
-            ? `<video src="${escapeHtml(reel.mediaUrl)}" loop playsinline preload="${eager ? 'auto' : 'none'}" muted></video>`
+            ? `<video src="${escapeHtml(reel.mediaUrl)}" loop playsinline preload="${eager ? 'auto' : 'none'}" muted="${getMuteState()}"></video>`
             : `<img src="${escapeHtml(reel.mediaUrl)}" loading="${eager ? 'eager' : 'lazy'}">`;
         
         const captionText = reel.text || '';
@@ -187,7 +188,6 @@ export async function renderReels() {
 }
 
 function bindReelEvents() {
-    // Progress bar seek
     document.querySelectorAll('.reel-progress').forEach(bar => {
         const handleSeek = (clientX) => {
             const reel = bar.closest('.reel');
@@ -225,7 +225,6 @@ function bindReelEvents() {
         });
     });
     
-    // Like buttons
     document.querySelectorAll('.reel-act[data-id]:not(.reel-cmt-btn)').forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -233,7 +232,6 @@ function bindReelEvents() {
         });
     });
     
-    // Comment buttons
     document.querySelectorAll('.reel-cmt-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -241,7 +239,6 @@ function bindReelEvents() {
         });
     });
     
-    // Share buttons
     document.querySelectorAll('.reel-share').forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -250,15 +247,13 @@ function bindReelEvents() {
         });
     });
     
-    // Download buttons
     document.querySelectorAll('.reel-dl').forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
-            window.downloadFile(btn.dataset.url, btn.dataset.name);
+            if (window.downloadFile) window.downloadFile(btn.dataset.url, btn.dataset.name);
         });
     });
     
-    // Follow buttons
     document.querySelectorAll('.reel-follow').forEach(btn => {
         btn.addEventListener('click', async (e) => {
             e.stopPropagation();
@@ -278,7 +273,6 @@ function bindReelEvents() {
         });
     });
     
-    // User profile links
     document.querySelectorAll('.reel-avi-link, .reel-uname-link').forEach(el => {
         el.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -288,7 +282,6 @@ function bindReelEvents() {
         });
     });
     
-    // Caption click
     document.querySelectorAll('.reel-cap').forEach(cap => {
         cap.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -298,7 +291,6 @@ function bindReelEvents() {
         });
     });
     
-    // Double-tap for like
     document.querySelectorAll('.reel').forEach(reel => {
         let tapTimer = null;
         reel.addEventListener('click', (e) => {
@@ -359,6 +351,9 @@ async function doReelLike(postId, btn) {
         
         btn.classList.add('like-pop');
         setTimeout(() => btn.classList.remove('like-pop'), 400);
+        
+        const rect = btn.getBoundingClientRect();
+        showHeartBurst(rect.width / 2, rect.height / 2, btn.parentElement || document.body);
     }
     
     const likeRef = doc(db, 'posts', postId, 'likes', currentUser.uid);
@@ -402,6 +397,7 @@ function openReelCaptionSheet(postId, uid, fullText) {
     const sheet = document.getElementById('reelCapSheet');
     const userRow = document.getElementById('rcapUserRow');
     const textEl = document.getElementById('rcapText');
+    if (!sheet || !userRow || !textEl) return;
     
     const user = getUserFromCache(uid) || { fullName: 'Anonymous', avatar: getDefaultAvatar('U') };
     const isFollowing = myFollowing.has(uid);
@@ -410,7 +406,7 @@ function openReelCaptionSheet(postId, uid, fullText) {
     userRow.innerHTML = `
         <div class="rcap-avi"><img src="${user.avatar}" onerror="this.style.display='none'"></div>
         <div style="flex:1"><div style="font-size:14px;font-weight:600">${escapeHtml(user.fullName)}</div></div>
-        ${!isMine ? `<button class="rcap-follow ${isFollowing ? 'following' : ''}" data-uid="${uid}">${isFollowing ? 'Following' : 'Follow'}</button>` : ''}
+        ${!isMine ? `<button class="rcap-follow ${isFollowing ? 'following' : ''}" id="rcapFollowBtn" data-uid="${uid}">${isFollowing ? 'Following' : 'Follow'}</button>` : ''}
     `;
     textEl.textContent = fullText;
     sheet.classList.add('show');
@@ -449,9 +445,7 @@ function setupReelObserver() {
                 }
                 
                 if (video) {
-                    import('./utils.js').then(({ getMuteState }) => {
-                        video.muted = getMuteState();
-                    });
+                    video.muted = getMuteState();
                     video.play().catch(() => {});
                     
                     const reelId = entry.target.dataset.id;
@@ -467,7 +461,6 @@ function setupReelObserver() {
                     };
                 }
                 
-                // Preload next reel
                 const nextReel = entry.target.nextElementSibling;
                 if (nextReel) {
                     const nextVideo = nextReel.querySelector('video');
@@ -491,7 +484,6 @@ function setupReelObserver() {
 }
 
 export async function initReels() {
-    // Reels are updated via feed listener
     if (window.appState?.allPosts) {
         setReelsData(window.appState.allPosts);
         await refreshReelsFollowing();

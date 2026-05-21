@@ -1,6 +1,6 @@
 import { db, ADMIN_EMAIL } from './config.js';
-import { doc, collection, query, orderBy, onSnapshot, getDoc, setDoc, deleteDoc, updateDoc, increment, where, getDocs } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
-import { escapeHtml, formatDate, formatFileSize, showHeartBurst, getDefaultAvatar } from './utils.js';
+import { doc, collection, query, orderBy, onSnapshot, getDoc, setDoc, deleteDoc, updateDoc, increment } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import { escapeHtml, formatDate, formatFileSize, showHeartBurst, getDefaultAvatar, getMuteState, setMuteState } from './utils.js';
 import { showToast, showConfirm, showSkeletons } from './ui.js';
 import { getUserFromCache, setUserCache, getCommentCount, setCommentCount, hasViewedPost, markPostViewed } from './cache.js';
 import { openCommentsModal } from './comments.js';
@@ -28,6 +28,7 @@ export function listenPosts(callback) {
     const postsQuery = query(collection(db, 'posts'), orderBy('createdAt', 'desc'));
     feedUnsubscribe = onSnapshot(postsQuery, (snap) => {
         allPosts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        if (window.appState) window.appState.allPosts = allPosts;
         if (callback) callback(allPosts);
     });
 }
@@ -84,8 +85,10 @@ async function loadUserData(uids) {
 }
 
 async function loadLikeStatus(posts) {
+    if (!currentUser) return new Set();
+    
     const unknown = posts.filter(p => !myLikedPosts.has(p.id) && !knownUnliked.has(p.id));
-    if (unknown.length && currentUser) {
+    if (unknown.length) {
         const likeDocs = await Promise.all(unknown.map(p => getDoc(doc(db, 'posts', p.id, 'likes', currentUser.uid))));
         unknown.forEach((p, i) => {
             if (likeDocs[i].exists()) myLikedPosts.add(p.id);
@@ -154,7 +157,6 @@ async function trackView(postId, userId) {
     
     try {
         await updateDoc(doc(db, 'posts', postId), { views: increment(1) });
-        // Update UI
         const statsEl = document.querySelector(`.post[data-id="${postId}"] .post-stats span:first-child`);
         if (statsEl) {
             const cur = parseInt(statsEl.textContent) || 0;
@@ -192,11 +194,8 @@ export async function renderFeedTo(container, posts, limit = null) {
         return;
     }
     
-    // Load user data
     const uids = [...new Set(displayPosts.map(p => p.userId))];
     const userMap = await loadUserData(uids);
-    
-    // Load like status
     const likedSet = await loadLikeStatus(displayPosts);
     
     let html = '';
@@ -249,22 +248,18 @@ export async function renderFeedTo(container, posts, limit = null) {
 }
 
 function bindFeedEvents(container) {
-    // Like buttons
     container.querySelectorAll('.like-btn').forEach(btn => {
         btn.addEventListener('click', () => doLike(btn.dataset.id, btn));
     });
     
-    // Delete buttons
     container.querySelectorAll('.del-btn').forEach(btn => {
         btn.addEventListener('click', () => doDelete(btn.dataset.id));
     });
     
-    // Comment buttons
     container.querySelectorAll('.cmt-open-btn').forEach(btn => {
         btn.addEventListener('click', () => openCommentsModal(btn.dataset.id));
     });
     
-    // Share buttons
     container.querySelectorAll('.share-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             navigator.clipboard?.writeText(btn.dataset.url);
@@ -272,7 +267,6 @@ function bindFeedEvents(container) {
         });
     });
     
-    // User avatar click
     container.querySelectorAll('.user-avi-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             if (btn.dataset.uid !== currentUser?.uid) {
@@ -281,7 +275,6 @@ function bindFeedEvents(container) {
         });
     });
     
-    // Caption expand/collapse
     container.querySelectorAll('.cap-more').forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -291,26 +284,38 @@ function bindFeedEvents(container) {
         });
     });
     
-    // Video initialization
     container.querySelectorAll('.vid-wrap').forEach(wrap => initVideoWrap(wrap));
     
-    // Media click for zoom
     container.querySelectorAll('.post-media').forEach(media => {
         media.addEventListener('click', (e) => {
             if (e.target.closest('.file-dl') || e.target.closest('.vid-controls')) return;
             openMediaZoom(media.dataset.id);
         });
     });
+    
+    container.querySelectorAll('.file-dl').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            window.downloadFile(btn.dataset.url, btn.dataset.name);
+        });
+    });
 }
 
-function initVideoWrap(wrap) {
+export function initVideoWrap(wrap) {
     const video = wrap.querySelector('video');
-    if (video._inited) return;
+    if (!video || video._inited) return;
     video._inited = true;
+    
+    video.muted = getMuteState();
+    
+    const volIcon = wrap.querySelector('.ic-vol');
+    const mutedIcon = wrap.querySelector('.ic-muted');
+    if (volIcon) volIcon.style.display = getMuteState() ? 'none' : '';
+    if (mutedIcon) mutedIcon.style.display = getMuteState() ? '' : 'none';
     
     video.addEventListener('loadedmetadata', () => {
         const ratio = video.videoWidth / video.videoHeight;
-        wrap.style.aspectRatio = ratio.toFixed(4);
+        if (ratio && isFinite(ratio)) wrap.style.aspectRatio = ratio.toFixed(4);
     });
     
     video.addEventListener('timeupdate', () => {
@@ -364,6 +369,9 @@ async function doLike(postId, btn) {
         
         btn.classList.add('like-pop');
         setTimeout(() => btn.classList.remove('like-pop'), 400);
+        
+        const rect = btn.getBoundingClientRect();
+        showHeartBurst(rect.width / 2, rect.height / 2, btn.parentElement || document.body);
     }
     
     const likeRef = doc(db, 'posts', postId, 'likes', currentUser.uid);
@@ -412,66 +420,6 @@ function openMediaZoom(postId) {
     zoomModal.classList.add('show');
 }
 
-// Global video controls
-window.toggleVidPlay = (el) => {
-    const wrap = el.closest ? el.closest('.vid-wrap') : el;
-    const video = wrap?.querySelector('video');
-    if (!video) return;
-    if (video.paused) {
-        video.play().catch(() => {});
-    } else {
-        video.pause();
-    }
-};
-
-window.seekVid = (e, bar) => {
-    const wrap = bar.closest('.vid-wrap');
-    const video = wrap?.querySelector('video');
-    if (!video || !video.duration) return;
-    const rect = bar.getBoundingClientRect();
-    video.currentTime = ((e.clientX - rect.left) / rect.width) * video.duration;
-};
-
-window.toggleMute = (wrap) => {
-    const video = wrap?.querySelector('video');
-    if (!video) return;
-    video.muted = !video.muted;
-    import('./utils.js').then(({ setMuteState, getMuteState }) => {
-        if (video.muted !== getMuteState()) setMuteState(video.muted);
-    });
-    const volIcon = wrap.querySelector('.ic-vol');
-    const mutedIcon = wrap.querySelector('.ic-muted');
-    if (volIcon) volIcon.style.display = video.muted ? 'none' : '';
-    if (mutedIcon) mutedIcon.style.display = video.muted ? '' : 'none';
-};
-
-window.reqFullscreen = (wrap) => {
-    const video = wrap?.querySelector('video');
-    if (!video) return;
-    if (video.requestFullscreen) video.requestFullscreen();
-    else if (video.webkitRequestFullscreen) video.webkitRequestFullscreen();
-};
-
-window.downloadFile = async (url, name) => {
-    showToast('Downloading...', 'info', 8000);
-    try {
-        const response = await fetch(url);
-        if (!response.ok) throw new Error('Network error');
-        const blob = await response.blob();
-        const blobUrl = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = blobUrl;
-        a.download = name || 'file';
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(() => { URL.revokeObjectURL(blobUrl); a.remove(); }, 1000);
-        showToast('Downloaded!', 'success');
-    } catch (e) {
-        window.open(url, '_blank');
-        showToast('Opened in new tab', 'info');
-    }
-};
-
 export async function initFeed() {
     listenPosts(async () => {
         await refreshMyFollowing();
@@ -489,7 +437,7 @@ export async function renderFeed() {
     const posts = getFilteredPosts(appState.searchQuery, appState.tab);
     const displayPosts = posts.slice(0, appState.visibleN);
     
-    if (!feedContainer.querySelector('.post')) {
+    if (!feedContainer.querySelector('.post') && !feedContainer.querySelector('.skeleton-post')) {
         showSkeletons(feedContainer, 3);
     }
     
@@ -510,7 +458,7 @@ export async function renderFollowingFeed() {
     const posts = getFollowingPosts(appState?.searchQuery);
     const displayPosts = posts.slice(0, appState?.visibleN || 8);
     
-    if (!container.querySelector('.post')) {
+    if (!container.querySelector('.post') && !container.querySelector('.skeleton-post')) {
         showSkeletons(container, 2);
     }
     
@@ -544,6 +492,5 @@ function setupInfiniteScroll() {
 }
 
 export function loadViewedPostsFromStorage() {
-    // Handled in cache.js
     import('./cache.js').then(({ loadViewedFromStorage }) => loadViewedFromStorage());
 }

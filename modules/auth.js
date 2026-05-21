@@ -87,8 +87,9 @@ export function getCurrentUser() {
     return auth.currentUser;
 }
 
-// Setup auth UI
+// Setup auth UI - BU FUNKSIYA MAVJUDLIGINI TEKSHIRING
 export function initAuthUI() {
+    console.log('initAuthUI called');
     const authBtn = document.getElementById('authBtn');
     const authSwitchBtn = document.getElementById('authSwitchBtn');
     const nameRow = document.getElementById('nameRow');
@@ -96,6 +97,11 @@ export function initAuthUI() {
     const authTitle = document.getElementById('authTitle');
     const authSwitchText = document.getElementById('authSwitchText');
     const authErr = document.getElementById('authErr');
+    
+    if (!authBtn || !authSwitchBtn) {
+        console.error('Auth elements not found!');
+        return;
+    }
     
     let isLogin = true;
     
@@ -105,33 +111,33 @@ export function initAuthUI() {
         authBtn.textContent = isLogin ? 'Sign in' : 'Sign up';
         authSwitchText.textContent = isLogin ? 'No account? ' : 'Have an account? ';
         authSwitchBtn.textContent = isLogin ? 'Sign up' : 'Sign in';
-        nameRow.style.display = isLogin ? 'none' : 'block';
-        confirmRow.style.display = isLogin ? 'none' : 'block';
-        authErr.textContent = '';
+        if (nameRow) nameRow.style.display = isLogin ? 'none' : 'block';
+        if (confirmRow) confirmRow.style.display = isLogin ? 'none' : 'block';
+        if (authErr) authErr.textContent = '';
     };
     
     authBtn.onclick = async () => {
-        const username = document.getElementById('aUsername').value.trim();
-        const password = document.getElementById('aPassword').value;
+        const username = document.getElementById('aUsername')?.value.trim();
+        const password = document.getElementById('aPassword')?.value;
         
         if (!username || username.length < 3) {
-            authErr.textContent = 'Username must be at least 3 characters';
+            if (authErr) authErr.textContent = 'Username must be at least 3 characters';
             return;
         }
         if (!password || password.length < 6) {
-            authErr.textContent = 'Password must be at least 6 characters';
+            if (authErr) authErr.textContent = 'Password must be at least 6 characters';
             return;
         }
         
-        authErr.textContent = '';
+        if (authErr) authErr.textContent = '';
         
         if (isLogin) {
             await signIn(username, password);
         } else {
-            const fullName = document.getElementById('aFullname').value.trim();
-            const confirm = document.getElementById('aConfirm').value;
+            const fullName = document.getElementById('aFullname')?.value.trim();
+            const confirm = document.getElementById('aConfirm')?.value;
             if (!fullName) {
-                authErr.textContent = 'Enter your name';
+                if (authErr) authErr.textContent = 'Enter your name';
                 return;
             }
             await signUp(username, password, fullName, confirm);
@@ -143,7 +149,7 @@ export function initAuthUI() {
         const el = document.getElementById(id);
         if (el) {
             el.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') authBtn.click();
+                if (e.key === 'Enter' && authBtn) authBtn.click();
             });
         }
     });

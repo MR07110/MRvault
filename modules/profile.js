@@ -1,8 +1,8 @@
 import { db, supabase, ADMIN_EMAIL } from './config.js';
-import { doc, getDoc, updateDoc, setDoc, arrayUnion, arrayRemove, collection, getDocs } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import { doc, getDoc, updateDoc, setDoc, arrayUnion, arrayRemove, collection, getDocs, increment, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 import { updateProfile } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 import { auth } from './config.js';
-import { escapeHtml, getDefaultAvatar, formatFileSize, formatDate } from './utils.js';
+import { escapeHtml, getDefaultAvatar, formatDate } from './utils.js';
 import { showToast, showConfirm } from './ui.js';
 import { getUserFromCache, setUserCache } from './cache.js';
 import { logout } from './auth.js';
@@ -25,7 +25,6 @@ export async function renderProfile() {
     const fullName = userData.fullName || currentUser.displayName || 'User';
     const avatar = userData.avatar || getDefaultAvatar(fullName);
     
-    // Update UI
     const profileAvi = document.getElementById('profileAvi');
     if (profileAvi) {
         profileAvi.innerHTML = `<img src="${avatar}" onerror="this.style.display='none'"><div class="avi-edit-badge"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div>`;
@@ -49,7 +48,6 @@ export async function renderProfile() {
     if (statFollowers) statFollowers.textContent = (userData.followers || []).length;
     if (statFollowing) statFollowing.textContent = (userData.following || []).length;
     
-    // Avatar click for upload
     if (profileAvi) {
         profileAvi.onclick = () => uploadAvatar();
     }
@@ -136,8 +134,8 @@ async function openPostDetail(postId) {
     
     const detailModal = document.getElementById('detailModal');
     const detailContent = document.getElementById('detailContent');
+    if (!detailModal || !detailContent) return;
     
-    // Show loading skeleton
     detailContent.innerHTML = `
         <div class="dm-handle"></div>
         <div style="display:flex;align-items:center;gap:10px;padding:14px 16px 10px">
@@ -148,7 +146,6 @@ async function openPostDetail(postId) {
         <div style="height:60px"></div>`;
     detailModal.classList.add('show');
     
-    // Load real data
     const [likeDoc, commentsSnap, userDoc] = await Promise.all([
         getDoc(doc(db, 'posts', postId, 'likes', currentUser.uid)),
         getDocs(collection(db, 'posts', postId, 'comments')),
@@ -204,13 +201,11 @@ async function openPostDetail(postId) {
             ${post.mediaUrl ? `<button class="dm-act" id="dmShareBtn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>` : ''}
         </div>`;
     
-    // Initialize video if present
     const videoWrap = detailContent.querySelector('.vid-wrap');
     if (videoWrap) {
         import('./feed.js').then(({ initVideoWrap }) => initVideoWrap(videoWrap));
     }
     
-    // Close handler
     const closeDetail = () => {
         const video = detailContent.querySelector('video');
         if (video) video.pause();
@@ -220,7 +215,6 @@ async function openPostDetail(postId) {
     document.getElementById('dmClose').onclick = closeDetail;
     detailModal.onclick = (e) => { if (e.target === detailModal) closeDetail(); };
     
-    // Like button
     document.getElementById('dmLikeBtn').onclick = async () => {
         await doDetailLike(postId);
         const updatedPost = await getDoc(doc(db, 'posts', postId));
@@ -229,13 +223,11 @@ async function openPostDetail(postId) {
         document.getElementById('dmLikeCount2').textContent = newLikes;
     };
     
-    // Comment button
     document.getElementById('dmCmtBtn').onclick = () => {
         closeDetail();
-        import('./comments.js').then(({ openCommentsModal }) => openCommentsModal(postId));
+        openCommentsModal(postId);
     };
     
-    // Share button
     const shareBtn = document.getElementById('dmShareBtn');
     if (shareBtn) {
         shareBtn.addEventListener('click', () => {
@@ -244,7 +236,6 @@ async function openPostDetail(postId) {
         });
     }
     
-    // User profile links
     detailContent.querySelectorAll('.dm-avi-link, .dm-name-link').forEach(el => {
         el.addEventListener('click', () => {
             closeDetail();
@@ -273,6 +264,8 @@ export async function openUserProfileModal(uid) {
     
     const modal = document.getElementById('userProfileModal');
     const body = document.getElementById('upBody');
+    if (!modal || !body) return;
+    
     modal.classList.add('show');
     body.innerHTML = '<div class="spin-wrap" style="padding-top:80px"><div class="spinner"></div></div>';
     
@@ -343,7 +336,6 @@ export async function openUserProfileModal(uid) {
                 followBtn.textContent = 'Following';
                 await followUser(targetUid);
             }
-            // Update followers count
             const followersSpan = body.querySelector('.up-stat:nth-child(3) .up-stat-val');
             if (followersSpan) {
                 const current = parseInt(followersSpan.textContent) || 0;
@@ -362,6 +354,7 @@ async function followUser(uid) {
         updateDoc(doc(db, 'users', currentUser.uid), { following: arrayUnion(uid) }),
         updateDoc(doc(db, 'users', uid), { followers: arrayUnion(currentUser.uid) })
     ]);
+    showToast('Now following', 'success');
 }
 
 async function unfollowUser(uid) {
@@ -369,17 +362,25 @@ async function unfollowUser(uid) {
         updateDoc(doc(db, 'users', currentUser.uid), { following: arrayRemove(uid) }),
         updateDoc(doc(db, 'users', uid), { followers: arrayRemove(currentUser.uid) })
     ]);
+    showToast('Unfollowed', 'info');
 }
 
-// Close modal
-document.getElementById('upBack')?.addEventListener('click', () => {
-    document.getElementById('userProfileModal').classList.remove('show');
-});
-document.getElementById('userProfileModal')?.addEventListener('click', (e) => {
-    if (e.target === document.getElementById('userProfileModal')) {
-        document.getElementById('userProfileModal').classList.remove('show');
-    }
-});
+// Close modal event listeners
+const upBack = document.getElementById('upBack');
+if (upBack) {
+    upBack.addEventListener('click', () => {
+        document.getElementById('userProfileModal')?.classList.remove('show');
+    });
+}
+
+const userProfileModal = document.getElementById('userProfileModal');
+if (userProfileModal) {
+    userProfileModal.addEventListener('click', (e) => {
+        if (e.target === userProfileModal) {
+            userProfileModal.classList.remove('show');
+        }
+    });
+}
 
 export function initProfile() {
     const editBtn = document.getElementById('editProfileBtn');
@@ -392,32 +393,36 @@ export function initProfile() {
         editBtn.onclick = async () => {
             const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
             const data = userDoc.data() || {};
-            document.getElementById('editName').value = data.fullName || '';
-            document.getElementById('editBioInput').value = data.bio || '';
-            overlay.classList.add('show');
+            const editName = document.getElementById('editName');
+            const editBio = document.getElementById('editBioInput');
+            if (editName) editName.value = data.fullName || '';
+            if (editBio) editBio.value = data.bio || '';
+            if (overlay) overlay.classList.add('show');
         };
     }
     
     if (saveBtn) {
         saveBtn.onclick = async () => {
-            const newName = document.getElementById('editName').value.trim();
+            const newName = document.getElementById('editName')?.value.trim();
             if (!newName) {
                 showToast('Enter your name', 'error');
                 return;
             }
             await updateDoc(doc(db, 'users', currentUser.uid), {
                 fullName: newName,
-                bio: document.getElementById('editBioInput').value.trim()
+                bio: document.getElementById('editBioInput')?.value.trim() || ''
             });
             await updateProfile(currentUser, { displayName: newName });
-            overlay.classList.remove('show');
+            if (overlay) overlay.classList.remove('show');
             showToast('Profile updated', 'success');
             renderProfile();
         };
     }
     
     if (cancelBtn) {
-        cancelBtn.onclick = () => overlay.classList.remove('show');
+        cancelBtn.onclick = () => {
+            if (overlay) overlay.classList.remove('show');
+        };
     }
     
     if (logoutBtn) {
@@ -426,7 +431,9 @@ export function initProfile() {
         };
     }
     
-    overlay?.addEventListener('click', (e) => {
-        if (e.target === overlay) overlay.classList.remove('show');
-    });
+    if (overlay) {
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) overlay.classList.remove('show');
+        });
+    }
 }

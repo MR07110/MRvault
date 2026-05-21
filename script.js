@@ -1,6 +1,6 @@
 // Main entry point - loads all modules
 import './modules/config.js';
-import { initAuth, onAuthStateChange } from './modules/auth.js';
+import { initAuthUI, onAuthStateChange } from './modules/auth.js';
 import { initUI, showToast } from './modules/ui.js';
 import { initFeed, setCurrentUser, loadViewedPostsFromStorage } from './modules/feed.js';
 import { initReels } from './modules/reels.js';
@@ -33,6 +33,7 @@ async function initApp() {
     initMuteSystem();
     initComments();
     initUpload();
+    initAuthUI();  // <-- initAuthUI emas, initAuth
     
     // Auth state listener
     onAuthStateChange(async (user) => {
@@ -40,9 +41,12 @@ async function initApp() {
         setCurrentUser(user);
         
         if (user) {
-            document.getElementById('authStateLoader')?.remove();
-            document.getElementById('authWrap').classList.remove('show');
-            document.getElementById('app').classList.add('show');
+            const loader = document.getElementById('authStateLoader');
+            if (loader) loader.remove();
+            const authWrap = document.getElementById('authWrap');
+            const app = document.getElementById('app');
+            if (authWrap) authWrap.classList.remove('show');
+            if (app) app.classList.add('show');
             showToast(`Welcome back, ${user.displayName || 'User'}!`, 'success');
             
             await initFeed();
@@ -52,9 +56,12 @@ async function initApp() {
             // Render home feed
             import('./modules/feed.js').then(({ renderFeed }) => renderFeed());
         } else {
-            document.getElementById('app').classList.remove('show');
-            document.getElementById('authWrap').classList.add('show');
-            document.getElementById('authStateLoader')?.remove();
+            const app = document.getElementById('app');
+            const authWrap = document.getElementById('authWrap');
+            const loader = document.getElementById('authStateLoader');
+            if (app) app.classList.remove('show');
+            if (authWrap) authWrap.classList.add('show');
+            if (loader) loader.remove();
         }
     });
 }
