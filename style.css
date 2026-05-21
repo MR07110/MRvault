@@ -2580,165 +2580,202 @@ body {
 }
 
 /* ═══════════════════════════════════════════════
-   DESKTOP SIDEBAR LAYOUT  (≥ 768px)
+   DESKTOP SIDEBAR — narrow icon-only (≥ 768px)
    ═══════════════════════════════════════════════ */
 
-/* ── Sidebar-only elements: hidden on mobile ── */
+/* sidebar-only elements: hidden on mobile */
 .sb-top, .sb-search-row, .sb-tabs, .sb-bottom, .sb-create-label { display: none; }
 
-@media (min-width: 768px) {
-  :root {
-    --sidebar: 220px;
-  }
+/* Search flyout panel (desktop) */
+#sbSearchPanel {
+  display: none;
+  position: fixed;
+  top: 0; bottom: 0;
+  left: 68px;
+  width: 320px;
+  background: var(--bg2);
+  border-right: 1px solid var(--glass-border);
+  z-index: 90;
+  flex-direction: column;
+  padding: 28px 16px 20px;
+  gap: 14px;
+  box-shadow: 4px 0 24px rgba(0,0,0,0.3);
+}
+#sbSearchPanel.open { display: flex; }
 
-  /* ── Hide top header on desktop ── */
+.sb-panel-title {
+  font-size: 20px; font-weight: 700; letter-spacing: -0.4px;
+  color: var(--text);
+}
+.sb-panel-input-wrap {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--bg3); border: 1px solid var(--line);
+  border-radius: 12px; padding: 9px 12px;
+  transition: var(--transition);
+}
+.sb-panel-input-wrap:focus-within {
+  border-color: rgba(91,142,245,0.35);
+  background: rgba(91,142,245,0.04);
+}
+.sb-panel-input-wrap svg { flex-shrink: 0; color: var(--text3); }
+.sb-panel-input {
+  background: none; border: none; outline: none;
+  color: var(--text); font-family: var(--font); font-size: 14px; width: 100%;
+}
+.sb-panel-input::placeholder { color: var(--text3); }
+
+/* Tabs inside search panel */
+.sb-panel-tabs {
+  display: flex; gap: 4px;
+  background: var(--bg3); border: 1px solid var(--line);
+  border-radius: 12px; padding: 3px;
+}
+.sb-panel-tab {
+  flex: 1; padding: 7px 0; border-radius: 9px;
+  font-size: 12px; font-weight: 500; font-family: var(--font);
+  cursor: pointer; border: none; background: none; color: var(--text2);
+  transition: var(--transition);
+}
+.sb-panel-tab.on {
+  background: linear-gradient(135deg, var(--blue3), var(--blue));
+  color: #fff;
+}
+
+@media (min-width: 768px) {
+  :root { --sidebar: 68px; }
+
+  /* ── Hide top header ── */
   .app-hdr { display: none !important; }
 
-  /* ── Bot-nav → Left Sidebar ── */
+  /* ── Nav → narrow left sidebar ── */
   .bot-nav {
     top: 0; left: 0; bottom: 0; right: auto;
     width: var(--sidebar);
     height: 100dvh;
     flex-direction: column;
     justify-content: flex-start;
-    align-items: stretch;
-    gap: 2px;
-    padding: 20px 10px 20px;
+    align-items: center;
+    gap: 4px;
+    padding: 16px 0 16px;
     border-top: none;
     border-right: 1px solid var(--glass-border);
     border-bottom: none;
-    overflow-y: auto;
-    scrollbar-width: none;
+    overflow: visible;
   }
   .bot-nav::before {
-    top: 0; bottom: 0; left: auto; right: 0; width: 1px; height: auto;
-    background: linear-gradient(180deg, transparent, rgba(91,142,245,0.12), transparent);
+    top: 0; bottom: 0; left: auto; right: 0;
+    width: 1px; height: auto;
+    background: linear-gradient(180deg, transparent, rgba(91,142,245,0.1), transparent);
   }
 
-  /* ── Sidebar top: logo + search + tabs ── */
-  .sb-top { display: flex; flex-direction: column; gap: 14px; padding: 0 4px 16px; margin-bottom: 8px; }
-
+  /* ── Logo at top ── */
+  .sb-top {
+    display: flex; flex-direction: column; align-items: center;
+    padding-bottom: 16px; margin-bottom: 4px; width: 100%;
+    border-bottom: 1px solid var(--line);
+  }
   .sb-logo-row {
-    display: flex; align-items: center; gap: 8px;
-    padding: 4px 2px;
+    display: flex; align-items: center; justify-content: center;
+    width: 44px; height: 44px;
   }
-  .sb-brand-text {
-    font-weight: 700; font-size: 17px; letter-spacing: -0.3px;
-    background: linear-gradient(135deg, #fff, var(--blue2));
-    -webkit-background-clip: text; background-clip: text; color: transparent;
-  }
+  /* hide text brand — icon only */
+  .sb-brand-text, .sb-search-row, .sb-tabs { display: none; }
 
-  /* ── Search input always visible in sidebar ── */
-  .sb-search-row {
-    display: flex; align-items: center; gap: 8px;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    padding: 8px 12px;
-    transition: var(--transition);
-    color: var(--text3);
-  }
-  .sb-search-row:focus-within {
-    border-color: rgba(91,142,245,0.3);
-    background: rgba(91,142,245,0.04);
-    color: var(--blue);
-  }
-  .sb-search-input {
-    background: none; border: none; outline: none;
-    color: var(--text); font-family: var(--font); font-size: 13px;
-    width: 100%;
-  }
-  .sb-search-input::placeholder { color: var(--text3); font-size: 12px; }
-
-  /* ── Tabs ── */
-  .sb-tabs {
-    display: flex; gap: 4px;
-    background: var(--bg3);
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    padding: 3px;
-  }
-  .sb-tab {
-    flex: 1; padding: 6px 0; border-radius: 8px;
-    font-size: 12px; font-weight: 500; font-family: var(--font);
-    cursor: pointer; border: none; background: none; color: var(--text2);
-    transition: var(--transition);
-  }
-  .sb-tab.on {
-    background: linear-gradient(135deg, var(--blue3), var(--blue));
-    color: #fff;
-  }
-
-  /* ── Nav buttons: horizontal → vertical ── */
+  /* ── Nav buttons — icon only, centered ── */
   .nav-btn {
-    flex-direction: row;
-    justify-content: flex-start;
-    width: 100%;
-    padding: 10px 12px;
-    gap: 12px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 44px; height: 44px;
+    padding: 0;
+    gap: 0;
     border-radius: 14px;
+    flex-shrink: 0;
   }
-  .nav-btn:hover { transform: none; background: rgba(255,255,255,0.05); }
-  .nav-btn svg { width: 20px; height: 20px; flex-shrink: 0; }
-  .nav-btn span { font-size: 13px; font-weight: 500; letter-spacing: -0.1px; }
-  .nav-btn.on { background: rgba(91,142,245,0.1); }
+  .nav-btn span { display: none; }
+  .nav-btn svg { width: 22px; height: 22px; }
+  .nav-btn:hover { transform: none; background: rgba(255,255,255,0.07); }
+  .nav-btn.on { background: rgba(91,142,245,0.12); }
   .nav-btn.on svg { stroke: var(--blue); }
-  .nav-btn.on span { color: var(--blue); }
 
-  /* ── Create button: pill style in sidebar ── */
+  /* ── Create button — compact circle ── */
   .nav-center-btn {
-    width: 100%;
-    height: 44px;
+    width: 44px; height: 44px;
     border-radius: 14px;
-    margin: 4px 0;
-    flex-direction: row;
-    justify-content: flex-start;
-    padding: 0 12px;
-    gap: 12px;
-    order: unset;
+    margin: 0;
+    flex-shrink: 0;
   }
   .nav-center-btn::after { display: none; }
-  .sb-create-label {
-    display: block;
-    font-size: 13px; font-weight: 500; color: #fff; letter-spacing: -0.1px;
-  }
+  .sb-create-label { display: none; }
 
-  /* ── Bottom spacer + mute ── */
+  /* ── Bottom: mute icon ── */
   .sb-bottom {
-    display: flex; flex-direction: column; margin-top: auto; padding-top: 12px;
+    display: flex; flex-direction: column; align-items: center;
+    margin-top: auto; padding-top: 12px; width: 100%;
     border-top: 1px solid var(--line);
   }
   .sb-mute-btn {
-    display: flex; align-items: center; gap: 12px;
-    padding: 10px 12px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    width: 44px; height: 44px; border-radius: 14px;
     background: none; border: none; color: var(--text2);
-    cursor: pointer; font-family: var(--font); font-size: 13px; font-weight: 500;
-    width: 100%; transition: var(--transition);
+    cursor: pointer; transition: var(--transition); padding: 0;
   }
-  .sb-mute-btn:hover { background: rgba(255,255,255,0.05); color: var(--text); }
-  .sb-mute-btn.is-unmuted { color: var(--blue); }
-  .sb-mute-btn.is-unmuted svg { stroke: var(--blue); }
+  .sb-mute-btn span { display: none; }
+  .sb-mute-btn:hover { background: rgba(255,255,255,0.07); color: var(--text); }
+  .sb-mute-btn.is-unmuted { color: var(--blue); background: rgba(91,142,245,0.1); }
 
-  /* ── Shift all content right by sidebar width ── */
+  /* ── Tooltips on hover ── */
+  .nav-btn[data-v], .nav-center-btn, .sb-mute-btn {
+    position: relative;
+  }
+  .nav-btn[data-v]::after,
+  .nav-center-btn::after,
+  .sb-mute-btn::after {
+    content: attr(data-tip);
+    position: absolute;
+    left: calc(100% + 12px);
+    top: 50%; transform: translateY(-50%);
+    background: var(--bg4);
+    border: 1px solid var(--line2);
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 12px; font-weight: 500;
+    padding: 5px 10px; border-radius: 8px;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0; transition: opacity 0.15s;
+    z-index: 200;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  }
+  .nav-btn[data-v]:hover::after,
+  .nav-center-btn:hover::after,
+  .sb-mute-btn:hover::after { opacity: 1; }
+  /* nav-center-btn::after is used for tooltip, not shine */
+  .nav-center-btn::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 50%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.12), transparent);
+    border-radius: 14px 14px 0 0;
+  }
+
+  /* ── Shift content right ── */
   #homeView, #followingView, #reelsView, #profileView {
     margin-left: var(--sidebar);
     padding-bottom: 24px;
   }
-  #homeView, #followingView {
-    padding-top: 24px;
-  }
-  #reelsView {
-    padding-top: 0;
-  }
+  #homeView, #followingView { padding-top: 24px; }
+  #reelsView { padding-top: 0; margin-left: var(--sidebar); }
 
-  /* ── Feed: max-width on desktop ── */
+  /* ── Feed centered, max-width ── */
   .feed {
     max-width: 560px;
     margin: 0 auto;
     padding: 0 16px;
   }
 
-  /* ── Post cards get a border on desktop ── */
+  /* ── Post cards on desktop ── */
   .post {
     border-radius: 16px;
     border: 1px solid var(--line);
@@ -2748,52 +2785,31 @@ body {
   }
   .post-media { margin: 10px -14px; border-radius: 0; }
 
-  /* ── Profile view: center on desktop ── */
-  #profileView {
-    max-width: 900px;
-    margin-left: calc(var(--sidebar) + auto);
-    padding-top: 24px;
-  }
-  /* actually let it fill and center content */
+  /* ── Profile ── */
   #profileView { margin-left: var(--sidebar); }
 
-  /* ── Reels mute button: adjust for sidebar ── */
-  .reels-mute-btn {
-    left: calc(var(--sidebar) + 14px);
-    right: auto;
-  }
+  /* ── Reels mute btn ── */
+  .reels-mute-btn { right: 14px; left: auto; }
 
-  /* ── Following view ── */
-  #followingView .feed {
-    max-width: 560px;
-    margin: 0 auto;
-    padding: 0 16px;
-  }
+  /* ── Following feed ── */
+  #followingView .feed { max-width: 560px; margin: 0 auto; padding: 0 16px; }
 
-  /* ── Detail modal: center on desktop, wider ── */
+  /* ── Detail modal ── */
   #detailContent {
-    max-width: 600px;
+    max-width: 580px;
     border-radius: 20px;
     margin-bottom: 20px;
   }
-  #detailModal {
-    padding-left: var(--sidebar);
-  }
+  #detailModal { padding-left: var(--sidebar); }
 
-  /* ── User profile modal: account for sidebar ── */
-  #userProfileModal {
-    left: var(--sidebar);
-  }
+  /* ── User profile modal: next to sidebar ── */
+  #userProfileModal { left: var(--sidebar); }
   .up-back { left: calc(var(--sidebar) + 14px); }
 }
 
-/* ── Profile avatar overflow fix (all screens) ── */
-.up-cover {
-  overflow: visible !important;
-}
-.up-cover > *:not(.up-avi-wrap) {
-  overflow: hidden;
-}
+/* ── Profile avatar overflow fix ── */
+.up-cover { overflow: visible !important; }
+.up-cover::after { clip-path: inset(0); }
 
 /* ── Detail modal above user profile modal ── */
 #detailModal { z-index: 400 !important; }

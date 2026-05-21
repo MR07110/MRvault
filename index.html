@@ -152,23 +152,27 @@
       </div>
     </div>
 
-    <button class="nav-btn on" data-v="home">
+    <button class="nav-btn on" data-v="home" data-tip="Home">
       <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
       <span>Home</span>
     </button>
-    <button class="nav-btn" data-v="reels">
+    <button class="nav-btn sb-search-toggle" id="sbSearchToggle" data-tip="Search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <span>Search</span>
+    </button>
+    <button class="nav-btn" data-v="reels" data-tip="Reels">
       <svg viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="m10 8 6 4-6 4V8z"/></svg>
       <span>Reels</span>
     </button>
-    <button class="nav-center-btn" id="createBtn">
+    <button class="nav-center-btn" id="createBtn" data-tip="Create">
       <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       <span class="sb-create-label">Create</span>
     </button>
-    <button class="nav-btn" data-v="following">
+    <button class="nav-btn" data-v="following" data-tip="Following">
       <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
       <span>Following</span>
     </button>
-    <button class="nav-btn" data-v="profile">
+    <button class="nav-btn" data-v="profile" data-tip="Profile">
       <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
       <span>Profile</span>
     </button>
@@ -291,6 +295,19 @@
     <div id="confirmMsg" style="font-size:14px;color:var(--text2);margin-bottom:20px;text-align:center"></div>
     <button class="btn-danger" id="confirmOkBtn">Confirm</button>
     <button class="btn-ghost"  id="confirmCancelBtn">Cancel</button>
+  </div>
+</div>
+
+<!-- DESKTOP SEARCH PANEL -->
+<div id="sbSearchPanel">
+  <div class="sb-panel-title">Search</div>
+  <div class="sb-panel-input-wrap">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input type="text" class="sb-panel-input" id="sbPanelInput" placeholder="Search posts, people...">
+  </div>
+  <div class="sb-panel-tabs">
+    <button class="sb-panel-tab on" data-stab="all">All</button>
+    <button class="sb-panel-tab" data-stab="mine">My posts</button>
   </div>
 </div>
 

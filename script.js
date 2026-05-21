@@ -1856,12 +1856,31 @@ function switchView(v) {
 
 document.querySelectorAll('.nav-btn[data-v]').forEach(b => b.addEventListener('click', () => switchView(b.dataset.v)));
 
-/* ── Desktop sidebar search ── */
-const sbSearchInput = $('sbSearchInput');
-if (sbSearchInput) {
-  sbSearchInput.oninput = e => {
+/* ── Desktop search flyout panel ── */
+const sbSearchToggle = $('sbSearchToggle');
+const sbSearchPanel  = $('sbSearchPanel');
+const sbPanelInput   = $('sbPanelInput');
+
+if (sbSearchToggle && sbSearchPanel) {
+  sbSearchToggle.addEventListener('click', e => {
+    e.stopPropagation();
+    const isOpen = sbSearchPanel.classList.toggle('open');
+    sbSearchToggle.classList.toggle('on', isOpen);
+    if (isOpen && sbPanelInput) setTimeout(() => sbPanelInput.focus(), 60);
+  });
+
+  // Close panel on outside click
+  document.addEventListener('click', e => {
+    if (!sbSearchPanel.contains(e.target) && e.target !== sbSearchToggle) {
+      sbSearchPanel.classList.remove('open');
+      sbSearchToggle.classList.remove('on');
+    }
+  });
+}
+
+if (sbPanelInput) {
+  sbPanelInput.oninput = e => {
     search = e.target.value;
-    // Sync with header search too
     const hi = $('searchInput');
     if (hi) hi.value = search;
     clearTimeout(window._sT);
@@ -1872,18 +1891,23 @@ if (sbSearchInput) {
   };
 }
 
-/* ── Desktop sidebar tabs ── */
+/* ── Desktop sidebar panel tabs ── */
+document.querySelectorAll('.sb-panel-tab[data-stab]').forEach(b => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('.sb-panel-tab').forEach(x => x.classList.remove('on'));
+    document.querySelectorAll('.hdr-tab').forEach(x => x.classList.toggle('on', x.dataset.tab === b.dataset.stab));
+    b.classList.add('on');
+    tab = b.dataset.stab; visibleN = 8; renderFeed();
+  });
+});
+
+/* ── Sidebar old tab elements (kept for mobile compatibility) ── */
 document.querySelectorAll('.sb-tab[data-stab]').forEach(b => {
   b.addEventListener('click', () => {
     document.querySelectorAll('.sb-tab').forEach(x => x.classList.remove('on'));
-    // Also sync header tabs
-    document.querySelectorAll('.hdr-tab').forEach(x => {
-      x.classList.toggle('on', x.dataset.tab === b.dataset.stab);
-    });
+    document.querySelectorAll('.hdr-tab').forEach(x => x.classList.toggle('on', x.dataset.tab === b.dataset.stab));
     b.classList.add('on');
-    tab = b.dataset.stab;
-    visibleN = 8;
-    renderFeed();
+    tab = b.dataset.stab; visibleN = 8; renderFeed();
   });
 });
 
