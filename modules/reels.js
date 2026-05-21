@@ -4,9 +4,9 @@ import { toast }                                   from './toast.js';
 import { userCache, setupViewObserver, trackView } from './cache.js';
 import { follow, unfollow }                        from './auth.js';
 import {
-  collection, query, orderBy, doc, getDoc,
-  getDocs, deleteDoc, setDoc, updateDoc,
-  serverTimestamp, increment
+  collection, doc, getDoc, getDocs,
+  deleteDoc, setDoc, updateDoc,
+  serverTimestamp
 } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
 /* ── Main reels render ───────────────────────────────────────────────── */
@@ -282,7 +282,6 @@ export function bindReelEvents(reels, uMap) {
     });
   });
 
-  // IntersectionObserver for auto-play
   if (state.reelObs) state.reelObs.disconnect();
   state.reelObs = new IntersectionObserver(entries => {
     entries.forEach(async en => {
@@ -305,7 +304,6 @@ export function bindReelEvents(reels, uMap) {
             if (fill) fill.style.width = '0%';
           };
         }
-        // Preload next reel
         const nextReel = en.target.nextElementSibling;
         if (nextReel) {
           const nv = nextReel.querySelector('video');
@@ -355,7 +353,7 @@ export async function doReelLike(postId, btn) {
   const pRef = doc(db,'posts',postId);
   try {
     if (wasLiked) {
-      await Promise.all([deleteDoc(lRef), updateDoc(pRef, { likes: Math.max(0,cur-1) })]);
+      await Promise.all([deleteDoc(lRef), updateDoc(pRef,{likes:Math.max(0,cur-1)})]);
     } else {
       await Promise.all([setDoc(lRef,{userId:state.me.uid,createdAt:serverTimestamp()}), updateDoc(pRef,{likes:cur+1})]);
     }

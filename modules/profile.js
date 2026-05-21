@@ -1,10 +1,10 @@
-import { db, sb, state }                           from './config.js';
+import { db, sb, state }                 from './config.js';
 import { $, esc, fmt, fmtSz, defAvi,
-         initVidWrap, toggleVidPlay, seekVid }     from './utils.js';
-import { toast }                                   from './toast.js';
-import { userCache }                               from './cache.js';
-import { follow, unfollow, refreshMyFollowing }    from './auth.js';
-import { refreshReelFollowButtons }                from './reels.js';
+         initVidWrap }                   from './utils.js';
+import { toast }                         from './toast.js';
+import { userCache }                     from './cache.js';
+import { follow, unfollow }              from './auth.js';
+import { refreshReelFollowButtons }      from './reels.js';
 import {
   collection, query, orderBy, doc, getDoc,
   getDocs, deleteDoc, setDoc, updateDoc,
@@ -40,14 +40,14 @@ export async function renderProfile() {
     inp.onchange = async e => {
       const f = e.target.files[0];
       if (!f || !f.type.startsWith('image/')) return;
-      if (f.size > 5*1024*1024) { toast('Avatar 5 MB dan kichik bo\'lsin', 'error'); return; }
+      if (f.size > 5*1024*1024) { toast('Avatar must be under 5 MB', 'error'); return; }
       const path = `avatars/${state.me.uid}/${Date.now()}`;
       const {data, error} = await sb.storage.from('videos').upload(path, f, {upsert:true, contentType: f.type});
-      if (error) { toast('Xato: '+error.message, 'error'); return; }
+      if (error) { toast('Error: '+error.message, 'error'); return; }
       const {data:{publicUrl}} = sb.storage.from('videos').getPublicUrl(data.path);
       await updateDoc(doc(db,'users',state.me.uid), {avatar: publicUrl});
       userCache.delete(state.me.uid);
-      renderProfile(); toast('Avatar yangilandi', 'success');
+      renderProfile(); toast('Avatar updated', 'success');
     };
     inp.click();
   };
@@ -61,7 +61,8 @@ export function renderProfileGrid(posts) {
       <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" style="opacity:.3;margin:0 auto 10px;display:block">
         <rect x="3" y="3" width="18" height="18" rx="2"/><path d="m3 9 4-4 4 4 4-4 4 4"/>
       </svg>
-      Hali post yo'q\n    </div>`;
+      No posts yet
+    </div>`;
     return;
   }
   $('profileGrid').innerHTML = posts.map(p => {
@@ -91,7 +92,6 @@ export function renderProfileGrid(posts) {
 export async function openDetail(id) {
   const p = state.allPosts.find(x => x.id === id); if (!p) return;
 
-  // Show skeleton immediately
   $('detailContent').innerHTML = `
     <div class="dm-handle"></div>
     <div style="display:flex;align-items:center;gap:10px;padding:14px 16px 10px">
@@ -129,7 +129,7 @@ export async function openDetail(id) {
     <div class="dm-head">
       <div class="dm-avi${isOwn?'':' dm-avi-link'}" ${isOwn?'':('data-uid="'+p.userId+'"')}><img src="${av}" onerror="this.style.display='none'"></div>
       <div class="dm-meta">
-        <div class="dm-name${isOwn?'':' dm-name-link'}" ${isOwn?'':('data-uid="'+p.userId+'"')}>${esc(ud.fullName||'Anonim')}</div>
+        <div class="dm-name${isOwn?'':' dm-name-link'}" ${isOwn?'':('data-uid="'+p.userId+'"')}>${esc(ud.fullName||'Anonymous')}</div>
         <div class="dm-time">${fmt(p.createdAt)}</div>
       </div>
       <button class="dm-close" id="dmClose"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
@@ -171,11 +171,8 @@ export async function openDetail(id) {
     $('dmLikeCount').textContent  = n;
     $('dmLikeCount2').textContent = n;
   };
-  $('dmCmtBtn').onclick = () => {
-    closeDetail();
-    import('./comments.js').then(({ openCmtModal }) => openCmtModal(id));
-  };
-  $('dmShareBtn')?.addEventListener('click', () => { navigator.clipboard?.writeText(p.mediaUrl); toast('Havola nusxalandi','info'); });
+  $('dmCmtBtn').onclick = () => { closeDetail(); import('./comments.js').then(({ openCmtModal }) => openCmtModal(id)); };
+  $('dmShareBtn')?.addEventListener('click', () => { navigator.clipboard?.writeText(p.mediaUrl); toast('Link copied','info'); });
   $('detailContent').querySelectorAll('.dm-avi-link,.dm-name-link').forEach(el => {
     el.addEventListener('click', () => { closeDetail(); openUserProfileModal(el.dataset.uid); });
   });
@@ -190,12 +187,10 @@ export async function doLikeGen(id, btn) {
   const svg      = btn.querySelector('svg');
   if (wasLiked) {
     state.myLikedPosts.delete(id);
-    state._knownUnliked.add(id);   // FIX: doFeedLike bilan sinxronlash
     await Promise.all([deleteDoc(lRef), updateDoc(pRef,{likes:Math.max(0,cur-1)})]);
     btn.classList.remove('liked'); svg.setAttribute('fill','none'); svg.setAttribute('stroke','currentColor');
   } else {
     state.myLikedPosts.add(id);
-    state._knownUnliked.delete(id); // FIX: doFeedLike bilan sinxronlash
     await Promise.all([setDoc(lRef,{userId:state.me.uid,createdAt:serverTimestamp()}), updateDoc(pRef,{likes:cur+1})]);
     btn.classList.add('liked'); svg.setAttribute('fill','#f04060'); svg.setAttribute('stroke','#f04060');
   }
@@ -225,7 +220,7 @@ export async function renderUserProfileModal(uid) {
   const isF            = state.myFollowing.has(uid);
 
   const gridHTML = userPublicPosts.length === 0
-    ? '<div style="grid-column:1/-1;padding:32px;text-align:center;color:var(--text3);font-size:13px">Ommaviy post yo\'q</div>'
+    ? '<div style="grid-column:1/-1;padding:32px;text-align:center;color:var(--text3);font-size:13px">No public posts</div>'
     : userPublicPosts.map(p => {
         let c = '';
         if (p.mediaUrl && p.mediaType?.startsWith('image'))
@@ -253,16 +248,16 @@ export async function renderUserProfileModal(uid) {
   $('upBody').innerHTML = `
     <div class="up-cover"><div class="up-avi-wrap"><div class="up-avi"><img src="${av}" onerror="this.src='${defAvi(ud.fullName || 'U')}'" style="width:100%;height:100%;object-fit:cover"></div></div></div>
     <div class="up-info">
-      <div class="up-name">${esc(ud.fullName||'Anonim')}</div>
+      <div class="up-name">${esc(ud.fullName||'Anonymous')}</div>
       ${ud.bio ? `<div class="up-bio">${esc(ud.bio)}</div>` : ''}
       <div class="up-stats">
-        <div class="up-stat"><div class="up-stat-val">${userPublicPosts.length}</div><div class="up-stat-lbl">postlar</div></div>
-        <div class="up-stat"><div class="up-stat-val">${totalLikes}</div><div class="up-stat-lbl">layklar</div></div>
-        <div class="up-stat"><div class="up-stat-val">${followersCount}</div><div class="up-stat-lbl">kuzatuvchilar</div></div>
-        <div class="up-stat"><div class="up-stat-val">${followingCount}</div><div class="up-stat-lbl">kuzatilayotgan</div></div>
+        <div class="up-stat"><div class="up-stat-val">${userPublicPosts.length}</div><div class="up-stat-lbl">posts</div></div>
+        <div class="up-stat"><div class="up-stat-val">${totalLikes}</div><div class="up-stat-lbl">likes</div></div>
+        <div class="up-stat"><div class="up-stat-val">${followersCount}</div><div class="up-stat-lbl">followers</div></div>
+        <div class="up-stat"><div class="up-stat-val">${followingCount}</div><div class="up-stat-lbl">following</div></div>
       </div>
       <button class="up-follow-btn ${isF?'is-following':'not-following'}" id="upFollowBtn" data-uid="${uid}">
-        ${isF ? 'Kuzatilmoqda' : 'Kuzatish'}
+        ${isF ? 'Following' : 'Follow'}
       </button>
       <div class="up-posts-tab">
         <span class="up-posts-tab-item">
@@ -280,12 +275,12 @@ export async function renderUserProfileModal(uid) {
       if (currently) {
         state.myFollowing.delete(uid);
         followBtn.className   = 'up-follow-btn not-following';
-        followBtn.textContent = 'Kuzatish';
+        followBtn.textContent = 'Follow';
         unfollow(uid).catch(() => {});
       } else {
         state.myFollowing.add(uid);
         followBtn.className   = 'up-follow-btn is-following';
-        followBtn.textContent = 'Kuzatilmoqda';
+        followBtn.textContent = 'Following';
         follow(uid).catch(() => {});
       }
       refreshReelFollowButtons();
@@ -303,13 +298,13 @@ export async function renderUserProfileModal(uid) {
 }
 
 $('upBack').onclick = () => {
-  state.currentViewingUserId   = null;
+  state.currentViewingUserId    = null;
   state.currentViewingUserPosts = [];
   $('userProfileModal').classList.remove('show');
 };
 $('userProfileModal').addEventListener('click', e => {
   if (e.target === $('userProfileModal')) {
-    state.currentViewingUserId   = null;
+    state.currentViewingUserId    = null;
     state.currentViewingUserPosts = [];
     $('userProfileModal').classList.remove('show');
   }

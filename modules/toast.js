@@ -1,6 +1,6 @@
 /**
- * Toast notification module — queue tizimi bilan.
- * Tezkor ketma-ket toast lar bir-birini ustma-ust yopmaydi.
+ * Toast notification module with queue system.
+ * Rapid successive toasts don't overlap.
  */
 
 const _queue = [];

@@ -5,41 +5,26 @@ import { toast }  from './toast.js';
 export const $    = id => document.getElementById(id);
 export const esc  = s  => s ? String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') : '';
 
-/** FIX: Relative time — "3 soat oldin", "2 kun oldin" */
 export const fmt  = ts => {
   if (!ts) return '';
-  const d    = ts.toDate ? ts.toDate() : new Date(ts);
-  const diff = Date.now() - d.getTime();
-  if (diff < 60000)        return 'hozir';
-  if (diff < 3600000)      return `${Math.floor(diff / 60000)} daq. oldin`;
-  if (diff < 86400000)     return `${Math.floor(diff / 3600000)} soat oldin`;
-  if (diff < 604800000)    return `${Math.floor(diff / 86400000)} kun oldin`;
-  return new Intl.DateTimeFormat('uz', { day:'numeric', month:'short' }).format(d);
+  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  return new Intl.DateTimeFormat('en', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' }).format(d);
 };
 
 export const fmtSz  = b  => b > 1048576 ? (b/1048576).toFixed(1)+' MB' : (b/1024).toFixed(0)+' KB';
 export const initL  = n  => (n && n[0] ? n[0].toUpperCase() : 'U');
-export const uToEmail = u => `${u.toLowerCase().replace(/[^a-z0-9_]/g,'').replace(/_/g,'')}@mrtube.uz`;
+export const uToEmail = u => `${u.toLowerCase().replace(/[^a-z0-9]/g,'')}@mrtube.uz`;
 export const clr    = n  => {
   const c = ['#4f8ef7','#3ecf8e','#e84057','#f5a623','#9b59b6','#1abc9c'];
   return c[Math.abs((n||'').length) % c.length];
 };
 export const defAvi = n => {
   const l = initL(n), c = clr(n);
-  return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect width='100' height='100' fill='${encodeURIComponent(c)}' rx='50'/%3E%3Ctext x='50' y='68' text-anchor='middle' fill='white' font-size='44' font-weight='600' font-family='DM Sans,sans-serif'%3E${l}%3E/text%3E%3C/svg%3E`;
+  return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect width='100' height='100' fill='${encodeURIComponent(c)}' rx='50'/%3E%3Ctext x='50' y='68' text-anchor='middle' fill='white' font-size='44' font-weight='600' font-family='DM Sans,sans-serif'%3E${l}%3C/text%3E%3C/svg%3E`;
 };
 
-/* ── Username validation ─────────────────────────────────────────────── */
-/** FIX: Qat'iy username validation — faqat kichik harf, raqam, _ belgisi */
-export function validateUsername(u) {
-  if (!u || u.length < 3) return 'Username kamida 3 ta belgi bo\'lsin';
-  if (u.length > 20)       return 'Username 20 belgidan oshmasin';
-  if (!/^[a-z0-9_]+$/.test(u)) return 'Faqat kichik harf, raqam va _ belgisi';
-  return null;
-}
-
 /* ── Confirm dialog ───────────────────────────────────────────────────── */
-export function showConfirm(msg, onOk, title = 'Tasdiqlaysizmi?') {
+export function showConfirm(msg, onOk, title = 'Are you sure?') {
   $('confirmTitle').textContent = title;
   $('confirmMsg').textContent   = msg;
   $('confirmOverlay').classList.add('show');
@@ -48,7 +33,7 @@ export function showConfirm(msg, onOk, title = 'Tasdiqlaysizmi?') {
   const close  = () => $('confirmOverlay').classList.remove('show');
   const newOk  = ok.cloneNode(true);
   ok.parentNode.replaceChild(newOk, ok);
-  newOk.onclick     = () => { close(); onOk(); };
+  newOk.onclick  = () => { close(); onOk(); };
   cancel.onclick = close;
 }
 
@@ -98,10 +83,9 @@ export function setPlayState(wrap, playing) {
 }
 
 export function initVidWrap(wrap) {
-  if (!wrap || wrap._init) return;
-  wrap._init = true;
   const vid = wrap.querySelector('video');
-  if (!vid) return;
+  if (!vid || vid._inited) return;
+  vid._inited = true;
   vid.muted = state.globalMuted;
   const volIc = wrap.querySelector('.ic-vol'), mutedIc = wrap.querySelector('.ic-muted');
   if (volIc)   volIc.style.display   = state.globalMuted ? 'none' : '';
@@ -123,7 +107,6 @@ export function initVidWrap(wrap) {
   vid.addEventListener('pause', () => setPlayState(wrap, false));
 }
 
-/* ── FIX: event delegation orqali video tugmalari ────────────────────── */
 export function toggleVidPlay(el) {
   const wrap = el.closest ? el.closest('.vid-wrap') : el;
   const vid  = wrap?.querySelector('video');
@@ -149,10 +132,8 @@ export function toggleMute(wrap) {
   if (!vid) return;
   vid.muted = !vid.muted;
   state.globalMuted = vid.muted;
-  const volIc   = wrap.querySelector('.ic-vol');
-  const mutedIc = wrap.querySelector('.ic-muted');
-  if (volIc)   volIc.style.display   = vid.muted ? 'none' : '';
-  if (mutedIc) mutedIc.style.display = vid.muted ? '' : 'none';
+  wrap.querySelector('.ic-vol').style.display   = vid.muted ? 'none' : '';
+  wrap.querySelector('.ic-muted').style.display = vid.muted ? '' : 'none';
   document.dispatchEvent(new CustomEvent('mutestatechange'));
 }
 
@@ -163,7 +144,7 @@ export function reqFullscreen(wrap) {
   else if (vid.webkitRequestFullscreen) vid.webkitRequestFullscreen();
 }
 
-/* ── FIX: Event delegation — global onclick handler ─────────────────── */
+/* ── Event delegation for video controls ─────────────────────────────── */
 document.addEventListener('click', e => {
   const wrap = e.target.closest('.vid-wrap');
   if (!wrap) return;
@@ -183,10 +164,10 @@ document.addEventListener('click', e => {
 
 /* ── File download ────────────────────────────────────────────────────── */
 export async function dlFile(url, name) {
-  toast('Yuklanmoqda...', 'info', 8000);
+  toast('Downloading...', 'info', 8000);
   try {
     const res  = await fetch(url);
-    if (!res.ok) throw new Error('Tarmoq xatosi');
+    if (!res.ok) throw new Error('Network error');
     const blob = await res.blob();
     const burl = URL.createObjectURL(blob);
     const a    = document.createElement('a');
@@ -195,10 +176,10 @@ export async function dlFile(url, name) {
     document.body.appendChild(a);
     a.click();
     setTimeout(() => { URL.revokeObjectURL(burl); a.remove(); }, 1000);
-    toast('Yuklandi!', 'success');
+    toast('Downloaded!', 'success');
   } catch {
     window.open(url, '_blank');
-    toast('Yangi tabda ochildi', 'info');
+    toast('Opened in new tab', 'info');
   }
 }
 
@@ -218,7 +199,7 @@ $('zoomModal').onclick = e => {
   if (e.target === $('zoomModal')) { $('zoomVideo').pause(); $('zoomModal').classList.remove('show'); }
 };
 
-/* ── FIX: Keyboard navigation — Escape tugmasi bilan overlay yopish ─── */
+/* ── Keyboard: Escape closes overlays ────────────────────────────────── */
 document.addEventListener('keydown', e => {
   if (e.key !== 'Escape') return;
   document.querySelectorAll('.overlay.show, #zoomModal.show, #detailModal.show, #userProfileModal.show')
@@ -233,6 +214,6 @@ document.addEventListener('keydown', e => {
   }
 });
 
-/* ── FIX: Offline/online holat xabarlari ─────────────────────────────── */
-window.addEventListener('offline', () => toast('Internet aloqasi yo\'q', 'error', 5000));
-window.addEventListener('online',  () => toast('Aloqa tiklandi', 'success'));
+/* ── Offline / online notifications ──────────────────────────────────── */
+window.addEventListener('offline', () => toast('No internet connection', 'error', 5000));
+window.addEventListener('online',  () => toast('Connection restored', 'success'));
