@@ -2579,6 +2579,9 @@ body {
   font-family: var(--mono);
 }
 
+/* Hide header when in reels on mobile */
+.app-hdr.force-hide { display: none !important; }
+
 /* ═══════════════════════════════════════════════
    DESKTOP SIDEBAR — narrow icon-only (≥ 768px)
    ═══════════════════════════════════════════════ */

@@ -44,7 +44,7 @@ export async function switchView(v) {
   document.querySelector(`.nav-btn[data-v="${v}"]`)?.classList.add('on');
 
   const isReels = v === 'reels';
-  $('appHdr').style.display      = isReels ? 'none' : 'flex';
+  $('appHdr').classList.toggle('force-hide', isReels);
   $('reelsMuteBtn').style.display = isReels ? 'flex' : 'none';
   updateMuteBtnUI();
   window.scrollTo({ top: 0 });
@@ -133,9 +133,13 @@ async function _doSearch(val) {
   }, 300);
 }
 
-/* ── Mobile header search input ────────────────────────────────────── */
+/* ── Search inputs ───────────────────────────────────────────────────── */
 const searchInput = $('searchInput');
 if (searchInput) searchInput.oninput = e => _doSearch(e.target.value);
+
+// Sidebar search input (desktop wide mode)
+const sbSearchInput = $('sbSearchInput');
+if (sbSearchInput) sbSearchInput.oninput = e => _doSearch(e.target.value);
 
 /* ── Desktop: search toggle → show header search bar ───────────────── */
 const sbSearchToggle = $('sbSearchToggle');
