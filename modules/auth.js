@@ -161,8 +161,8 @@ $('saveProfileBtn').onclick = async () => {
 };
 
 $('cancelEditBtn').onclick = () => $('profileEditOverlay').classList.remove('show');
-$('logoutBtn').onclick = () => {
-  const { showConfirm } = await import('./utils.js').then(m => m);
+$('logoutBtn').onclick = async () => {
+  const { showConfirm } = await import('./utils.js');
   showConfirm('You will need to sign in again.', () => signOut(auth), 'Sign out?');
 };
 $('profileEditOverlay').onclick = e => {
