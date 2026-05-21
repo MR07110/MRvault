@@ -1,0 +1,78 @@
+/* ═══════════════════════
+   SPLASH SCREEN
+   ═══════════════════════ */
+#splash { 
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  transition: opacity 0.35s var(--ease);
+  background-image: radial-gradient(ellipse 60% 40% at 50% 30%, rgba(91,142,245,0.06) 0%, transparent 70%);
+}
+
+#splash.out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.splash-inner { text-align: center; }
+
+.splash-svg {
+  width: 140px;
+  height: 140px;
+  position: relative;
+  z-index: 1;
+  filter: drop-shadow(0 8px 24px rgba(58,134,244,0.35));
+  animation: splashPop 0.7s var(--ease-back) both;
+}
+
+@keyframes splashPop {
+  0%   { opacity: 0; transform: scale(0.5) rotate(-10deg); }
+  60%  { transform: scale(1.08) rotate(2deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+
+.splash-wordmark {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--text);
+  margin-top: 16px;
+  animation: fadeUp 0.5s 0.25s var(--ease) both;
+}
+
+.splash-sub {
+  font-size: 10px;
+  color: var(--text3);
+  margin-top: 4px;
+  letter-spacing: 3px;
+  font-family: var(--mono);
+  animation: fadeUp 0.5s 0.4s var(--ease) both;
+}
+
+.splash-bar {
+  width: 56px;
+  height: 2px;
+  background: var(--bg4);
+  border-radius: 4px;
+  margin: 24px auto 0;
+  overflow: hidden;
+  animation: fadeUp 0.4s 0.55s var(--ease) both;
+}
+
+.splash-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--blue3), var(--blue2), var(--blue));
+  border-radius: 4px;
+  animation: barLoad 0.5s 0.2s var(--ease) forwards;
+}
+
+@keyframes barLoad { to { width: 100%; } }
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

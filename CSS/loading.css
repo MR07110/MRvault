@@ -1,0 +1,258 @@
+/* ═══════════════════════
+   AUTH SCREEN
+   ═══════════════════════ */
+#authWrap {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 100;
+  background: var(--bg);
+  background-image: radial-gradient(ellipse 70% 50% at 50% 0%, rgba(91,142,245,0.06) 0%, transparent 60%);
+}
+
+#authWrap.show {
+  display: flex;
+  animation: fadeIn 0.35s var(--ease);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 380px;
+  background: var(--bg2);
+  border: 1px solid var(--glass-border);
+  border-radius: 24px;
+  padding: 36px 30px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+}
+
+.auth-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(91,142,245,0.35), transparent);
+}
+
+.auth-card::after {
+  content: '';
+  position: absolute;
+  top: -80px; right: -80px;
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, rgba(91,142,245,0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.auth-logo {
+  display: flex;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.auth-brand {
+  font-size: 18px;
+  font-weight: 700;
+  margin-left: 8px;
+  letter-spacing: -0.3px;
+  background: linear-gradient(135deg, #fff, var(--blue2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.auth-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text2);
+  margin-bottom: 20px;
+  letter-spacing: -0.1px;
+}
+
+.err-msg {
+  color: var(--red);
+  font-size: 12px;
+  text-align: center;
+  margin-top: 6px;
+  min-height: 16px;
+  font-family: var(--mono);
+}
+
+/* ═══════════════════════
+   EMPTY / LOADER
+   ═══════════════════════ */
+.empty {
+  padding: 60px 20px;
+  text-align: center;
+  color: var(--text3);
+  font-size: 14px;
+}
+
+.empty-icon {
+  font-size: 34px;
+  margin-bottom: 12px;
+  opacity: 0.4;
+}
+
+.spin-wrap {
+  padding: 44px;
+  text-align: center;
+}
+
+.spinner {
+  width: 28px; height: 28px;
+  border: 2px solid var(--line2);
+  border-top-color: var(--blue);
+  border-radius: 50%;
+  margin: 0 auto;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ═══════════════════════
+   SKELETON LOADING
+   ═══════════════════════ */
+.skeleton-post {
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  margin-bottom: 12px;
+  overflow: hidden;
+  padding: 14px;
+  animation: skelFadeIn 0.3s var(--ease);
+}
+
+@keyframes skelFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.skel {
+  background: var(--bg4);
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.skel::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.06) 50%, transparent 100%);
+  animation: shimmer 0.9s infinite;
+}
+
+@keyframes shimmer {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(100%); }
+}
+
+.skel-avi  { width: 38px; height: 38px; border-radius: 50%; }
+.skel-line { height: 11px; }
+.skel-media {
+  height: 200px;
+  margin: 12px -14px;
+  border-radius: 0;
+}
+.skel-actions { height: 42px; border-radius: 10px; margin-top: 10px; }
+
+/* Comment skeleton rows */
+.cmt-skel-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  animation: skelFadeIn 0.25s var(--ease) both;
+}
+
+/* ═══════════════════════
+   TOAST
+   ═══════════════════════ */
+#toast {
+  position: fixed;
+  bottom: calc(var(--nav) + 20px);
+  left: 50%;
+  transform: translateX(-50%) translateY(16px);
+  background: var(--glass);
+  backdrop-filter: blur(24px);
+  border: 1px solid var(--glass-border);
+  border-radius: 40px;
+  padding: 10px 24px;
+  font-size: 13px;
+  font-weight: 500;
+  z-index: 600;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.25s var(--ease);
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  letter-spacing: -0.1px;
+}
+
+#toast.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ═══════════════════════
+   TOAST TYPES
+   ═══════════════════════ */
+#toast.toast-success {
+  background: rgba(48,208,128,0.12);
+  border-color: rgba(48,208,128,0.28);
+  color: var(--green);
+}
+
+#toast.toast-error {
+  background: rgba(240,64,96,0.12);
+  border-color: rgba(240,64,96,0.28);
+  color: var(--red);
+}
+
+#toast.toast-info {
+  background: rgba(91,142,245,0.12);
+  border-color: rgba(91,142,245,0.28);
+  color: var(--blue2);
+}
+
+/* ═══════════════════════
+   SEARCH EMPTY STATE
+   ═══════════════════════ */
+.empty-search {
+  padding: 56px 20px;
+  text-align: center;
+  color: var(--text3);
+  font-size: 14px;
+}
+
+.empty-search-icon {
+  margin: 0 auto 14px;
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  background: var(--bg3);
+  border: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.empty-search strong { color: var(--text2); font-weight: 500; }
+
+.empty-search-hint {
+  font-size: 12px;
+  color: var(--text3);
+  margin-top: 6px;
+  font-family: var(--mono);
+}
