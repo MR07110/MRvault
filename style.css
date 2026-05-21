@@ -2663,9 +2663,34 @@ body {
     transition: var(--transition);
   }
   .hdr-search-close:hover { background: rgba(255,255,255,0.07); color: var(--text); }
-  /* Search toggle active state */
+  /* ── Search toggle visible in sidebar ── */
+  .sb-search-toggle {
+    display: flex;
+  }
   #sbSearchToggle.search-active { background: rgba(91,142,245,0.12); }
   #sbSearchToggle.search-active svg { stroke: var(--blue); }
+  /* Tooltip for search button */
+  #sbSearchToggle {
+    position: relative;
+  }
+  #sbSearchToggle::after {
+    content: 'Search';
+    position: absolute;
+    left: calc(100% + 12px);
+    top: 50%; transform: translateY(-50%);
+    background: var(--bg4);
+    border: 1px solid var(--line2);
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 12px; font-weight: 500;
+    padding: 5px 10px; border-radius: 8px;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0; transition: opacity 0.15s;
+    z-index: 200;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  }
+  #sbSearchToggle:hover::after { opacity: 1; }
 
   /* ── Nav → narrow left sidebar ── */
   .bot-nav {

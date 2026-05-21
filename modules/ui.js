@@ -44,6 +44,19 @@ export async function switchView(v) {
   document.getElementById(`${v}View`)?.classList.add('on');
   document.querySelector(`.nav-btn[data-v="${v}"]`)?.classList.add('on');
 
+  /* Boshqa tabga o'tilganda — boshqa foydalanuvchi profil modali yopilsin */
+  const upm = $('userProfileModal');
+  if (upm?.classList.contains('show')) {
+    state.currentViewingUserId    = null;
+    state.currentViewingUserPosts = [];
+    upm.classList.remove('show');
+  }
+
+  /* Tabga o'tilganda desktop search bandi yopilsin */
+  if (appHdr?.classList.contains('search-open')) {
+    closeDesktopSearch();
+  }
+
   const isReels = v === 'reels';
   $('appHdr').classList.toggle('force-hide', isReels);
   $('reelsMuteBtn').style.display = isReels ? 'flex' : 'none';
