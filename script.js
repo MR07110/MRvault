@@ -33,6 +33,7 @@ let myFollowing = new Set();
 let myLikedPosts = new Set();
 let cmtPostId = null;
 let pendingReelId = null;
+let pendingReelTime = 0;
 let _lastPostIds = '';
 
 // User profile modal uchun state
@@ -476,7 +477,29 @@ function buildMedia(p) {
   if (p.mediaType?.startsWith('image'))
     return `<div class="post-media" data-id="${p.id}" data-type="image" data-url="${esc(p.mediaUrl)}"><img src="${esc(p.mediaUrl)}" loading="lazy"></div>`;
   if (p.mediaType?.startsWith('video'))
-    return `<div class="post-media" data-id="${p.id}" data-type="video" data-url="${esc(p.mediaUrl)}"><video src="${esc(p.mediaUrl)}" controls preload="metadata"></video></div>`;
+    return `<div class="post-media" data-id="${p.id}" data-type="video" data-url="${esc(p.mediaUrl)}">
+      <div class="vid-wrap">
+        <video src="${esc(p.mediaUrl)}" preload="metadata" playsinline></video>
+        <div class="vid-overlay" onclick="toggleVidPlay(this)"></div>
+        <div class="vid-controls">
+          <button class="vc-play" onclick="toggleVidPlay(this.closest('.vid-wrap'))">
+            <svg class="ic-play" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+            <svg class="ic-pause" viewBox="0 0 24 24" fill="currentColor" style="display:none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+          </button>
+          <div class="vc-progress" onclick="seekVid(event, this)">
+            <div class="vc-bar"><div class="vc-fill"></div></div>
+          </div>
+          <span class="vc-time">0:00</span>
+          <button class="vc-mute" onclick="toggleMute(this.closest('.vid-wrap'))">
+            <svg class="ic-vol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11,5 6,9 2,9 2,15 6,15 11,19"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+            <svg class="ic-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><polygon points="11,5 6,9 2,9 2,15 6,15 11,19"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+          </button>
+          <button class="vc-fs" onclick="reqFullscreen(this.closest('.vid-wrap'))">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15,3 21,3 21,9"/><polyline points="9,21 3,21 3,15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>`;
   return `<div class="file-card">
     <div class="file-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5b8ef5" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
     <div class="file-info"><div class="file-name">${esc(p.fileName||'File')}</div><div class="file-size">${p.fileSize ? fmtSz(p.fileSize) : ''}</div></div>
@@ -490,7 +513,64 @@ window.dlFile = (url, name) => {
   toast('Download started', 'info');
 };
 
+function initVidWrap(wrap) {
+  const vid = wrap.querySelector('video');
+  if (vid._inited) return;
+  vid._inited = true;
+  vid.addEventListener('loadedmetadata', () => {
+    const ratio = vid.videoWidth / vid.videoHeight;
+    wrap.style.aspectRatio = ratio.toFixed(4);
+  });
+  vid.addEventListener('timeupdate', () => {
+    if (!vid.duration) return;
+    const pct = (vid.currentTime / vid.duration) * 100;
+    const fill = wrap.querySelector('.vc-fill');
+    const timeEl = wrap.querySelector('.vc-time');
+    if (fill) fill.style.width = pct + '%';
+    if (timeEl) timeEl.textContent = fmtVidTime(vid.currentTime);
+  });
+  vid.addEventListener('ended', () => setPlayState(wrap, false));
+  vid.addEventListener('play', () => setPlayState(wrap, true));
+  vid.addEventListener('pause', () => setPlayState(wrap, false));
+}
+function fmtVidTime(s) {
+  const m = Math.floor(s / 60), sec = Math.floor(s % 60);
+  return m + ':' + String(sec).padStart(2, '0');
+}
+function setPlayState(wrap, playing) {
+  const ip = wrap.querySelector('.ic-play'), ipu = wrap.querySelector('.ic-pause');
+  if (ip) ip.style.display = playing ? 'none' : '';
+  if (ipu) ipu.style.display = playing ? '' : 'none';
+}
+window.toggleVidPlay = (el) => {
+  const wrap = el.closest ? el.closest('.vid-wrap') : el;
+  const vid = wrap.querySelector('video');
+  if (!vid) return;
+  vid.paused ? vid.play() : vid.pause();
+};
+window.seekVid = (e, bar) => {
+  const wrap = bar.closest('.vid-wrap');
+  const vid = wrap.querySelector('video');
+  if (!vid || !vid.duration) return;
+  const rect = bar.getBoundingClientRect();
+  vid.currentTime = ((e.clientX - rect.left) / rect.width) * vid.duration;
+};
+window.toggleMute = (wrap) => {
+  const vid = wrap.querySelector('video');
+  if (!vid) return;
+  vid.muted = !vid.muted;
+  wrap.querySelector('.ic-vol').style.display = vid.muted ? 'none' : '';
+  wrap.querySelector('.ic-muted').style.display = vid.muted ? '' : 'none';
+};
+window.reqFullscreen = (wrap) => {
+  const vid = wrap.querySelector('video');
+  if (!vid) return;
+  if (vid.requestFullscreen) vid.requestFullscreen();
+  else if (vid.webkitRequestFullscreen) vid.webkitRequestFullscreen();
+};
+
 function bindFeedEvents(feedEl) {
+  feedEl.querySelectorAll('.vid-wrap').forEach(w => initVidWrap(w));
   feedEl.querySelectorAll('.like-btn').forEach(b => b.addEventListener('click', () => doLike(b.dataset.id, b)));
   feedEl.querySelectorAll('.del-btn') .forEach(b => b.addEventListener('click', () => doDelete(b.dataset.id)));
   feedEl.querySelectorAll('.cmt-open-btn').forEach(b => b.addEventListener('click', () => openCmtModal(b.dataset.id)));
@@ -499,6 +579,7 @@ function bindFeedEvents(feedEl) {
   }));
   feedEl.querySelectorAll('.post-media').forEach(m => m.addEventListener('click', e => {
     if (e.target.closest('.file-dl')) return;
+    if (e.target.closest('.vid-controls') || e.target.closest('.vc-progress')) return;
     openMediaInReels(m.dataset.id);
   }));
   feedEl.querySelectorAll('.user-avi-btn').forEach(b => b.addEventListener('click', () => {
@@ -514,6 +595,26 @@ function bindFeedEvents(feedEl) {
       cap.classList.toggle('cap-expanded');
     });
   });
+  setupFeedVideoObs(feedEl);
+}
+
+let feedVidObs = null;
+function setupFeedVideoObs(feedEl) {
+  if (feedVidObs) feedVidObs.disconnect();
+  feedVidObs = new IntersectionObserver(entries => {
+    entries.forEach(en => {
+      const wrap = en.target;
+      const vid = wrap.querySelector('video');
+      if (!vid) return;
+      if (en.isIntersecting && en.intersectionRatio >= 0.5) {
+        vid.muted = true;
+        vid.play().catch(() => {});
+      } else {
+        vid.pause();
+      }
+    });
+  }, { threshold: 0.5 });
+  feedEl.querySelectorAll('.vid-wrap').forEach(w => feedVidObs.observe(w));
 }
 
 function openMediaInReels(postId) {
@@ -522,6 +623,9 @@ function openMediaInReels(postId) {
   const inReels = (post.isPublic || post.userId === me?.uid) &&
     post.mediaUrl && (post.mediaType?.startsWith('image') || post.mediaType?.startsWith('video'));
   if (inReels) {
+    // Hozirgi video time ni saqlab qo'yamiz
+    const feedVid = document.querySelector(`.post-media[data-id="${postId}"] video`);
+    pendingReelTime = feedVid ? feedVid.currentTime : 0;
     pendingReelId = postId;
     switchView('reels');
   } else {
@@ -763,7 +867,7 @@ async function renderUserProfileModal(uid) {
       }).join('');
   
   $('upBody').innerHTML = `
-    <div class="up-cover"><div class="up-cover-glow"></div><div class="up-avi-wrap"><div class="up-avi" id="userProfileAvi"><img src="${av}" onerror="this.src='${defAvi(ud.fullName || 'U')}'" style="width:100%;height:100%;object-fit:cover"></div></div></div>
+    <div class="up-cover"><div class="up-avi-wrap"><div class="up-avi"><img src="${av}" onerror="this.src='${defAvi(ud.fullName || 'U')}'" style="width:100%;height:100%;object-fit:cover"></div></div></div>
     <div class="up-info">
       <div class="up-name">${esc(ud.fullName||'Anonymous')}</div>
       ${ud.bio ? `<div class="up-bio">${esc(ud.bio)}</div>` : ''}
@@ -776,8 +880,12 @@ async function renderUserProfileModal(uid) {
       <button class="up-follow-btn ${isF?'is-following':'not-following'}" id="upFollowBtn" data-uid="${uid}">
         ${isF ? 'Following' : 'Follow'}
       </button>
-      <div class="up-divider"></div>
-      <div class="up-grid-label">PUBLIC POSTS</div>
+      <div class="up-posts-tab">
+        <span class="up-posts-tab-item">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          Posts
+        </span>
+      </div>
       <div class="up-grid" id="upGrid">${gridHTML}</div>
     </div>`;
   
@@ -810,11 +918,7 @@ async function renderUserProfileModal(uid) {
   
   // Profil ichidagi postlarga click event
   document.querySelectorAll('.up-grid-cell[data-id]').forEach(cell => {
-    cell.addEventListener('click', () => {
-      const postId = cell.dataset.id;
-      const postOwnerId = cell.dataset.uid;
-      openUserReelsWithFilter(postOwnerId, postId);
-    });
+    cell.addEventListener('click', () => openDetail(cell.dataset.id));
   });
 }
 
@@ -876,7 +980,7 @@ async function renderFilteredReels(filteredReels, startPostId) {
     html += `<div class="reel" data-id="${p.id}" data-uid="${p.userId}">
       ${med}
       <div class="reel-grad"></div>
-      <div class="reel-progress"><div class="reel-progress-fill" id="rp-${p.id}"></div></div>
+      <div class="reel-progress"><div class="reel-progress-track"><div class="reel-progress-fill" id="rp-${p.id}"></div></div></div>
       <div class="reel-pause-icon" id="rpause-${p.id}">
         <svg width="28" height="28" viewBox="0 0 24 24" fill="rgba(255,255,255,0.9)">
           <rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/>
@@ -988,7 +1092,7 @@ async function renderReels() {
     html += `<div class="reel" data-id="${p.id}" data-uid="${p.userId}">
       ${med}
       <div class="reel-grad"></div>
-      <div class="reel-progress"><div class="reel-progress-fill" id="rp-${p.id}"></div></div>
+      <div class="reel-progress"><div class="reel-progress-track"><div class="reel-progress-fill" id="rp-${p.id}"></div></div></div>
       <div class="reel-pause-icon" id="rpause-${p.id}">
         <svg width="28" height="28" viewBox="0 0 24 24" fill="rgba(255,255,255,0.9)">
           <rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/>
@@ -1036,15 +1140,56 @@ async function renderReels() {
   setTimeout(() => setupViewObserver(), 100);
 
   if (pendingReelId) {
+    const _pid = pendingReelId, _pt = pendingReelTime;
+    pendingReelId = null; pendingReelTime = 0;
     requestAnimationFrame(() => {
-      const el = document.querySelector(`.reel[data-id="${pendingReelId}"]`);
-      if (el) el.scrollIntoView({ behavior: 'instant' });
-      pendingReelId = null;
+      const el = document.querySelector(`.reel[data-id="${_pid}"]`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'instant' });
+        if (_pt > 0) {
+          const vid = el.querySelector('video');
+          if (vid) {
+            const applyTime = () => { vid.currentTime = _pt; };
+            if (vid.readyState >= 1) applyTime();
+            else vid.addEventListener('loadedmetadata', applyTime, { once: true });
+          }
+        }
+      }
     });
   }
 }
 
 function bindReelEvents(reels, uMap) {
+  // Progress bar drag/seek
+  document.querySelectorAll('.reel-progress').forEach(bar => {
+    const reel = bar.closest('.reel');
+    const getVid = () => reel?.querySelector('video');
+    const seek = (clientX) => {
+      const vid = getVid(); if (!vid || !vid.duration) return;
+      const rect = bar.getBoundingClientRect();
+      const pct = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+      vid.currentTime = pct * vid.duration;
+      const fill = bar.querySelector('.reel-progress-fill');
+      if (fill) fill.style.width = (pct * 100) + '%';
+    };
+    // Mouse
+    bar.addEventListener('mousedown', e => {
+      e.stopPropagation(); seek(e.clientX);
+      const onMove = ev => seek(ev.clientX);
+      const onUp = () => { document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); };
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+    });
+    // Touch
+    bar.addEventListener('touchstart', e => {
+      e.stopPropagation(); seek(e.touches[0].clientX);
+      const onMove = ev => { ev.preventDefault(); seek(ev.touches[0].clientX); };
+      const onEnd = () => { document.removeEventListener('touchmove', onMove); document.removeEventListener('touchend', onEnd); };
+      document.addEventListener('touchmove', onMove, { passive: false });
+      document.addEventListener('touchend', onEnd);
+    }, { passive: true });
+  });
+
   document.querySelectorAll('.reel-act[data-id]:not(.reel-cmt-btn)').forEach(b => {
     b.addEventListener('click', e => { e.stopPropagation(); doReelLike(b.dataset.id, b); });
   });
@@ -1340,63 +1485,94 @@ function renderProfileGrid(posts) {
 
 async function openDetail(id) {
   const p = allPosts.find(x => x.id === id); if (!p) return;
+
+  $('detailContent').innerHTML = `
+    <div class="dm-handle"></div>
+    <div style="display:flex;align-items:center;gap:10px;padding:14px 16px 10px">
+      <div style="width:38px;height:38px;border-radius:50%;background:var(--bg3);flex-shrink:0"></div>
+      <div style="flex:1"><div style="height:12px;width:120px;background:var(--bg3);border-radius:4px;margin-bottom:6px"></div><div style="height:10px;width:80px;background:var(--bg3);border-radius:4px"></div></div>
+    </div>
+    <div style="width:100%;aspect-ratio:1;background:var(--bg3)"></div>
+    <div style="height:60px"></div>`;
+  $('detailModal').classList.add('show');
+
   const [lS, cS, uS] = await Promise.all([
     getDoc(doc(db,'posts',id,'likes',me.uid)),
     getDocs(query(collection(db,'posts',id,'comments'), orderBy('createdAt','asc'))),
     getDoc(doc(db,'users',p.userId))
   ]);
   const isLiked = lS.exists();
-  const cmts = cS.docs.map(d => ({ id: d.id, ...d.data() }));
+  const cmtCount = cS.docs.length;
   const ud = uS.data() || {};
   const av = ud.avatar || defAvi(ud.fullName);
-
-  $('detailContent').innerHTML = `<div style="padding-top:60px;padding-bottom:20px">
-    <div class="post-head" style="padding:14px">
-      <div class="avi${p.userId!==me?.uid?' user-avi-btn':''}" ${p.userId!==me?.uid?`data-uid="${p.userId}"`:''}><img src="${av}" onerror="this.style.display='none'"></div>
-      <div class="post-meta"><div class="post-name">${esc(ud.fullName||'Anonymous')}</div><div class="post-time">${fmt(p.createdAt)}</div></div>
-    </div>
-    ${buildMedia(p)}
-    ${p.text ? `<div class="post-caption" style="padding:10px 14px">${esc(p.text)}</div>` : ''}
-    <div class="post-stats" style="padding:8px 14px">${p.views||0} views · <span id="dlc">${p.likes||0}</span> likes · ${cmts.length} comments</div>
-    <div class="post-actions">
-      <button class="act-btn detail-like${isLiked?' liked':''}" data-id="${id}">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="${isLiked?'#f04060':'none'}" stroke="${isLiked?'#f04060':'currentColor'}" stroke-width="2">
-          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-        </svg>
-      </button>
-      <button class="act-btn" id="det-cmt-open">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-        </svg>
-      </button>
-      ${p.mediaUrl ? `<button class="act-btn" id="det-share">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
-          <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
-        </svg>
-      </button>` : ''}
-    </div>
-  </div>`;
-
+  const isOwn = p.userId === me?.uid;
   if (isLiked) myLikedPosts.add(id);
 
-  $('detailContent').querySelector('.detail-like')?.addEventListener('click', async b => {
-    const btn = b.currentTarget;
-    await doLikeGen(id, btn);
+  let mediaHtml = '';
+  if (p.mediaUrl && p.mediaType?.startsWith('image')) {
+    mediaHtml = `<div class="dm-media"><img src="${esc(p.mediaUrl)}" loading="lazy"></div>`;
+  } else if (p.mediaUrl && p.mediaType?.startsWith('video')) {
+    mediaHtml = `<div class="dm-media"><div class="vid-wrap"><video src="${esc(p.mediaUrl)}" preload="metadata" playsinline></video><div class="vid-overlay" onclick="toggleVidPlay(this)"></div><div class="vid-controls"><button class="vc-play" onclick="toggleVidPlay(this.closest(\'.vid-wrap\'))"><svg class="ic-play" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg><svg class="ic-pause" viewBox="0 0 24 24" fill="currentColor" style="display:none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg></button><div class="vc-progress" onclick="seekVid(event,this)"><div class="vc-bar"><div class="vc-fill"></div></div></div><span class="vc-time">0:00</span><button class="vc-mute" onclick="toggleMute(this.closest(\'.vid-wrap\'))"><svg class="ic-vol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11,5 6,9 2,9 2,15 6,15 11,19"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg><svg class="ic-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><polygon points="11,5 6,9 2,9 2,15 6,15 11,19"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg></button><button class="vc-fs" onclick="reqFullscreen(this.closest(\'.vid-wrap\'))"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15,3 21,3 21,9"/><polyline points="9,21 3,21 3,15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg></button></div></div></div>`;
+  }
+
+  const likeColor = isLiked ? '#f04060' : 'currentColor';
+  const likeFill  = isLiked ? '#f04060' : 'none';
+
+  $('detailContent').innerHTML = `
+    <div class="dm-handle"></div>
+    <div class="dm-head">
+      <div class="dm-avi${isOwn?'':' dm-avi-link'}" ${isOwn?'':('data-uid="'+p.userId+'"')}><img src="${av}" onerror="this.style.display='none'"></div>
+      <div class="dm-meta">
+        <div class="dm-name${isOwn?'':' dm-name-link'}" ${isOwn?'':('data-uid="'+p.userId+'"')}>${esc(ud.fullName||'Anonymous')}</div>
+        <div class="dm-time">${fmt(p.createdAt)}</div>
+      </div>
+      <button class="dm-close" id="dmClose"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    ${mediaHtml}
+    ${p.text ? `<div class="dm-caption">${esc(p.text)}</div>` : ''}
+    <div class="dm-stats">
+      <span class="dm-stat-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> ${p.views||0}</span>
+      <span class="dm-stat-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="${likeFill}" stroke="${likeColor}" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> <span id="dmLikeCount">${p.likes||0}</span></span>
+      <span class="dm-stat-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> ${cmtCount}</span>
+    </div>
+    <div class="dm-actions">
+      <button class="dm-act${isLiked?' liked':''}" id="dmLikeBtn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="${likeFill}" stroke="${likeColor}" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        <span class="dm-act-count" id="dmLikeCount2">${p.likes||0}</span>
+      </button>
+      <button class="dm-act" id="dmCmtBtn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span class="dm-act-count">${cmtCount}</span>
+      </button>
+      ${p.mediaUrl ? `<button class="dm-act" id="dmShareBtn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>` : ''}
+    </div>`;
+
+  const vw = $('detailContent').querySelector('.vid-wrap');
+  if (vw) initVidWrap(vw);
+
+  const closeDetail = () => {
+    const vid = $('detailContent').querySelector('video');
+    if (vid) vid.pause();
+    $('detailModal').classList.remove('show');
+  };
+
+  $('dmClose').onclick = closeDetail;
+  $('detailModal').onclick = e => { if (e.target === $('detailModal')) closeDetail(); };
+
+  $('dmLikeBtn').onclick = async () => {
+    await doLikeGen(id, $('dmLikeBtn'));
     const s = await getDoc(doc(db,'posts',id));
-    $('dlc').textContent = `${s.data()?.likes||0}`;
+    const n = s.data()?.likes||0;
+    $('dmLikeCount').textContent = n;
+    $('dmLikeCount2').textContent = n;
+  };
+  $('dmCmtBtn').onclick = () => { closeDetail(); openCmtModal(id); };
+  $('dmShareBtn')?.addEventListener('click', () => { navigator.clipboard?.writeText(p.mediaUrl); toast('Link copied','info'); });
+  $('detailContent').querySelectorAll('.dm-avi-link,.dm-name-link').forEach(el => {
+    el.addEventListener('click', () => { closeDetail(); openUserProfileModal(el.dataset.uid); });
   });
-  $('detailContent').querySelector('#det-cmt-open')?.addEventListener('click', () => {
-    $('detailModal').classList.remove('show'); openCmtModal(id);
-  });
-  $('detailContent').querySelector('#det-share')?.addEventListener('click', () => {
-    navigator.clipboard?.writeText(p.mediaUrl); toast('Link copied', 'info');
-  });
-  $('detailContent').querySelectorAll('.user-avi-btn').forEach(b => b.addEventListener('click', () => {
-    if (b.dataset.uid !== me?.uid) openUserProfileModal(b.dataset.uid);
-  }));
-  $('detailModal').classList.add('show');
 }
+
 
 async function doLikeGen(id, btn) {
   const wasLiked = myLikedPosts.has(id);
@@ -1561,6 +1737,6 @@ $('searchInput').oninput = e => {
   }, 300);
 };
 
-$('detailBack').onclick = () => $('detailModal').classList.remove('show');
+// detailBack hidden — close handled by dmClose and backdrop click
 
 setTimeout(() => { if (!me) $('authWrap').classList.add('show'); }, 100);
